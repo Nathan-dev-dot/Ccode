@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<database dbname="database_name">
+     <table tname="table1_name">
+          <column colname="c1" type="int" attribute="prim_key"></column>
+          <column colname="c2" type="varchar" size="32">NULL</column>
+     </table>
+     <table tname="table2_name">
+          <column colname="c1" type="int" attribute="prim_key"></column>
+          <column colname="c2" type="varchar" size="32">NULL</column>
+     </table>
+</database>
+
+<!--
+Gérer les multiples clés primaires
+Gérer les clés étrangères
+-->
