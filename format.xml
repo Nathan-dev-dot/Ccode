@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<database dbname="database_name">
-     <table tname="table1_name">
-          <column colname="c1" type="int" attribute="prim_key"></column>
-          <column colname="c2" type="varchar" size="32">NULL</column>
+<database dbname="test">
+     <table tname="table1">
+          <column type="integer" attribute="primary key" constraints="auto_increment" reference="target">tcv</column>
+          <column type="varchar" size="32" default="null">t1c2</column>
      </table>
-     <table tname="table2_name">
-          <column colname="c1" type="int" attribute="prim_key"></column>
-          <column colname="c2" type="varchar" size="32">NULL</column>
+     <table tname="table2">
+          <column type="varchar" size="32" attribute="primary key">t2c1</column>
+          <column type="varchar" size="32" default="Hello" attribute="primary key">t2c2</column>
+          <column type="integer" constraints="not null" reference="table1(tcv)">t2c3</column>
      </table>
 </database>
 
 <!--
-Gérer les multiples clés primaires
 Gérer les clés étrangères
 -->

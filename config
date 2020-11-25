@@ -1,0 +1,10 @@
+// m = mandatory / n = non mandatory
+[columns]
+m prop :type
+m prop :size
+n prop :constraints
+n prop :check
+n prop :default
+n prop :attribute
+
+[forbidden_names]

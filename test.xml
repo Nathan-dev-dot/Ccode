@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<database dbname="theo">
+     <table tname="place">
+          <column type="integer" attribute="primary key" constraints="auto_increment" reference="target">id</column>
+          <column type="varchar" size="32">name</column>
+          <column type="varchar" size="32">address</column>
+          <column type="char" size="32" default="null">map</column>
+     </table>
+     <table tname="drink">
+          <column type="integer" constraints="auto_increment" attribute="primary key" reference="target">id</column>
+          <column type="varchar" size="32">name</column>
+          <column type="varchar" size="32">category</column>
+     </table>
+     <table tname="_place_propose_drink">
+          <column type="integer" reference="place(id)" attribute="primary key">place</column>
+          <column type="integer" reference="drink(id)" attribute="primary key">drink</column>
+          <column type="integer">price</column>
+     </table>
+     <table tname="room">
+          <column type="integer" attribute="primary key" constraints="auto_increment" reference="target">id</column>
+          <column type="varchar" size="32">name</column>
+          <column type="integer">max_capacity</column>
+          <column type="integer">price_half_day</column>
+          <column type="integer" constraint="not null" reference="place(id)">place</column>
+     </table>
+     <table tname="booking">
+          <column type="integer" attribute="primary key" constraints="auto_increment" reference="target">id</column>
+          <column type="integer">nb_persons</column>
+          <column type="integer">price</column>
+          <column type="date">date_booking</column>
+          <column type="timestamp">time_slot</column>
+          <column type="integer" constraint="not null" reference="room(id)">room</column>
+     </table>
+     <table tname="_booking_include_drink">
+          <column type="integer" reference="booking(id)" attribute="primary key">booking</column>
+          <column type="integer" reference="drink(id)" attribute="primary key">drink</column>
+     </table>
+     <table tname="equipment">
+          <column type="integer" constraints="auto_increment" attribute="primary key" reference="target">id</column>
+          <column type="varchar" size="32">name</column>
+          <column type="varchar" size="32">category</column>
+     </table>
+     <table tname="_room_owns_equipment">
+          <column type="integer" reference="room(id)" attribute="primary key">room</column>
+          <column type="integer" reference="equipment(id)" attribute="primary key">equipment</column>
+          <column type="integer">price</column>
+     </table>
+</database>
