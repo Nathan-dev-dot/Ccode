@@ -4,17 +4,13 @@
 #include <libxml/parser.h>
 #include <mysql/mysql.h>
 
-int initDB (char *name) ;
-<<<<<<< HEAD
+int initDB (FILE *sqlFile, char *name) ;
 int connectDB(char *command) ;
-=======
-int connectDB(char *command, MYSQL *mysql) ;
->>>>>>> ce75a99ed555a3d0c85974b3ae798bd54167a25c
 int parseDoc(void);
 void enterPath (char *fileName) ;
 void trimWhiteSpace (char *str) ;
 void replaceWhiteSpace (char *str) ;
-int parseNodes (xmlNodePtr node, FILE *file);
+int parseNodes (xmlNodePtr node, FILE *sqlFile);
 int writeSQLColumn (xmlNodePtr node, char *colConf[10][2][20], char *command, char *primKeys[][20], char *foreignKeys[15][3][20]) ;
 int catMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *command) ;
 int catNotMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *command, char *primKeys[][20]) ;
@@ -25,6 +21,7 @@ int catForeignKeys(char *table[15][3][20], xmlNodePtr n, char *command) ;
 int initConf (char *conf[10][2][20]) ;
 void addSpace (char *str) ;
 void removeLastChar (char *str) ;
+int writeSqlFile(FILE *sqlFile, char *command);
 
 FILE *confFile ;
 char nameDB[30] ;
@@ -77,7 +74,7 @@ int parseDoc(void){
 
     root = xmlDocGetRootElement(doc);
 
-    kill = initDB((char *)xmlGetProp(root, (const xmlChar *)"dbname")) ;
+    kill = initDB(sqlFile,(char *)xmlGetProp(root, (const xmlChar *)"dbname")) ;
     if (kill != 0) {
         return 1 ;
     }
@@ -103,14 +100,14 @@ returns :
 0 if ok
 1 if something went wrong
 */
-int initDB (char *name) {
+int initDB (FILE *sqlFile, char *name) {
     MYSQL mysql ;
     char command[30] = "CREATE DATABASE " ;
     mysql_init(&mysql) ;
     mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
     strcat(command, name) ;
-
-    if(mysql_real_connect(&mysql, "localhost", "root", "root", NULL, 3306, NULL, 0) == NULL){
+    writeSqlFile(sqlFile, command);
+    if(mysql_real_connect(&mysql, "localhost", "root", "", NULL, 3306, NULL, 0) == NULL){
         printf("Connection to mysql failed\n");
         mysql_close(&mysql);
         return 1 ;
@@ -139,7 +136,8 @@ int connectDB (char *command) {
     mysql_init(&mysql) ;
     mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
 
-    if(mysql_real_connect(&mysql, "localhost", "root", "root", nameDB, 3306, NULL, 0) == NULL){
+
+    if(mysql_real_connect(&mysql, "localhost", "root", "", nameDB, 3306, NULL, 0) == NULL){
         printf("\nConnection to mysql database failed\n");
         mysql_close(&mysql);
         return 1 ;
@@ -157,13 +155,13 @@ Sets the variables used for parsing the tables
 Writes a full table creation command
 
 xmlNodePtr node : first table node
-FILE *file : sql file to be written
+FILE *sqlFile : sql file to be written
 
 returns :
 0 if ok
 1 if something went wrong
 */
-int parseNodes (xmlNodePtr node, FILE *file) {
+int parseNodes (xmlNodePtr node, FILE *sqlFile) {
     int kill ;
     int i ;
     int j ;
@@ -173,22 +171,20 @@ int parseNodes (xmlNodePtr node, FILE *file) {
     char *foreignKeys[15][3][20] ;
     char command[500] ;
     MYSQL mysql ;
-
     kill = initConf(colConf) ;
     if (kill != 0) {
         return 1 ;
     }
-
     for (i = 0 ; i < 15 ; ++i)
         for (j = 0 ; j < 3 ; ++j)
             strcpy((char *)foreignKeys[i][j], "STOP") ;
-
     for (n = node ; n != NULL ; n = n->next) {
         kill = getForeignKeys(foreignKeys, n) ;
         if (kill != 0)
             return 1 ;
         strcpy(command, "") ;
         if (n->type == XML_ELEMENT_NODE && strcmp((const char *)n->name, "table") == 0){
+
             for (j = 0 ; j < 10 ; ++j) {
                 strcpy((char *)primKeys[j], "STOP") ;
             }
@@ -201,17 +197,16 @@ int parseNodes (xmlNodePtr node, FILE *file) {
             }
             catPrimaryKeys(primKeys, command) ;
             strcat(command, ")") ;
-            printf("%s\n", command) ;
+            kill = connectDB(command) ;
+
+            if (kill != 0)
+                return 1 ;
+
+            kill = writeSqlFile(sqlFile, command);
+            if (kill < 0)
+                return 1;
         }
-<<<<<<< HEAD
-        kill = connectDB(command) ;
-=======
-        kill = connectDB(command, &mysql) ;
->>>>>>> ce75a99ed555a3d0c85974b3ae798bd54167a25c
-        if (kill != 0)
-            return 1 ;
     }
-    mysql_close(&mysql);
     return 0 ;
 }
 
@@ -276,6 +271,7 @@ int writeSQLColumn (xmlNodePtr node, char *colConf[10][2][20], char *command, ch
             }
             catForeignKeys(foreignKeys, n, command) ;
             addSpace(strcat(command, ",")) ;
+
         }
     }
     return 0 ;
@@ -387,7 +383,7 @@ void catPrimaryKeys (char *table[][20], char *command) {
 Function : getForeignKeys
 -------------------
 Stores all the foreign keys in an array to be used later
-(Storing format : table | column | type&size)
+(Storing format : table |column | type&size)
 
 char *table[15][3][20] : foreign keys array
 xmlNodePtr parent : table node
@@ -466,11 +462,8 @@ int catForeignKeys(char *table[15][3][20], xmlNodePtr n, char *command) {
         }
         count++ ;
     }
-<<<<<<< HEAD
+
     return 1 ;
-=======
-    return 0 ;
->>>>>>> ce75a99ed555a3d0c85974b3ae798bd54167a25c
 }
 
 /*
@@ -527,6 +520,19 @@ void trimWhiteSpace (char *str) {
     strncpy(str, tmp + start, end - start + 1) ;
     str[end - start + 1] = '\0' ;
     free(tmp) ;
+}
+
+/*
+Function : writeSqlFile
+-------------------
+Writes a sql command in the sql file
+
+FILE *sqlFile : sqlFile stream
+char *command : command to be written
+*/
+int writeSqlFile(FILE *sqlFile, char *command){
+    strcat(command,";\n");
+    return fprintf(sqlFile, "%s",command);
 }
 
 /*
