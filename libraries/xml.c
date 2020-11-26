@@ -71,12 +71,6 @@ int parseDoc(void) {
         return EXIT_FAILURE ;
     }
 
-    sqlFile = fopen("../db.sql", "w") ;
-    if (sqlFile == NULL) {
-        fprintf(stderr, "Error in creating the sql file\n") ;
-        return EXIT_FAILURE ;
-    }
-
     enterPath(xmlFile) ;
     doc = xmlParseFile(xmlFile) ;
 
@@ -87,7 +81,7 @@ int parseDoc(void) {
 
     root = xmlDocGetRootElement(doc);
 
-    kill = initDB(sqlFile,(char *)xmlGetProp(root, (const xmlChar *)"dbname")) ;
+    kill = initDB((char *)xmlGetProp(root, (const xmlChar *)"dbname")) ;
     if (kill != 0) {
         return 1 ;
     }
@@ -97,7 +91,6 @@ int parseDoc(void) {
     }
 
     fclose(confFile);
-    fclose(sqlFile);
     xmlFreeDoc(doc);
     return 0 ;
 }
@@ -158,7 +151,7 @@ int parseNodes (xmlNodePtr node, FILE *sqlFile) {
             if (kill != 0)
                 return 1 ;
 
-            kill = writeSqlFile(sqlFile, command);
+            kill = writeSqlFile(command, 1);
             if (kill < 0)
                 return 1;
         }

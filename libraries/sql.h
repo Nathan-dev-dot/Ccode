@@ -8,6 +8,6 @@ void addPrimaryKey (char *table[][20], char *colName) ;
 void catPrimaryKeys (char *table[][20], char *command) ;
 int getForeignKeys (char *table[15][3][20], xmlNodePtr parent) ;
 int catForeignKeys(char *table[15][3][20], xmlNodePtr n, char *command) ;
-int writeSqlFile(FILE *sqlFile, char *command) ;
+int writeSqlFile(char *command, int first) ;
 
 #endif

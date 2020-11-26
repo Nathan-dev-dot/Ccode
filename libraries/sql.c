@@ -265,10 +265,31 @@ Function : writeSqlFile
 -------------------
 Writes a sql command in the sql file
 
-FILE *sqlFile : sqlFile stream
 char *command : command to be written
+int first : first time calling the function
 */
-int writeSqlFile(FILE *sqlFile, char *command) {
+int writeSqlFile(char *command, int first) {
+    FILE *sqlFile ;
+    char filePath[30] = "../" ;
+    int print ;
+
+    strcat(strcat(filePath, nameDB), ".sql") ;
+
+    if (first == 0) {
+        sqlFile = fopen(filePath, "w+") ;
+        first = 1 ;
+    } else {
+        sqlFile = fopen(filePath, "a+") ;
+    }
+    if (sqlFile == NULL) {
+        fprintf(stderr, "Error in creating the sql file\n") ;
+        return EXIT_FAILURE ;
+    }
+
+    fseek(sqlFile, 0, SEEK_END) ;
+
     strcat(command,";\n");
-    return fprintf(sqlFile, "%s",command);
+    print = fprintf(sqlFile, "%s",command);
+    fclose(sqlFile) ;
+    return print ;
 }
