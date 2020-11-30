@@ -19,6 +19,20 @@
 extern char nameDB[30] ;
 
 /*
+Function : dbFromXML
+-------------------
+Launches the program that will create a database from an XML file
+*/
+void dbFromXML (void) {
+    int kill ;
+    kill = parseDoc();
+    if (kill != 0)
+        printError (kill) ;
+    else
+        printf("Database created\n") ;
+}
+
+/*
 Function : initConf
 -------------------
 Reads the config file of the columns and stores the data in an array

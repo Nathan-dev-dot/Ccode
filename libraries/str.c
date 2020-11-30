@@ -16,6 +16,42 @@
 #include "str.h"
 #include "errCodes.h"
 
+
+/*
+Function : printError
+-------------------------
+Prints the errors reading from the config file
+
+int errorNo : error number given by the previous functions
+*/
+void printError (int errorNo) {
+    FILE *confFile = fopen("../config", "r") ;
+    char str[150] ;
+    char errMessage[150] ;
+    int errCode ;
+
+    if (confFile == NULL){
+        printf("Error in opening the configuration file") ;
+        return ;
+    }
+
+    while (fgets(str, 150, confFile) != NULL) {
+        if (strcmp(str, "[error_codes]\n") == 0) {
+            while (fgets(str, 150, confFile) != NULL && strcmp(str, "\n") != 0) {
+                sscanf(str, "%d", &errCode) ;
+                if (errCode == errorNo) {
+                    printf("************ERROR************\n") ;
+                    printf("%s", strchr(str, ':') + 1) ;
+                    printf("*****************************\n") ;
+                    return ;
+                }
+            }
+        }
+    }
+
+    printf("Error code not found\n") ;
+}
+
 /*
 Function : trimWhiteSpace
 -------------------------
