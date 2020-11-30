@@ -14,8 +14,8 @@
 #include "sql.h"
 #include "xml.h"
 #include "str.h"
+#include "errCodes.h"
 
-extern FILE *confFile ;
 extern char nameDB[30] ;
 
 /*
@@ -45,27 +45,23 @@ int writeSQLColumn (xmlNodePtr node, char *colConf[10][2][20], char *command, ch
         i = 0 ;
         if (n->type == XML_ELEMENT_NODE) {
             if (xmlNodeGetContent(n) == NULL)
-                return 1 ;
+                return ERR_XML ;
             strcpy(name, (const char *)xmlNodeGetContent(n)) ;
             trimWhiteSpace(name) ;
             addSpace(strcat(command, name)) ;
             while (strcmp((const char *)colConf[i][0], "STOP") != 0) {
                 if (strcmp((const char *)colConf[i][0], "m") == 0) {
-                    kill = catMandatory(n, colConf, i, command) ;
+                    if ((kill = catMandatory(n, colConf, i, command)) != 0)
+                        return kill ;
                     i++ ;
-                    if (kill != 0)
-                        return 1 ;
                 }
                 if (strcmp((const char *)colConf[i][0], "n") == 0) {
-                    kill = catNotMandatory(n, colConf, i, command, primKeys) ;
-                    if (kill != 0)
-                        return 1 ;
+                    catNotMandatory(n, colConf, i, command, primKeys) ;
                 }
                 i++ ;
             }
             catForeignKeys(foreignKeys, n, command) ;
             addSpace(strcat(command, ",")) ;
-
         }
     }
     return 0 ;
@@ -88,12 +84,12 @@ returns :
 int catMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *command) {
     char prop[30] ;
     if (xmlGetProp(n, (const xmlChar *)colConf[i][1]) == NULL){
-        return 1 ;}
+        return ERR_XML ;}
     strcpy(prop, (const char *)xmlGetProp(n, (const xmlChar *)colConf[i][1])) ;
     strcat(command, prop) ;
     if (!strcmp((const char *)prop, "varchar") || !strcmp((const char *)prop, "char")) {
         if (colConf[i+1][1] == NULL){
-            return 1 ;}
+            return ERR_XML ;}
         strcat(strcat(strcat(command, "("), (const char *)xmlGetProp(n, (const xmlChar *)colConf[i+1][1])), ")") ;
     }
     addSpace(command) ;
@@ -116,7 +112,7 @@ returns :
 0 if ok
 1 if something went wrong
 */
-int catNotMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *command, char *primKeys[][20]) {
+void catNotMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *command, char *primKeys[][20]) {
     char prop[30] ;
     if (xmlGetProp(n, (const xmlChar *)colConf[i][1]) != NULL) {
         strcpy(prop, (const char *)xmlGetProp(n, (const xmlChar *)colConf[i][1])) ;
@@ -134,7 +130,6 @@ int catNotMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *comman
             addSpace(strcat(command, prop)) ;
         }
     }
-    return 0 ;
 }
 
 /*
@@ -148,9 +143,8 @@ char *colName : column name
 */
 void addPrimaryKey (char *table[][20], char *colName) {
     int i = 0 ;
-    while (strcmp((const char *)table[i], "STOP") != 0) {
+    while (strcmp((const char *)table[i], "STOP") != 0)
         i++ ;
-    }
     strcpy((char *)table[i], colName) ;
 }
 
@@ -162,15 +156,18 @@ Concatenates the primary keys at the end of the table creation command
 char *table[][20] : array storing the primary keys of the table
 char *command : SQL command
 */
-void catPrimaryKeys (char *table[][20], char *command) {
+int catPrimaryKeys (char *table[][20], char *command) {
     int i = 0 ;
     strcat(command, "primary key(") ;
+    if (strcmp((const char *)table[i], "STOP") == 0)
+        return ERR_XML ;
     while (strcmp((const char *)table[i], "STOP") != 0) {
         strcat(strcat(command, (const char *)table[i]), ",") ;
         i++ ;
     }
     removeLastChar(command) ;
     strcat(command, ")") ;
+    return 0 ;
 }
 
 /*
@@ -196,14 +193,14 @@ int getForeignKeys (char *table[15][3][20], xmlNodePtr parent) {
             if (strcmp((const char *)xmlGetProp(n, (const xmlChar *)"reference"), "target") == 0) {
                 strcpy((char *)table[count][0], (const char *)xmlGetProp(parent, (const xmlChar *)"tname")) ;
                 if (xmlNodeGetContent(n) == NULL)
-                    return 1 ;
+                    return ERR_XML ;
                 strcpy((char *)table[count][1], (const char *)xmlNodeGetContent(n)) ;
                 if (xmlGetProp(n, (const xmlChar *)"type") == NULL)
-                    return 1 ;
+                    return ERR_XML ;
                 strcpy((char *)table[count][2], (const char *)xmlGetProp(n, (const xmlChar *)"type")) ;
                 if (strcmp((const char *)table[count][2], "varchar") == 0 || strcmp((const char *)table[count][2], "char") == 0) {
                     if (xmlGetProp(n, (const xmlChar *)"size") == NULL)
-                        return 1 ;
+                        return ERR_XML ;
                     strcat((char *)table[count][2], (const char *)xmlGetProp(n, (const xmlChar *)"size")) ;
                 }
             }
@@ -241,11 +238,11 @@ int catForeignKeys(char *table[15][3][20], xmlNodePtr n, char *command) {
             strncat(tab, tmp, strchr(tmp, '(') - tmp) ;
             strncat(col, strchr(tmp, '(') + 1, strchr(tmp, ')') - strchr(tmp, '(') - 1) ;
             if (xmlGetProp(n, (const xmlChar *)"type") == NULL)
-                return 1 ;
+                return ERR_XML ;
             strcpy(type, (const char *)xmlGetProp(n, (const xmlChar *)"type")) ;
             if (strcmp(type, "varchar") == 0 || strcmp(type, "char") == 0) {
                 if (xmlGetProp(n, (const xmlChar *)"size") == NULL)
-                    return 1 ;
+                    return ERR_XML ;
                 strcat(type, (const char *)xmlGetProp(n, (const xmlChar *)"size")) ;
             }
 
@@ -256,21 +253,20 @@ int catForeignKeys(char *table[15][3][20], xmlNodePtr n, char *command) {
         }
         count++ ;
     }
-
-    return 1 ;
+    return ERR_XML ;
 }
 
 /*
-Function : writeSqlFile
+Function : writeSQLFile
 -------------------
 Writes a sql command in the sql file
 
 char *command : command to be written
 int first : first time calling the function
 */
-int writeSqlFile(char *command, int first) {
+int writeSQLFile(char *command, int first) {
     FILE *sqlFile ;
-    char filePath[30] = "../" ;
+    char filePath[30] = "../outputs/" ;
     int print ;
 
     strcat(strcat(filePath, nameDB), ".sql") ;
@@ -288,8 +284,15 @@ int writeSqlFile(char *command, int first) {
 
     fseek(sqlFile, 0, SEEK_END) ;
 
-    strcat(command,";\n");
-    print = fprintf(sqlFile, "%s",command);
+    strcat(command, ";\n");
+    print = fprintf(sqlFile, "%s", command);
     fclose(sqlFile) ;
-    return print ;
+    return ERR_SQL ;
+}
+
+void dropSQLFile (void) {
+    char filePath[30] = "../outputs/" ;
+
+    strcat(strcat(filePath, nameDB), ".sql") ;
+    remove(filePath) ;
 }

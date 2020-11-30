@@ -14,6 +14,7 @@
 #include "sql.h"
 #include "xml.h"
 #include "str.h"
+#include "errCodes.h"
 
 /*
 Function : trimWhiteSpace

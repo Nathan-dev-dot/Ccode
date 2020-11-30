@@ -3,5 +3,6 @@
 
 int initDB (char *name) ;
 int connectDB (char *command) ;
+void dropDB (void) ;
 
 #endif
