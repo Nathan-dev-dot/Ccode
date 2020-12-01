@@ -28,13 +28,13 @@ xmlNodePtr node : first column node in the table
 char *colConf[10][2][20] : array with the column configuration (mandatory and not mandatory)
 char *command : SQL command
 char *primKeys[][20] : array with the primary keys of the table
-char *foreignKeys[15][3][20] : array with the foreign keys of the database
+ForeignKey *foreignKeys : array with the foreign keys of the database
 
 returns :
 0 if ok
 1 if something went wrong
 */
-int writeSQLColumn (xmlNodePtr node, char *colConf[10][2][20], char *command, char *primKeys[][20], char *foreignKeys[15][3][20]) {
+int writeSQLColumn (xmlNodePtr node, char *colConf[10][2][20], char *command, char *primKeys[][20], ForeignKey *foreignKeys) {
     int kill ;
     int i ;
     xmlNodePtr n ;
@@ -60,7 +60,7 @@ int writeSQLColumn (xmlNodePtr node, char *colConf[10][2][20], char *command, ch
                 }
                 i++ ;
             }
-            catForeignKeys(foreignKeys, n, command) ;
+            kill = catForeignKeys(foreignKeys, n, command) ;
             addSpace(strcat(command, ",")) ;
         }
     }
@@ -176,37 +176,45 @@ Function : getForeignKeys
 Stores all the foreign keys in an array to be used later
 (Storing format : table |column | type&size)
 
-char *table[15][3][20] : foreign keys array
+ForeignKey *foreignKeys : foreign keys array
 xmlNodePtr parent : table node
 
 returns :
 0 if ok
 1 in case of an error
 */
-int getForeignKeys (char *table[15][3][20], xmlNodePtr parent) {
-    int count = 0 ;
-    xmlNodePtr n ;
-    while (strcmp((const char *)table[count][0], "STOP") != 0)
-        count++ ;
-    for (n = parent->children ; n != NULL ; n = n->next) {
-        if (xmlGetProp(n, (const xmlChar *)"reference") != NULL) {
-            if (strcmp((const char *)xmlGetProp(n, (const xmlChar *)"reference"), "target") == 0) {
-                strcpy((char *)table[count][0], (const char *)xmlGetProp(parent, (const xmlChar *)"tname")) ;
-                if (xmlNodeGetContent(n) == NULL)
-                    return ERR_XML ;
-                strcpy((char *)table[count][1], (const char *)xmlNodeGetContent(n)) ;
-                if (xmlGetProp(n, (const xmlChar *)"type") == NULL)
-                    return ERR_XML ;
-                strcpy((char *)table[count][2], (const char *)xmlGetProp(n, (const xmlChar *)"type")) ;
-                if (strcmp((const char *)table[count][2], "varchar") == 0 || strcmp((const char *)table[count][2], "char") == 0) {
-                    if (xmlGetProp(n, (const xmlChar *)"size") == NULL)
-                        return ERR_XML ;
-                    strcat((char *)table[count][2], (const char *)xmlGetProp(n, (const xmlChar *)"size")) ;
+ForeignKey * getForeignKeys (xmlNodePtr parent, int size) {
+    int i = 0 ;
+    ForeignKey *foreignKeys ;
+    xmlNodePtr nColumn ;
+    xmlNodePtr nTable ;
+
+    foreignKeys = (ForeignKey *)malloc(sizeof(ForeignKey) * (size + 1)) ;
+    if (foreignKeys == NULL)
+        return NULL ;
+
+    for (nTable = parent ; nTable != NULL ; nTable = nTable->next) {
+        for (nColumn = nTable->children ; nColumn != NULL ; nColumn = nColumn->next) {
+            if (nColumn->type == XML_ELEMENT_NODE && strcmp((const char *)nColumn->name, "column") == 0) {
+                if (xmlGetProp(nColumn, (const xmlChar *)"reference") != NULL && strcmp((const char *)xmlGetProp(nColumn, (const xmlChar *)"reference"), "target") == 0) {
+                    if (xmlGetProp(nTable, (const xmlChar *)"tname") == NULL || xmlNodeGetContent(nColumn) == NULL || xmlGetProp(nColumn, (const xmlChar *)"type") == NULL)
+                        return foreignKeys ;
+
+                    strcpy(foreignKeys[i].tableName, (const char *)xmlGetProp(nTable, (const xmlChar *)"tname")) ;
+                    strcpy(foreignKeys[i].colName, (const char *)xmlNodeGetContent(nColumn)) ;
+                    strcpy(foreignKeys[i].type, (const char *)xmlGetProp(nColumn, (const xmlChar *)"type")) ;
+                    if (strcmp(foreignKeys[i].type, "varchar") == 0 || strcmp(foreignKeys[i].type, "char") == 0) {
+                        if (xmlGetProp(nColumn, (const xmlChar *)"size") == NULL)
+                            return foreignKeys ;
+                        strcat(foreignKeys[i].type, (const char *)xmlGetProp(nColumn, (const xmlChar *)"size")) ;
+                    }
+                    i++ ;
                 }
             }
         }
     }
-    return 0 ;
+    strcpy(foreignKeys[i].type, strcpy(foreignKeys[i].colName, strcpy(foreignKeys[i].tableName, "STOP"))) ;
+    return foreignKeys ;
 }
 
 /*
@@ -222,38 +230,36 @@ returns :
 0 if ok
 1 in case of an error
 */
-int catForeignKeys(char *table[15][3][20], xmlNodePtr n, char *command) {
-    int count = 0 ;
-    char tmp[30] = "" ;
-    char tab[30] = "" ;
-    char col[30] = "" ;
-    char type[30] = "" ;
-    while (strcmp((const char *)table[count][0], "STOP") != 0){
-        strcpy(tab, "") ;
-        strcpy(col, "") ;
-        strcpy(type, "") ;
-        strcpy(tmp, "") ;
+int catForeignKeys(ForeignKey *foreignKeys, xmlNodePtr n, char *command) {
+    int i = 0 ;
+    ForeignKey tmp ;
+    char strTmp[30] = "" ;
+    while (strcmp(foreignKeys[i].tableName, "STOP") != 0){
+        strcpy(tmp.type, strcpy(tmp.colName, strcpy(tmp.tableName, ""))) ;
+        strcpy(strTmp, "") ;
         if (xmlGetProp(n, (const xmlChar *)"reference") != NULL && strcmp((const char *)xmlGetProp(n, (const xmlChar *)"reference"), "target") != 0) {
-            strcpy(tmp, (const char *)xmlGetProp(n, (const xmlChar *)"reference")) ;
-            strncat(tab, tmp, strchr(tmp, '(') - tmp) ;
-            strncat(col, strchr(tmp, '(') + 1, strchr(tmp, ')') - strchr(tmp, '(') - 1) ;
-            if (xmlGetProp(n, (const xmlChar *)"type") == NULL)
-                return ERR_XML ;
-            strcpy(type, (const char *)xmlGetProp(n, (const xmlChar *)"type")) ;
-            if (strcmp(type, "varchar") == 0 || strcmp(type, "char") == 0) {
-                if (xmlGetProp(n, (const xmlChar *)"size") == NULL)
-                    return ERR_XML ;
-                strcat(type, (const char *)xmlGetProp(n, (const xmlChar *)"size")) ;
+            strcpy(strTmp, (const char *)xmlGetProp(n, (const xmlChar *)"reference")) ;
+            strncat(tmp.tableName, strTmp, strchr(strTmp, '(') - strTmp) ;
+            strncat(tmp.colName, strchr(strTmp, '(') + 1, strchr(strTmp, ')') - strchr(strTmp, '(') - 1) ;
+            if (xmlGetProp(n, (const xmlChar *)"type") == NULL){
+                printf("type\n") ;
+                return ERR_XML ;}
+            strcpy(tmp.type, (const char *)xmlGetProp(n, (const xmlChar *)"type")) ;
+            if (strcmp(tmp.type, "varchar") == 0 || strcmp(tmp.type, "char") == 0) {
+                if (xmlGetProp(n, (const xmlChar *)"size") == NULL){
+                    printf("size\n") ;
+                    return ERR_XML;}
+                strcat(tmp.type, (const char *)xmlGetProp(n, (const xmlChar *)"size")) ;
             }
 
-            if (strcmp(tab, (const char *)table[count][0]) == 0 && strcmp(col, (const char *)table[count][1]) == 0 && strcmp(type, (const char *)table[count][2]) == 0) {
-                strcat(strcat(command, "references "), tmp) ;
+            if (strcmp(tmp.tableName, foreignKeys[i].tableName) == 0 && strcmp(tmp.colName, foreignKeys[i].colName) == 0 && strcmp(tmp.type, foreignKeys[i].type) == 0) {
+                strcat(strcat(command, "references "), strTmp) ;
                 return 0 ;
             }
         }
-        count++ ;
+        i++ ;
     }
-    return ERR_XML ;
+    return 0 ;
 }
 
 /*

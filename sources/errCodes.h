@@ -5,5 +5,6 @@
 #define ERR_CONF 2
 #define ERR_XML 3
 #define ERR_SQL 4
+#define ERR_MEM 5
 
 #endif

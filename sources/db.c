@@ -31,21 +31,24 @@ returns :
 */
 int initDB (char *name) {
     MYSQL mysql ;
-    char command[30] = "CREATE DATABASE " ;
+    char drop[100] = "DROP DATABASE IF EXISTS " ;
+    char create[100] = "CREATE DATABASE " ;
     int success ;
 
     mysql_init(&mysql) ;
     mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
-    strcat(command, name) ;
+    strcat(create, name) ;
+    strcat(drop, name) ;
     if(mysql_real_connect(&mysql, "localhost", "root", "root", NULL, 3306, NULL, 0) == NULL){
         printf("Unable to connect to the database\n");
         mysql_close(&mysql);
         return ERR_DB ;
     }
     strcpy(nameDB, name) ;
-    success = mysql_query(&mysql, command) == 0 ? 0 : 1;
+    mysql_query(&mysql, drop) ;
+    success = mysql_query(&mysql, create) == 0 ? 0 : 1 ;
     if (!success)
-        writeSQLFile(command, 0) ;
+        writeSQLFile(create, 0) ;
     mysql_close(&mysql);
     return success ;
 }
@@ -69,7 +72,7 @@ int connectDB (char *command) {
     mysql_init(&mysql) ;
     mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
 
-    if(mysql_real_connect(&mysql, "localhost", "root", "root", nameDB, 3306, NULL, 0) == NULL){
+    if(mysql_real_connect(&mysql, "localhost", "root", "root", nameDB, 3306, NULL, 0) == NULL) {
         printf("\nConnection to mysql database failed\n");
         mysql_close(&mysql);
         return ERR_DB ;

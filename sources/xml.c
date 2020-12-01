@@ -131,18 +131,19 @@ int writeSQLTables (xmlNodePtr node) {
     xmlNodePtr n ;
     char *colConf[10][2][20] = { "" } ;
     char *primKeys[30][20] ;
-    char *foreignKeys[15][3][20] ;
+    ForeignKey *foreignKeys = NULL ;
+    int size ;
     char command[500] ;
 
     if ((kill = initConf(colConf)) != 0)
         return kill ;
 
-    for (i = 0 ; i < 15 ; ++i)
-        for (j = 0 ; j < 3 ; ++j)
-            strcpy((char *)foreignKeys[i][j], "STOP") ;
+    if ((size = countForeignKeys(node)) == 0)
+        return ERR_XML ;
+    if ((foreignKeys = getForeignKeys(node, size)) == NULL)
+        return ERR_MEM ;
+
     for (n = node ; n != NULL ; n = n->next) {
-        if ((kill = getForeignKeys(foreignKeys, n)) != 0)
-            return kill ;
         strcpy(command, "") ;
         if (n->type == XML_ELEMENT_NODE && strcmp((const char *)n->name, "table") == 0){
             for (j = 0 ; j < 10 ; ++j)
@@ -165,7 +166,36 @@ int writeSQLTables (xmlNodePtr node) {
                 return kill ;
         }
     }
+    if (foreignKeys != NULL)
+        free(foreignKeys) ;
     return 0 ;
+}
+
+
+/*
+Function : countForeignKeys
+-------------------
+Counts the number of foreign keys in the XML file
+
+xmlNodePtr start : first parent node counting from
+
+returns : the number of foreign keys
+*/
+int countForeignKeys (xmlNodePtr start) {
+    int count = 0 ;
+    xmlNodePtr nColumn ;
+    xmlNodePtr nTable ;
+
+    for (nTable = start ; nTable != NULL ; nTable = nTable->next) {
+        for (nColumn = nTable->children ; nColumn != NULL ; nColumn = nColumn->next) {
+            if (nColumn->type == XML_ELEMENT_NODE && strcmp((const char *)nColumn->name, "column") == 0) {
+                if (xmlGetProp(nColumn, (const xmlChar *)"reference") != NULL && strcmp((const char *)xmlGetProp(nColumn, (const xmlChar *)"reference"), "target") == 0) {
+                    count++ ;
+                }
+            }
+        }
+    }
+    return count ;
 }
 
 /*

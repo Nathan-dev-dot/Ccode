@@ -2,7 +2,7 @@
 
 <database dbname="test">
      <table tname="table1">
-          <column attribute="primary key" constraints="auto_increment" reference="target">hello</column>
+          <column type="integer" attribute="primary key" constraints="auto_increment" reference="target">tcv</column>
           <column type="varchar" size="32" default="null">t1c2</column>
      </table>
      <table tname="table2">

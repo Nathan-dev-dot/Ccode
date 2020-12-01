@@ -24,7 +24,8 @@ void switchActions (int choice) ;
 char nameDB[30] ;
 
 int main(int argc, char **argv){
-    launcher() ;
+    dbFromXML() ;
+    //launcher() ;
     return 0 ;
 }
 
