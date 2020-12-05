@@ -130,7 +130,6 @@ int writeSQLTables (xmlNodePtr node) {
     int j ;
     xmlNodePtr n ;
     char *colConf[10][2][20] = { "" } ;
-    char *primKeys[30][20] ;
     ForeignKey *foreignKeys = NULL ;
     int size ;
     char command[500] ;
@@ -146,16 +145,14 @@ int writeSQLTables (xmlNodePtr node) {
     for (n = node ; n != NULL ; n = n->next) {
         strcpy(command, "") ;
         if (n->type == XML_ELEMENT_NODE && strcmp((const char *)n->name, "table") == 0){
-            for (j = 0 ; j < 10 ; ++j)
-                strcpy((char *)primKeys[j], "STOP") ;
             if (xmlGetProp(n, (const xmlChar *)"tname") == NULL)
                 return ERR_XML ;
             strcat(strcat(strcat(command, "CREATE TABLE "), (const char *)xmlGetProp(n, (const xmlChar *)"tname")), "(") ;
 
-            if ((kill = writeSQLColumn(n->children, colConf, command, primKeys, foreignKeys)) != 0)
+            if ((kill = writeSQLColumn(n->children, colConf, command, foreignKeys)) != 0)
                 return kill ;
 
-            if ((kill = catPrimaryKeys(primKeys, command)) != 0)
+            if ((kill = catPrimaryKeys(n, command)) != 0)
                 return kill ;
             strcat(command, ")") ;
 

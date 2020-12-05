@@ -34,7 +34,7 @@ returns :
 0 if ok
 1 if something went wrong
 */
-int writeSQLColumn (xmlNodePtr node, char *colConf[10][2][20], char *command, char *primKeys[][20], ForeignKey *foreignKeys) {
+int writeSQLColumn (xmlNodePtr node, char *colConf[10][2][20], char *command, ForeignKey *foreignKeys) {
     int kill ;
     int i ;
     xmlNodePtr n ;
@@ -56,7 +56,7 @@ int writeSQLColumn (xmlNodePtr node, char *colConf[10][2][20], char *command, ch
                     i++ ;
                 }
                 if (strcmp((const char *)colConf[i][0], "n") == 0) {
-                    catNotMandatory(n, colConf, i, command, primKeys) ;
+                    catNotMandatory(n, colConf, i, command) ;
                 }
                 i++ ;
             }
@@ -100,7 +100,6 @@ int catMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *command) 
 Function : catNotMandatory
 -------------------
 Concatenates the not mandatory props for the column
-Calls to addPrimaryKey to add the primary keys in the primKeys array
 
 xmlNodePtr node : column node
 char *colConf[10][2][20] : array with the column configuration (mandatory and not mandatory)
@@ -112,10 +111,11 @@ returns :
 0 if ok
 1 if something went wrong
 */
-void catNotMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *command, char *primKeys[][20]) {
+void catNotMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *command) {
     char prop[30] ;
     if (xmlGetProp(n, (const xmlChar *)colConf[i][1]) != NULL) {
         strcpy(prop, (const char *)xmlGetProp(n, (const xmlChar *)colConf[i][1])) ;
+
         if (strcmp((const char *)colConf[i][1], "default") == 0) {
             strcat(command, "default ") ;
             if ((!strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "varchar") ||
@@ -124,8 +124,6 @@ void catNotMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *comma
             } else {
                 addSpace(strcat(command, prop)) ;
             }
-        } else if (strcmp((const char *)colConf[i][1], "attribute") == 0 && strcmp((const char *)xmlGetProp(n, (const xmlChar *)"attribute"), "primary key") == 0) {
-            addPrimaryKey(primKeys, (char *)xmlNodeGetContent(n)) ;
         } else {
             addSpace(strcat(command, prop)) ;
         }
@@ -133,39 +131,29 @@ void catNotMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *comma
 }
 
 /*
-Function : addPrimaryKey
-------------------------
-Adds a primary key (column name) to the array of primary keys
-The primary keys will be written at the end of the table command in case there are multiple ones
-
-char *table[][20] : array of primary keys to be modified
-char *colName : column name
-*/
-void addPrimaryKey (char *table[][20], char *colName) {
-    int i = 0 ;
-    while (strcmp((const char *)table[i], "STOP") != 0)
-        i++ ;
-    strcpy((char *)table[i], colName) ;
-}
-
-/*
 Function : catPrimaryKeys
 -------------------
 Concatenates the primary keys at the end of the table creation command
 
-char *table[][20] : array storing the primary keys of the table
+xmlNodePtr parent : node of the table
 char *command : SQL command
 */
-int catPrimaryKeys (char *table[][20], char *command) {
-    int i = 0 ;
+int catPrimaryKeys (xmlNodePtr parent, char *command) {
+    xmlNodePtr n ;
+    int i = 0;
     strcat(command, "primary key(") ;
-    if (strcmp((const char *)table[i], "STOP") == 0)
-        return ERR_XML ;
-    while (strcmp((const char *)table[i], "STOP") != 0) {
-        strcat(strcat(command, (const char *)table[i]), ",") ;
-        i++ ;
+    for (n = parent->children ; n != NULL ; n = n->next) {
+        if (n->type == XML_ELEMENT_NODE) {
+            if (xmlNodeGetContent(n) != NULL && xmlGetProp(n, (const xmlChar *)"attribute") != NULL
+                    && strcmp((const char *)xmlGetProp(n, (const xmlChar *)"attribute"), "primary key") == 0) {
+                strcat(strcat(command, (const char *)xmlNodeGetContent(n)), ", ") ;
+                i++ ;
+            }
+        }
     }
-    removeLastChar(command) ;
+    if (i == 0)
+        return ERR_XML ;
+    command[strlen(command) - 2] = '\0' ;
     strcat(command, ")") ;
     return 0 ;
 }

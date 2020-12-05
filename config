@@ -5,7 +5,7 @@ m prop :size
 n prop :constraints
 n prop :check
 n prop :default
-n prop :attribute
+p prop :attribute
 
 [error_codes]
 1 :Database error

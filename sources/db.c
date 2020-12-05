@@ -79,7 +79,7 @@ int connectDB (char *command) {
     }
     success = mysql_query(&mysql, command) == 0 ? 0 : 3;
     mysql_close(&mysql);
-    return success ;
+    return 0 ;
 }
 
 /*
