@@ -1,7 +1,7 @@
 /*
     Nathan Letourneau & Sarah Schlegel
     01.11.2020
-    Library of string modifiers
+    Project library of string modifiers
 */
 
 #include <stdio.h>

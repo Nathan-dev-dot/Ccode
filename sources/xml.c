@@ -1,7 +1,7 @@
 /*
     Nathan Letourneau & Sarah Schlegel
     01.11.2020
-    Library with XML functions
+    Project library with XML functions
 */
 
 #include <stdio.h>
@@ -9,10 +9,13 @@
 #include <string.h>
 #include <libxml/parser.h>
 #include <mysql/mysql.h>
+#include <gtk/gtk.h>
 
+#include "gtk.h"
 #include "db.h"
 #include "sql.h"
 #include "xml.h"
+#include "str.h"
 #include "errCodes.h"
 
 extern char nameDB[30] ;
@@ -135,6 +138,7 @@ int writeSQLTables (xmlNodePtr node) {
     ForeignKey *foreignKeys = NULL ;
     int size ;
     char command[500] ;
+    MYSQL_RES res ;
 
     if ((colConf = initConf()) == NULL)
          return ERR_CONF ;
@@ -158,7 +162,7 @@ int writeSQLTables (xmlNodePtr node) {
                 return kill ;
             strcat(command, ")") ;
 
-            if ((kill = connectDB(command)) != 0)
+            if ((kill = connectDB(command, &res)) != 0)
                 return kill ;
 
             if ((kill = writeSQLFile(command, 1)) < 0)

@@ -1,7 +1,7 @@
 /*
     Nathan Letourneau & Sarah Schlegel
     01.11.2020
-    Library with SQL writing functions
+    Project library with SQL writing functions
 */
 
 #include <stdio.h>
@@ -9,11 +9,13 @@
 #include <string.h>
 #include <libxml/parser.h>
 #include <mysql/mysql.h>
+#include <gtk/gtk.h>
 
-#include "str.h"
+#include "gtk.h"
 #include "db.h"
 #include "sql.h"
 #include "xml.h"
+#include "str.h"
 #include "errCodes.h"
 
 extern char nameDB[30] ;
@@ -61,6 +63,7 @@ int writeSQLColumn (xmlNodePtr node, Conf *colConf, char *command, ForeignKey *f
                 i++ ;
             }
             kill = catForeignKeys(foreignKeys, n, command) ;
+            trimWhiteSpace(command) ;
             addSpace(strcat(command, ",")) ;
         }
     }
@@ -83,14 +86,14 @@ returns :
 */
 int catMandatory (xmlNodePtr n, Conf *colConf, int i, char *command) {
     char prop[30] ;
-    if (xmlGetProp(n, colConf[i].prop) == NULL)
+    if (xmlGetProp(n, (const xmlChar *)colConf[i].prop) == NULL)
         return ERR_XML ;
-    strcpy(prop, (const char *)xmlGetProp(n, colConf[i].prop)) ;
+    strcpy(prop, (const char *)xmlGetProp(n, (const xmlChar *)colConf[i].prop)) ;
     strcat(command, prop) ;
     if (!strcmp((const char *)prop, "varchar") || !strcmp((const char *)prop, "char")) {
-        if (xmlGetProp(n, colConf[i+1].prop) == NULL)
+        if (xmlGetProp(n, (const xmlChar *)colConf[i+1].prop) == NULL)
             return ERR_XML ;
-        strcat(strcat(strcat(command, "("), (const char *)xmlGetProp(n, colConf[i+1].prop)), ")") ;
+        strcat(strcat(strcat(command, "("), (const char *)xmlGetProp(n, (const xmlChar *)colConf[i+1].prop)), ")") ;
     }
     addSpace(command) ;
     return 0 ;
@@ -113,8 +116,8 @@ returns :
 */
 void catNotMandatory (xmlNodePtr n, Conf *colConf, int i, char *command) {
     char prop[30] ;
-    if (xmlGetProp(n, colConf[i].prop) != NULL) {
-        strcpy(prop, (const char *)xmlGetProp(n, colConf[i].prop)) ;
+    if (xmlGetProp(n, (const xmlChar *)colConf[i].prop) != NULL) {
+        strcpy(prop, (const char *)xmlGetProp(n, (const xmlChar *)colConf[i].prop)) ;
 
         if (strcmp(colConf[i].prop, "default") == 0) {
             strcat(command, "default ") ;

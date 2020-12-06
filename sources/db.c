@@ -1,7 +1,7 @@
 /*
     Nathan Letourneau & Sarah Schlegel
     01.11.2020
-    Library with mysql functions
+    Program library with mysql functions
 */
 
 #include <stdio.h>
@@ -9,11 +9,13 @@
 #include <string.h>
 #include <libxml/parser.h>
 #include <mysql/mysql.h>
+#include <gtk/gtk.h>
 
-#include "str.h"
+#include "gtk.h"
 #include "db.h"
 #include "sql.h"
 #include "xml.h"
+#include "str.h"
 #include "errCodes.h"
 
 extern char nameDB[30] ;
@@ -60,12 +62,13 @@ Connects to the databse created by createDB()
 Sends the commands to the database
 
 char *command : command sent to be executed
+MYSQL_RES *results : structure of results (used only if output required)
 
 returns :
 0 if ok
 1 if something went wrong
 */
-int connectDB (char *command) {
+int connectDB (char *command, MYSQL_RES *results) {
     MYSQL mysql ;
     int success ;
 
@@ -83,7 +86,7 @@ int connectDB (char *command) {
 }
 
 /*
-Function : dropD
+Function : dropDB
 -------------------
 Drops the database if it was created and an error occured
 */
@@ -103,4 +106,9 @@ void dropDB (void) {
     }
     mysql_query(&mysql,command);
     mysql_close(&mysql);
+}
+
+
+void xmlFromDB (void) {
+    printf("Hello\n") ;
 }

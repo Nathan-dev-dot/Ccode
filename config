@@ -1,11 +1,10 @@
 // m = mandatory / n = non mandatory
 [columns]
-m prop :type
-m prop :size
-n prop :constraints
-n prop :check
-n prop :default
-p prop :attribute
+m :type
+m :size
+n :constraints
+n :check
+n :default
 
 [error_codes]
 1 :Database error
