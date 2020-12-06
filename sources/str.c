@@ -10,10 +10,10 @@
 #include <libxml/parser.h>
 #include <mysql/mysql.h>
 
+#include "str.h"
 #include "db.h"
 #include "sql.h"
 #include "xml.h"
-#include "str.h"
 #include "errCodes.h"
 
 

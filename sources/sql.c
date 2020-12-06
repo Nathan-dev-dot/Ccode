@@ -10,10 +10,10 @@
 #include <libxml/parser.h>
 #include <mysql/mysql.h>
 
+#include "str.h"
 #include "db.h"
 #include "sql.h"
 #include "xml.h"
-#include "str.h"
 #include "errCodes.h"
 
 extern char nameDB[30] ;
@@ -25,7 +25,7 @@ Concatenates the column creation command for each column node in the table
 Calls for catForeignKeys to put the foreign key at the end of the column command
 
 xmlNodePtr node : first column node in the table
-char *colConf[10][2][20] : array with the column configuration (mandatory and not mandatory)
+Conf *colConf : array with the column configuration (mandatory and not mandatory)
 char *command : SQL command
 char *primKeys[][20] : array with the primary keys of the table
 ForeignKey *foreignKeys : array with the foreign keys of the database
@@ -34,7 +34,7 @@ returns :
 0 if ok
 1 if something went wrong
 */
-int writeSQLColumn (xmlNodePtr node, char *colConf[10][2][20], char *command, ForeignKey *foreignKeys) {
+int writeSQLColumn (xmlNodePtr node, Conf *colConf, char *command, ForeignKey *foreignKeys) {
     int kill ;
     int i ;
     xmlNodePtr n ;
@@ -49,13 +49,13 @@ int writeSQLColumn (xmlNodePtr node, char *colConf[10][2][20], char *command, Fo
             strcpy(name, (const char *)xmlNodeGetContent(n)) ;
             trimWhiteSpace(name) ;
             addSpace(strcat(command, name)) ;
-            while (strcmp((const char *)colConf[i][0], "STOP") != 0) {
-                if (strcmp((const char *)colConf[i][0], "m") == 0) {
+            while (strcmp(colConf[i].prop, "STOP") != 0) {
+                if (colConf[i].mand == 1) {
                     if ((kill = catMandatory(n, colConf, i, command)) != 0)
                         return kill ;
                     i++ ;
                 }
-                if (strcmp((const char *)colConf[i][0], "n") == 0) {
+                if (colConf[i].mand == 0) {
                     catNotMandatory(n, colConf, i, command) ;
                 }
                 i++ ;
@@ -73,7 +73,7 @@ Function : catMandatory
 Concatenates the mandatory props for the column
 
 xmlNodePtr node : column node
-char *colConf[10][2][20] : array with the column configuration (mandatory and not mandatory)
+Conf *colConf : array with the column configuration (mandatory and not mandatory)
 int i : given line in colConf
 char *command : SQL command
 
@@ -81,16 +81,16 @@ returns :
 0 if ok
 1 if something went wrong
 */
-int catMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *command) {
+int catMandatory (xmlNodePtr n, Conf *colConf, int i, char *command) {
     char prop[30] ;
-    if (xmlGetProp(n, (const xmlChar *)colConf[i][1]) == NULL){
-        return ERR_XML ;}
-    strcpy(prop, (const char *)xmlGetProp(n, (const xmlChar *)colConf[i][1])) ;
+    if (xmlGetProp(n, colConf[i].prop) == NULL)
+        return ERR_XML ;
+    strcpy(prop, (const char *)xmlGetProp(n, colConf[i].prop)) ;
     strcat(command, prop) ;
     if (!strcmp((const char *)prop, "varchar") || !strcmp((const char *)prop, "char")) {
-        if (colConf[i+1][1] == NULL){
-            return ERR_XML ;}
-        strcat(strcat(strcat(command, "("), (const char *)xmlGetProp(n, (const xmlChar *)colConf[i+1][1])), ")") ;
+        if (xmlGetProp(n, colConf[i+1].prop) == NULL)
+            return ERR_XML ;
+        strcat(strcat(strcat(command, "("), (const char *)xmlGetProp(n, colConf[i+1].prop)), ")") ;
     }
     addSpace(command) ;
     return 0 ;
@@ -102,7 +102,7 @@ Function : catNotMandatory
 Concatenates the not mandatory props for the column
 
 xmlNodePtr node : column node
-char *colConf[10][2][20] : array with the column configuration (mandatory and not mandatory)
+Conf *colConf : array with the column configuration (mandatory and not mandatory)
 int i : given line in colConf
 char *command : SQL command
 char *primKeys[][20] : array of the primary key of the table
@@ -111,12 +111,12 @@ returns :
 0 if ok
 1 if something went wrong
 */
-void catNotMandatory (xmlNodePtr n, char *colConf[10][2][20], int i, char *command) {
+void catNotMandatory (xmlNodePtr n, Conf *colConf, int i, char *command) {
     char prop[30] ;
-    if (xmlGetProp(n, (const xmlChar *)colConf[i][1]) != NULL) {
-        strcpy(prop, (const char *)xmlGetProp(n, (const xmlChar *)colConf[i][1])) ;
+    if (xmlGetProp(n, colConf[i].prop) != NULL) {
+        strcpy(prop, (const char *)xmlGetProp(n, colConf[i].prop)) ;
 
-        if (strcmp((const char *)colConf[i][1], "default") == 0) {
+        if (strcmp(colConf[i].prop, "default") == 0) {
             strcat(command, "default ") ;
             if ((!strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "varchar") ||
                     !strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "char")) && strcmp(prop, "null")) {

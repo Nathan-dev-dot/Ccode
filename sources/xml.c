@@ -13,7 +13,6 @@
 #include "db.h"
 #include "sql.h"
 #include "xml.h"
-#include "str.h"
 #include "errCodes.h"
 
 extern char nameDB[30] ;
@@ -35,40 +34,43 @@ void dbFromXML (void) {
 /*
 Function : initConf
 -------------------
-Reads the config file of the columns and stores the data in an array
-(Storing format : n/m | propName)
-
-char *conf[10][2][20] : configuration array
+Reads the config file of the columns and stores the data in an array of structs
+(Storing format : 1/0 | propName)
 
 returns :
-0 if ok
-1 in case of an error
+The pointer of the array or NULL if the file wasn't loaded correctly
 */
-int initConf (char *conf[10][2][20]) {
-    int i = 0 ;
-    char str[50] ;
+Conf * initConf () {
+    Conf *colConf = NULL ;
     FILE *confFile = fopen("../config", "r") ;
+    char mand ;
+    char str[20] ;
+    int lines = 0 ;
+    int i ;
 
-    if (confFile == NULL) {
-        fprintf(stderr, "Config file not found\n") ;
-        return ERR_CONF ;
+    if (confFile == NULL)
+        return NULL ;
+
+    fseek(confFile, 47, SEEK_SET) ;
+    while (fgets(str, 50, confFile) != NULL && strcmp(str, "\n"))
+        lines++ ;
+
+    colConf = (Conf *)malloc(sizeof(Conf) * (lines + 1)) ;
+    if (colConf == NULL) {
+        fprintf(stderr, "Not enough memory available\n") ;
+        return NULL ;
     }
 
     fseek(confFile, 47, SEEK_SET) ;
-    while (fgets(str, 50, confFile) != NULL && strcmp(str, "\n")) {
-        strcpy((char *)conf[i][0], "") ;
-        strncat((char *)conf[i][0], str, 1) ;
-        strcpy((char *)conf[i][1], "") ;
-        strncat((char *)conf[i][1], strchr(str, ':') + 1, strlen(strchr(str, ':') + 1) - 1) ;
-        i++ ;
+    for (i = 0 ; i < lines ; ++i) {
+        fscanf(confFile, "%c :%s\n", &mand, colConf[i].prop) ;
+        colConf[i].mand = mand == 'm' ;
     }
-    if (i < 10) {
-        strcpy((char *)conf[i][0], "STOP") ;
-        strcpy((char *)conf[i][1], "STOP") ;
-    }
+    colConf[i].mand = 0 ;
+    strcpy(colConf[i].prop, "STOP") ;
 
     fclose(confFile) ;
-    return 0 ;
+    return colConf ;
 }
 
 /*
@@ -129,13 +131,13 @@ int writeSQLTables (xmlNodePtr node) {
     int i ;
     int j ;
     xmlNodePtr n ;
-    char *colConf[10][2][20] = { "" } ;
+    Conf *colConf = NULL ;
     ForeignKey *foreignKeys = NULL ;
     int size ;
     char command[500] ;
 
-    if ((kill = initConf(colConf)) != 0)
-        return kill ;
+    if ((colConf = initConf()) == NULL)
+         return ERR_CONF ;
 
     if ((size = countForeignKeys(node)) == 0)
         return ERR_XML ;
@@ -165,6 +167,8 @@ int writeSQLTables (xmlNodePtr node) {
     }
     if (foreignKeys != NULL)
         free(foreignKeys) ;
+    if (colConf != NULL)
+        free(colConf) ;
     return 0 ;
 }
 
