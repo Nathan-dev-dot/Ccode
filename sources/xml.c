@@ -4,19 +4,7 @@
     Project library with XML functions
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <libxml/parser.h>
-#include <mysql/mysql.h>
-#include <gtk/gtk.h>
-
-#include "gtk.h"
-#include "db.h"
-#include "sql.h"
-#include "xml.h"
-#include "str.h"
-#include "errCodes.h"
+#include "all.h"
 
 extern char nameDB[30] ;
 
@@ -25,9 +13,12 @@ Function : dbFromXML
 -------------------
 Launches the program that will create a database from an XML file
 */
-void dbFromXML (void) {
+void dbFromXML (GtkWidget *widget, GtkWidget *input) {
     int kill ;
-    kill = parseDoc();
+    char *path = "" ;
+    retrieveData(widget, input, &path) ;
+    printf("Path : %s\n", path) ;
+    kill = parseDoc(path);
     if (kill != 0)
         printError (kill) ;
     else
@@ -86,14 +77,13 @@ returns :
 0 if ok
 1 if something went wrong
 */
-int parseDoc(void) {
+int parseDoc (char *path) {
     int kill ;
     char xmlFile[100];
     xmlDocPtr doc;
     xmlNodePtr root;
 
-    enterPath(xmlFile) ;
-    doc = xmlParseFile(xmlFile) ;
+    doc = xmlParseFile(path) ;
 
     if (doc == NULL) {
          fprintf(stderr, "Invalid XML document\n") ;

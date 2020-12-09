@@ -21,57 +21,90 @@
 #include "str.h"
 #include "errCodes.h"
 
-void print_hello (GtkWidget *widget, gpointer data) {
-  g_print ("Hello World\n");
+void hello (GtkWidget *widget) {
+    printf("Hello\n") ;
 }
 
-void launcher (GtkApplication *app, gpointer user_data) {
-  GtkWidget *window;
-  GtkWidget *grid;
-  GtkWidget *button;
-
-
-  window = gtk_application_window_new (app);
-  gtk_window_set_title (GTK_WINDOW (window), "Database manager");
-  gtk_container_set_border_width (GTK_CONTAINER (window), 10);
-
-
-  grid = gtk_grid_new ();
-
-
-  gtk_container_add (GTK_CONTAINER (window), grid);
-
-  button = gtk_button_new_with_label ("Create database from XML");
-  g_signal_connect (button, "clicked", G_CALLBACK (dbFromXML), NULL);
-
-
-  gtk_grid_attach (GTK_GRID (grid), button, 0, 0, 1, 1);
-
-  button = gtk_button_new_with_label ("Button 2");
-  g_signal_connect (button, "clicked", G_CALLBACK (print_hello), NULL);
-
-
-  gtk_grid_attach (GTK_GRID (grid), button, 1, 0, 1, 1);
-
-  button = gtk_button_new_with_label ("Quit");
-  g_signal_connect_swapped (button, "clicked", G_CALLBACK (gtk_widget_destroy), window);
-
-
-  gtk_grid_attach (GTK_GRID (grid), button, 0, 1, 2, 1);
-
-
-  gtk_widget_show_all (window);
-
+void destroy (GtkWidget *widget, gpointer data) {
+    gtk_main_quit();
 }
 
 int initProg (int argc, char **argv) {
-  GtkApplication *app;
-  int status;
+    GtkBuilder *builder;
+    GtkWidget  *window;
+    GtkWidget *option1 ;
 
-  app = gtk_application_new ("org.gtk.example", G_APPLICATION_FLAGS_NONE);
-  g_signal_connect (app, "activate", G_CALLBACK (launcher), NULL);
-  status = g_application_run (G_APPLICATION (app), argc, argv);
-  g_object_unref (app);
+    gtk_init(&argc, &argv);
 
-  return status;
+    builder = gtk_builder_new();
+    gtk_builder_add_from_file (builder, "main.glade", NULL);
+
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "window_main"));
+    gtk_builder_connect_signals(builder, NULL);
+    g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL) ;
+
+    background_color(&window, "#999999" );
+    mainMenu(builder, window) ;
+
+    g_object_unref(builder);
+
+    gtk_widget_show(window);
+    gtk_main();
+
+    return 0;
+}
+
+void mainMenu (GtkBuilder *builder, GtkWidget *window) {
+    GtkWidget *option1;
+    GtkWidget *option2;
+    GtkWidget *option3;
+
+    option1 = GTK_WIDGET(gtk_builder_get_object(builder, "dbFromXml"));
+    g_signal_connect(option1, "clicked", G_CALLBACK(dbFromXMLWindow), NULL);
+
+    // option2 = GTK_WIDGET(gtk_builder_get_object(builder, "createXml"));
+    // g_signal_connect(option2, "clicked", G_CALLBACK(dbFromXMLWindow), window);
+    //
+    // option3 = GTK_WIDGET(gtk_builder_get_object(builder, "manageDatabase"));
+    // g_signal_connect(option3, "clicked", G_CALLBACK(dbFromXMLWindow), window);
+}
+
+void dbFromXMLWindow (GtkWidget *widget) {
+    GtkBuilder *builder;
+    GtkWidget *window;
+    GtkWidget *ok ;
+    GtkWidget *input ;
+
+    builder = gtk_builder_new();
+    gtk_builder_add_from_file (builder, "main.glade", NULL);
+
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "window_xml"));
+    gtk_builder_connect_signals(builder, NULL);
+
+    input = GTK_WIDGET(gtk_builder_get_object(builder, "XMLPath")) ;
+    ok = GTK_WIDGET(gtk_builder_get_object(builder, "validate")) ;
+    g_signal_connect(ok, "clicked", G_CALLBACK(dbFromXML), input);
+
+    background_color(&window, "#999999" );
+
+    g_object_unref(builder);
+
+    gtk_widget_show(window);
+    gtk_main();
+}
+
+void retrieveData(GtkWidget *widget, GtkWidget *input, char **str)
+{
+    *str = (char *)gtk_entry_get_text (GTK_ENTRY (input));
+}
+
+void background_color (GtkWidget **widget, char *color) {
+  GtkCssProvider * cssProvider = gtk_css_provider_new();    //store the css
+
+  char css[64] = "* { background-image:none; background-color:";
+  strcat( strcat( css , color ), ";}" );
+
+  gtk_css_provider_load_from_data(cssProvider, css,-1,NULL);
+  GtkStyleContext * context = gtk_widget_get_style_context(*widget);   //manage CSS provider
+  gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(cssProvider),GTK_STYLE_PROVIDER_PRIORITY_USER);
 }

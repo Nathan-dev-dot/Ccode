@@ -1,10 +1,10 @@
 #ifndef XML_H
 #define XML_H
 
-#include "str.h"
+#include "all.h"
 
-void dbFromXML (void) ;
-int parseDoc (void) ;
+void dbFromXML (GtkWidget *widget, GtkWidget *input) ;
+int parseDoc (char *path) ;
 int countForeignKeys (xmlNodePtr start) ;
 int writeSQLTables (xmlNodePtr node) ;
 void enterPath (char *fileName) ;
