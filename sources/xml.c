@@ -172,7 +172,7 @@ Function : countForeignKeys
 -------------------
 Counts the number of foreign keys in the XML file
 
-xmlNodePtr start : first parent node counting from
+xmlNodePtr start : first table node counting from
 
 returns : the number of foreign keys
 */
@@ -193,16 +193,268 @@ int countForeignKeys (xmlNodePtr start) {
     return count ;
 }
 
-/*
-Function : enterPath
--------------------
-Allows the user to enter the file he wants to use
+void createXMLFile (void) {
+    int kill ;
+    kill = createDoc() ;
+}
 
-char *fileName : string storing the file path
-*/
-void enterPath (char *fileName) {
-     printf("Enter XML file path : ") ;
-     fgets(fileName, 100, stdin) ;
-     if (fileName[strlen(fileName) - 1] == '\n')
-          fileName[strlen(fileName) - 1] = '\0' ;
+int createDoc (void) {
+    FILE *xmlFile ;
+    Conf *colConf ;
+    xmlDocPtr doc;
+    xmlNodePtr root ;
+    char path[50] = "" ;
+    int kill ;
+    int nbTables = 0 ;
+    int i ;
+
+    strcpy(nameDB, "coucou") ; //récup le nom du fichier
+    strcat(strcat(strcat(path, "../outputs/"), nameDB), ".xml") ;
+    kill = duplicateTemplate(path) ;
+    if (kill != 0)
+        return kill ;
+
+    doc = xmlParseFile(path) ;
+    if (doc == NULL) {
+         fprintf(stderr, "Invalid XML document\n") ;
+         return EXIT_FAILURE ;
+    }
+
+    root = xmlDocGetRootElement(doc);
+    kill = setRoot(root) ;
+    if (kill != 0)
+        return kill ;
+
+    if ((colConf = initConf()) == NULL)
+        return ERR_CONF ;
+
+    while (nbTables <= 0) {
+        printf("Enter number of tables : ") ;
+        scanf("%d", &nbTables) ;
+        fflush(stdin) ;
+    }
+    for (i = 0 ; i < nbTables ; ++i) {
+        kill = addTableNode(root, colConf) ;
+    }
+
+    kill = writeXMLFile(path, doc) ;
+    if (kill == -1)
+        return ERR_CREA ;
+    xmlFreeDoc(doc) ;
+    return 0 ;
+}
+
+int duplicateTemplate (char *fileName) {
+    FILE *origin ;
+    FILE *duplicate ;
+    char str[50] = "" ;
+
+    origin = fopen("../ressources/template.xml", "r") ;
+    if (origin == NULL) {
+        printf("Erreur d'ouverture du fichier d'origine\n") ;
+        return ERR_FILE ;
+    }
+    duplicate = fopen(fileName, "w+") ;
+    if (origin == NULL)
+        return ERR_FILE ;
+
+    while (fgets(str, 50, origin) != NULL) {
+        fprintf(duplicate, "%s", str) ;
+    }
+
+    fclose(origin) ;
+    fclose(duplicate) ;
+    return 0 ;
+}
+
+int setRoot (xmlNodePtr root) {
+    xmlAttrPtr attr = xmlSetProp(root, (const xmlChar *)"dbname", (const xmlChar *)nameDB) ;
+    return attr != NULL ? 0 : ERR_CREA ;
+}
+
+int addTableNode (xmlNodePtr root, Conf *conf) {
+    char tname[50] = "" ;
+    xmlNodePtr newNode ;
+    xmlAttrPtr attr ;
+    int kill ;
+    int nbCol = 0 ;
+    int i ;
+
+    while (strlen(tname) == 0) {
+        printf("Enter table name : ") ;
+        fgets(tname, 50, stdin) ;
+        removeChariot(tname) ;
+        trimWhiteSpace(tname) ;
+    }
+
+    newNode = xmlNewNode(NULL, (const xmlChar *)"table") ;
+    if (newNode == NULL)
+        return ERR_CREA ;
+
+    attr = xmlSetProp(newNode, (const xmlChar *)"tname", (const xmlChar *)tname) ;
+    if (attr == NULL)
+        return ERR_CREA ;
+
+    while (nbCol <= 0) {
+        printf("Enter number of columns : ") ;
+        scanf("%d", &nbCol) ;
+        fflush(stdin) ;
+    }
+    for (i = 0 ; i < nbCol ; ++i) {
+        kill = addColumnNode(newNode, conf) ;
+    }
+
+    xmlAddChild(root, newNode) ;
+    return 0 ;
+}
+
+int addColumnNode (xmlNodePtr table, Conf *conf) {
+    char cname[50] = "" ;
+    xmlNodePtr newNode ;
+    xmlAttrPtr attr ;
+    int kill ;
+    int i = 0 ;
+    int primKeys = 0 ;
+
+    while (strlen(cname) == 0) {
+        printf("Enter column name : ") ;
+        fgets(cname, 50, stdin) ;
+        removeChariot(cname) ;
+        trimWhiteSpace(cname) ;
+    }
+
+    newNode = xmlNewNode(NULL, (const xmlChar *)"column") ;
+    if (newNode == NULL)
+        return ERR_CREA ;
+
+    xmlNodeSetContent(newNode, (const xmlChar *)cname) ;
+    while (strcmp(conf[i].prop, "STOP") != 0) {
+        if (conf[i].mand == 1) {
+            if ((kill = addMandatory(newNode, conf, i)) != 0)
+                return kill ;
+            i++ ;
+        }
+        if (conf[i].mand == 0) {
+            addNotMandatory(newNode, conf, i) ;
+        }
+        i++ ;
+    }
+    kill = addPrimaryKey(newNode) ;
+    if (kill == 0)
+        return ERR_CREA ;
+    else primKeys += kill ;
+
+    kill = addForeignKey(newNode) ;
+    if (kill == ERR_CREA)
+        return kill ;
+
+    xmlAddChild(table, newNode) ;
+    return 0 ;
+}
+
+int addMandatory (xmlNodePtr col, Conf *conf, int i) {
+    char prop[30] = "" ;
+    xmlAttrPtr attr ;
+    int size = -1 ;
+
+    while (strlen(prop) == 0) {
+        printf("Enter %s : ", conf[i].prop) ;
+        fflush(stdin) ;
+        fgets(prop, 30, stdin) ;
+        removeChariot(prop) ;
+        trimWhiteSpace(prop) ;
+    }
+
+    attr = xmlSetProp(col, (const xmlChar *)conf[i].prop, (const xmlChar *)prop) ;
+    if (attr == NULL)
+        return ERR_CREA ;
+
+    if (strcmp(prop, "varchar") == 0 || strcmp(prop, "char") == 0) {
+        strcpy(prop, "") ;
+        while (size <= 0) {
+            printf("Enter %s : ", conf[i+1].prop) ;
+            scanf("%d", &size) ;
+            fflush(stdin) ;
+        }
+        sprintf(prop, "%d", size) ;
+        attr = xmlSetProp(col, (const xmlChar *)conf[i+1].prop, (const xmlChar *)prop) ;
+        if (attr == NULL)
+            return ERR_CREA ;
+    }
+    return 0 ;
+}
+
+int addNotMandatory (xmlNodePtr col, Conf *conf, int i) {
+    char prop[30] ;
+    xmlAttrPtr attr ;
+
+    printf("Enter %s : ", conf[i].prop) ;
+    fflush(stdin) ;
+    fgets(prop, 30, stdin) ;
+    removeChariot(prop) ;
+
+    if (strlen(prop) != 0)
+        attr = xmlSetProp(col, (const xmlChar *)conf[i].prop, (const xmlChar *)prop) ;
+    if (attr == NULL)
+        return ERR_CREA ;
+
+    return 0 ;
+}
+
+int addPrimaryKey (xmlNodePtr col) {
+    int yn = -1 ;
+    xmlAttrPtr attr ;
+    while (yn != 0 && yn != 1) {
+        printf("Primary key ? (0 : no / 1 : yes) ") ;
+        scanf("%d", &yn) ;
+        fflush(stdin) ;
+    }
+    if (yn == 1) {
+        attr = xmlSetProp(col, (const xmlChar *)"attribute", (const xmlChar *)"primary key") ;
+        if (attr == NULL)
+            return 0 ;
+    }
+    return 1 ;
+}
+
+int addForeignKey (xmlNodePtr col) {
+    int yn = -1 ;
+    char ref[50] = "" ;
+    xmlAttrPtr attr ;
+
+    while (yn != 0 && yn != 1) {
+        printf("Referenced table ? (0 : no / 1 : yes) ") ;
+        scanf("%d", &yn) ;
+        fflush(stdin) ;
+    }
+    if (yn == 1) {
+        attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)"target") ;
+        if (attr == NULL)
+            return ERR_CREA ;
+    }
+
+    yn = -1 ;
+    while (yn != 0 && yn != 1) {
+        printf("References another table ? (0 : no / 1 : yes) ") ;
+        scanf("%d", &yn) ;
+        fflush(stdin) ;
+    }
+    if (yn == 1) {
+        printf("Referenced table name : ") ;
+        fgets(ref, 50, stdin) ;
+        removeChariot(ref) ;
+        attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)ref) ;
+        if (attr == NULL)
+            return ERR_CREA ;
+    }
+    return 0 ;
+}
+
+int writeXMLFile (char *fileName, xmlDocPtr doc) {
+    FILE *file = fopen(fileName, "w+") ;
+    int success ;
+    if (file == NULL)
+        return ERR_FILE ;
+    success = xmlDocDump(file, doc) ;
+    return success ;
 }

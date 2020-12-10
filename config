@@ -12,3 +12,5 @@ n :default
 3 :Invalid XML format (check the mandatory attributes, the foreign and primary keys, and the names of the tables, columns and database)
 4 :Error in SQL file
 5 :Not enough memory available
+6 :Error in creating the file
+7 :XML parsing error

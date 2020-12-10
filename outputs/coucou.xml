@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<database dbname="coucou">
+    <table tname="table1">
+        <column type="integer" constraints="auto_increment" attribute="primary key" reference="target">tcv</column>
+        <column type="varchar" size="32" attribute="primary key">t1c2</column>
+    </table>
+    <table tname="table2">
+        <column type="varchar" size="32" attribute="primary key">t2c1</column>
+        <column type="varchar" size="32" default="hello" attribute="primary key">t2c2</column>
+        <column type="integer" constraints="not null" reference="table1(tcv)">t2c3</column>
+    </table>
+</database>

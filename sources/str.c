@@ -4,17 +4,7 @@
     Project library of string modifiers
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <libxml/parser.h>
-#include <mysql/mysql.h>
-
-#include "str.h"
-#include "db.h"
-#include "sql.h"
-#include "xml.h"
-#include "errCodes.h"
+#include "all.h"
 
 
 /*

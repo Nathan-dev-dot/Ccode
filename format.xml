@@ -2,7 +2,7 @@
 
 <database dbname="test">
      <table tname="table1">
-          <column type="integer" attribute="primary key" reference="target">tcv</column>
+          <column type="integer" constraints="auto_increment" attribute="primary key" reference="target">tcv</column>
           <column type="varchar" attribute="primary key" size="32">t1c2</column>
      </table>
      <table tname="table2">
@@ -11,7 +11,3 @@
           <column type="integer" constraints="not null" reference="table1(tcv)">t2c3</column>
      </table>
 </database>
-
-<!--
-Gérer les clés étrangères
--->
