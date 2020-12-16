@@ -28,7 +28,6 @@ int writeSQLColumn (xmlNodePtr node, Conf *colConf, char *command, ForeignKey *f
     int kill ;
     int i ;
     xmlNodePtr n ;
-    char str[30] ;
     char name[30] ;
 
     for (n = node ; n != NULL ; n = n->next) {

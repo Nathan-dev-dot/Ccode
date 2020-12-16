@@ -79,7 +79,6 @@ returns :
 */
 int parseDoc (char *path) {
     int kill ;
-    char xmlFile[100];
     xmlDocPtr doc;
     xmlNodePtr root;
 
@@ -121,8 +120,6 @@ returns :
 */
 int writeSQLTables (xmlNodePtr node) {
     int kill ;
-    int i ;
-    int j ;
     xmlNodePtr n ;
     Conf *colConf = NULL ;
     ForeignKey *foreignKeys = NULL ;
@@ -193,13 +190,16 @@ int countForeignKeys (xmlNodePtr start) {
     return count ;
 }
 
-void createXMLFile (void) {
+/*
+*/
+void createXMLFile (GtkWidget *widget, XMLdbParams *dbParams) {
     int kill ;
-    kill = createDoc() ;
+    kill = createDoc(widget, dbParams) ;
 }
 
-int createDoc (void) {
-    FILE *xmlFile ;
+/*
+*/
+int createDoc (GtkWidget *widget, XMLdbParams *dbParams) {
     Conf *colConf ;
     xmlDocPtr doc;
     xmlNodePtr root ;
@@ -208,8 +208,11 @@ int createDoc (void) {
     int nbTables = 0 ;
     int i ;
 
-    strcpy(nameDB, "coucou") ; //récup le nom du fichier
-    strcat(strcat(strcat(path, "../outputs/"), nameDB), ".xml") ;
+    if ((kill = setXMLDatabase(widget, dbParams->name, (char *)path)) != 0)
+        return kill ;
+    if ((kill = retrieveInteger(widget, dbParams->nb, &nbTables)) != 0)
+        return kill ;
+
     kill = duplicateTemplate(path) ;
     if (kill != 0)
         return kill ;
@@ -225,25 +228,61 @@ int createDoc (void) {
     if (kill != 0)
         return kill ;
 
-    if ((colConf = initConf()) == NULL)
+    if ((colConf = initConf()) == NULL){
+        xmlFreeDoc(doc) ;
         return ERR_CONF ;
-
-    while (nbTables <= 0) {
-        printf("Enter number of tables : ") ;
-        scanf("%d", &nbTables) ;
-        fflush(stdin) ;
     }
+
+    closeWindow(dbParams->window) ;
+
+
+
     for (i = 0 ; i < nbTables ; ++i) {
-        kill = addTableNode(root, colConf) ;
+        tableData(widget) ;
+    //     kill = addTableNode(root, colConf) ;
     }
-
+    xmlFreeDoc(doc) ;
+    return 0 ;
     kill = writeXMLFile(path, doc) ;
-    if (kill == -1)
+    if (kill == -1) {
+        xmlFreeDoc(doc) ;
         return ERR_CREA ;
+    }
     xmlFreeDoc(doc) ;
     return 0 ;
 }
 
+/*
+*/
+int setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) {
+    char *tmp ;
+    retrieveData(widget, input, &tmp) ;
+
+    if (strlen(tmp) == 0)
+        return ERR_ENTRY ;
+
+    strcpy(nameDB, tmp) ;
+    strcat(strcat(strcpy(path, "../outputs/"), nameDB), ".xml") ;
+
+    return 0 ;
+}
+
+/*
+*/
+int retrieveInteger (GtkWidget *widget, GtkWidget *input, int *integer) {
+    char *tmp = "" ;
+    retrieveData(widget, input, &tmp) ;
+
+    *integer = atoi(tmp) ;
+    if (*integer <= 0) {
+        return ERR_ENTRY ;
+    }
+
+    return 0 ;
+}
+
+/*
+*/
 int duplicateTemplate (char *fileName) {
     FILE *origin ;
     FILE *duplicate ;
@@ -267,11 +306,15 @@ int duplicateTemplate (char *fileName) {
     return 0 ;
 }
 
+/*
+*/
 int setRoot (xmlNodePtr root) {
     xmlAttrPtr attr = xmlSetProp(root, (const xmlChar *)"dbname", (const xmlChar *)nameDB) ;
     return attr != NULL ? 0 : ERR_CREA ;
 }
 
+/*
+*/
 int addTableNode (xmlNodePtr root, Conf *conf) {
     char tname[50] = "" ;
     xmlNodePtr newNode ;
@@ -308,10 +351,11 @@ int addTableNode (xmlNodePtr root, Conf *conf) {
     return 0 ;
 }
 
+/*
+*/
 int addColumnNode (xmlNodePtr table, Conf *conf) {
     char cname[50] = "" ;
     xmlNodePtr newNode ;
-    xmlAttrPtr attr ;
     int kill ;
     int i = 0 ;
     int primKeys = 0 ;
@@ -352,6 +396,8 @@ int addColumnNode (xmlNodePtr table, Conf *conf) {
     return 0 ;
 }
 
+/*
+*/
 int addMandatory (xmlNodePtr col, Conf *conf, int i) {
     char prop[30] = "" ;
     xmlAttrPtr attr ;
@@ -384,9 +430,11 @@ int addMandatory (xmlNodePtr col, Conf *conf, int i) {
     return 0 ;
 }
 
+/*
+*/
 int addNotMandatory (xmlNodePtr col, Conf *conf, int i) {
     char prop[30] ;
-    xmlAttrPtr attr ;
+    xmlAttrPtr attr = NULL ;
 
     printf("Enter %s : ", conf[i].prop) ;
     fflush(stdin) ;
@@ -401,6 +449,8 @@ int addNotMandatory (xmlNodePtr col, Conf *conf, int i) {
     return 0 ;
 }
 
+/*
+*/
 int addPrimaryKey (xmlNodePtr col) {
     int yn = -1 ;
     xmlAttrPtr attr ;
@@ -417,6 +467,8 @@ int addPrimaryKey (xmlNodePtr col) {
     return 1 ;
 }
 
+/*
+*/
 int addForeignKey (xmlNodePtr col) {
     int yn = -1 ;
     char ref[50] = "" ;
@@ -450,6 +502,8 @@ int addForeignKey (xmlNodePtr col) {
     return 0 ;
 }
 
+/*
+*/
 int writeXMLFile (char *fileName, xmlDocPtr doc) {
     FILE *file = fopen(fileName, "w+") ;
     int success ;

@@ -17,7 +17,6 @@ int errorNo : error number given by the previous functions
 void printError (int errorNo) {
     FILE *confFile = fopen("../config", "r") ;
     char str[150] ;
-    char errMessage[150] ;
     int errCode ;
 
     if (confFile == NULL){

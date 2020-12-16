@@ -1,4 +1,4 @@
-#Compilation flags
+#Compilation flags 
 CFLAGS = -Wall `pkg-config --cflags libxml-2.0 gtk+-3.0` -o
 
 #Libraries

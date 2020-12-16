@@ -9,8 +9,9 @@ int countForeignKeys (xmlNodePtr start) ;
 int writeSQLTables (xmlNodePtr node) ;
 Conf * initConf () ;
 
-void createXMLFile (void) ;
-int createDoc (void) ;
+void createXMLFile (GtkWidget *widget, XMLdbParams *dbParams) ;
+int createDoc (GtkWidget *widget, XMLdbParams *dbParams) ;
+int setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) ;
 int duplicateTemplate (char *fileName) ;
 int setRoot (xmlNodePtr root) ;
 int addTableNode (xmlNodePtr root, Conf *conf) ;
@@ -19,6 +20,7 @@ int addMandatory (xmlNodePtr col, Conf *conf, int i) ;
 int addNotMandatory (xmlNodePtr col, Conf *conf, int i) ;
 int addPrimaryKey (xmlNodePtr col)  ;
 int addForeignKey (xmlNodePtr col) ;
+int retrieveInteger (GtkWidget *widget, GtkWidget *input, int *integer) ;
 
 int writeXMLFile (char *fileName, xmlDocPtr doc) ;
 

@@ -20,6 +20,12 @@ typedef struct Conf {
     char prop[20] ;
 } Conf ;
 
+typedef struct XMLdbParams {
+    GtkWidget *name;
+    GtkWidget *nb;
+    GtkWidget *window ;
+} XMLdbParams ;
+
 #include "gtk.h"
 #include "db.h"
 #include "sql.h"
