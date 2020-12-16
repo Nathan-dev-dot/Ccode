@@ -129,7 +129,6 @@ void xmlFromEntries (GtkWidget *widget) {
     gtk_grid_attach(GTK_GRID(grid), button, 0, 6, 1, 1) ;
 
     background_color(&window, "#999999") ;
-
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -137,19 +136,20 @@ void xmlFromEntries (GtkWidget *widget) {
 /*
 */
 void tableData (GtkWidget *widget) {
-    GtkWidget *newWindow ;
+    GtkWidget *window ;
     GtkWidget *grid;
     GtkWidget *button ;
     GtkWidget *nbLabel ;
     GtkWidget *tLabel ;
     XMLdbParams dbParams;
 
-    newWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(newWindow), (const gchar *)"Number of columns") ;
-    gtk_window_set_default_size (GTK_WINDOW (newWindow), 200, 200);
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Number of columns") ;
+    gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+    dbParams.window = window ;
 
     grid = gtk_grid_new() ;
-    gtk_container_add(GTK_CONTAINER(newWindow), grid) ;
+    gtk_container_add(GTK_CONTAINER(window), grid) ;
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
 
     tLabel = gtk_label_new((const gchar *)"Enter the table name") ;
@@ -163,13 +163,112 @@ void tableData (GtkWidget *widget) {
     gtk_grid_attach(GTK_GRID(grid), dbParams.nb, 0, 4, 1, 1) ;
 
     button = gtk_button_new_with_label((const gchar *)"button") ;
-    g_signal_connect (button, "clicked", G_CALLBACK (hello), NULL);
+    g_signal_connect (button, "clicked", G_CALLBACK (setTableData), &dbParams);
     gtk_grid_attach(GTK_GRID(grid), button, 0, 6, 1, 1) ;
 
-    background_color(&newWindow, "#999999") ;
-
-    gtk_widget_show_all(newWindow) ;
+    background_color(&window, "#999999") ;
+    gtk_widget_show_all(window) ;
     gtk_main() ;
+}
+
+/*
+*/
+void getTableColumns (int nbCol, char *tName) {
+    GtkWidget *window ;
+    GtkWidget *grid ;
+    GtkColumn *columns ;
+    GtkWidget *button ;
+    char tmp[30] = "Table " ;
+
+    strcat(tmp, tName) ;
+
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)tmp) ;
+    gtk_window_set_default_size (GTK_WINDOW (window), 1500, 200 + 50 * nbCol);
+
+    grid = gtk_grid_new() ;
+    gtk_container_add(GTK_CONTAINER(window), grid) ;
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
+
+    columns = createColInputs(nbCol, grid) ;
+
+    button = gtk_button_new_with_label((const gchar *)"Send") ;
+    gtk_grid_attach(GTK_GRID(grid), button, 1, nbCol + 1, 1, 1) ;
+    g_signal_connect (button, "clicked", G_CALLBACK (fxTmp), columns[0].type);
+
+    free(columns) ;
+
+    background_color(&window, "#999999") ;
+    gtk_widget_show_all(window) ;
+    gtk_main() ;
+}
+
+void fxTmp (GtkWidget *widget, GtkWidget *box) {
+    char *tmp ;
+    retrieveComboBoxContent(widget, box, &tmp) ;
+    printf("%s\n", tmp) ;
+}
+
+
+GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
+    GtkColumn *columns ;
+    int i ;
+
+    columns = malloc(sizeof(GtkColumn) * nbCol) ;
+    if (columns == NULL)
+        return NULL ;
+
+    for (i = 0 ; i < nbCol ; ++i) {
+        columns[i].name = createInput("Name") ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].name, 0, i, 1, 1) ;
+        columns[i].type = createComboBoxType() ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].type, 1, i, 1, 1) ;
+        columns[i].size = createInput("Size") ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].size, 2, i, 1, 1) ;
+        columns[i].constraints = createInput("Constraints (auto_increment, etc.)") ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].constraints, 3, i, 1, 1) ;
+        columns[i].check = createInput("Check") ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].check, 4, i, 1, 1) ;
+        columns[i].def = createInput("Default") ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].def, 5, i, 1, 1) ;
+        columns[i].primKey = createComboBoxYN();
+        gtk_grid_attach(GTK_GRID(grid), columns[i].primKey, 6, i, 1, 1) ;
+        columns[i].ref = createInput("References") ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].ref, 7, i, 1, 1) ;
+        columns[i].refd = createComboBoxYN() ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].refd, 8, i, 1, 1) ;
+    }
+
+    return columns ;
+}
+
+/*
+*/
+GtkWidget * createComboBoxType (void) {
+    GtkWidget *box ;
+
+    box = gtk_combo_box_text_new() ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "integer", "INTEGER") ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "float", "FLOAT") ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "double", "DOUBLE") ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "char", "CHAR") ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "varchar", "VARCHAR") ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "text", "TEXT") ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "timestamp", "TIMESTAMP") ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "date", "DATE") ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "datetime", "DATETIME") ;
+
+    return box ;
+}
+
+GtkWidget * createComboBoxYN (void) {
+    GtkWidget *box ;
+
+    box = gtk_combo_box_text_new() ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "yes", "YES") ;
+    gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "no", "NO") ;
+
+    return box ;
 }
 
 /*
@@ -180,6 +279,12 @@ GtkWidget * createInput (char *placeholder) {
     return input ;
 }
 
+void retrieveComboBoxContent (GtkWidget *widget, GtkWidget *box, char **str) {
+    if (box == NULL)
+        return ;
+    *str = (char *)gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box)) ;
+}
+
 /*
 */
 void retrieveData(GtkWidget *widget, GtkWidget *input, char **str)
@@ -187,7 +292,6 @@ void retrieveData(GtkWidget *widget, GtkWidget *input, char **str)
     if (input == NULL)
         return ;
     *str = (char *)gtk_entry_get_text (GTK_ENTRY (input));
-    printf("%s\n", *str) ;
 }
 
 /*

@@ -26,6 +26,18 @@ typedef struct XMLdbParams {
     GtkWidget *window ;
 } XMLdbParams ;
 
+typedef struct GtkColumn {
+    GtkWidget *name ;
+    GtkWidget *type ;
+    GtkWidget *size ;
+    GtkWidget *constraints ;
+    GtkWidget *check ;
+    GtkWidget *def ;
+    GtkWidget *primKey ;
+    GtkWidget *ref ; //references another table
+    GtkWidget *refd ; //is referenced by another table
+} GtkColumn ;
+
 #include "gtk.h"
 #include "db.h"
 #include "sql.h"

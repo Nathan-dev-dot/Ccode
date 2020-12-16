@@ -14,6 +14,9 @@ int createDoc (GtkWidget *widget, XMLdbParams *dbParams) ;
 int setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) ;
 int duplicateTemplate (char *fileName) ;
 int setRoot (xmlNodePtr root) ;
+
+void setTableData (GtkWidget *widget, XMLdbParams *tableParams) ;
+
 int addTableNode (xmlNodePtr root, Conf *conf) ;
 int addColumnNode (xmlNodePtr table, Conf *conf) ;
 int addMandatory (xmlNodePtr col, Conf *conf, int i) ;

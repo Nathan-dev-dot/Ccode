@@ -235,10 +235,9 @@ int createDoc (GtkWidget *widget, XMLdbParams *dbParams) {
 
     closeWindow(dbParams->window) ;
 
-
-
     for (i = 0 ; i < nbTables ; ++i) {
         tableData(widget) ;
+        printf("No\n") ;
     //     kill = addTableNode(root, colConf) ;
     }
     xmlFreeDoc(doc) ;
@@ -265,6 +264,16 @@ int setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) {
     strcat(strcat(strcpy(path, "../outputs/"), nameDB), ".xml") ;
 
     return 0 ;
+}
+
+void setTableData (GtkWidget *widget, XMLdbParams *tableParams) {
+    int nbCol = 0 ;
+    char *tName ;
+
+    retrieveInteger(widget, tableParams->nb, &nbCol) ;
+    retrieveData(widget, tableParams->name, &tName) ;
+    closeWindow(tableParams->window) ;
+    getTableColumns(nbCol, tName) ;
 }
 
 /*
