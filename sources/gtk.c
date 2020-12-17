@@ -9,8 +9,8 @@
 
 #include "all.h"
 
-void hello (GtkWidget *widget) {
-    printf("Hello\n") ;
+void hello (GtkWidget *widget, XMLdbData *data) {
+    printf("Hello %p\n", data) ;
 }
 
 /*
@@ -102,7 +102,7 @@ void xmlFromEntries (GtkWidget *widget) {
     GtkWidget *button ;
     GtkWidget *nbLabel ;
     GtkWidget *dbLabel ;
-    XMLdbParams dbParams;
+    GtkDualInputs dbParams;
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Create an XML file") ;
@@ -135,13 +135,13 @@ void xmlFromEntries (GtkWidget *widget) {
 
 /*
 */
-void tableData (GtkWidget *widget) {
+void tableData (GtkWidget *widget, XMLdbData *dbData) {
     GtkWidget *window ;
     GtkWidget *grid;
     GtkWidget *button ;
     GtkWidget *nbLabel ;
     GtkWidget *tLabel ;
-    XMLdbParams dbParams;
+    GtkDualInputs dbParams;
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Number of columns") ;
@@ -162,8 +162,10 @@ void tableData (GtkWidget *widget) {
     dbParams.nb = createInput("Number") ;
     gtk_grid_attach(GTK_GRID(grid), dbParams.nb, 0, 4, 1, 1) ;
 
+    dbData->dualInputs = &dbParams ;
+
     button = gtk_button_new_with_label((const gchar *)"button") ;
-    g_signal_connect (button, "clicked", G_CALLBACK (setTableData), &dbParams);
+    g_signal_connect (button, "clicked", G_CALLBACK (setTableData), dbData);
     gtk_grid_attach(GTK_GRID(grid), button, 0, 6, 1, 1) ;
 
     background_color(&window, "#999999") ;
@@ -173,28 +175,30 @@ void tableData (GtkWidget *widget) {
 
 /*
 */
-void getTableColumns (int nbCol, char *tName) {
+void getTableColumns (XMLdbData *dbData) {
     GtkWidget *window ;
     GtkWidget *grid ;
     GtkColumn *columns ;
     GtkWidget *button ;
     char tmp[30] = "Table " ;
 
-    strcat(tmp, tName) ;
+    strcat(tmp, dbData->name) ;
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), (const gchar *)tmp) ;
-    gtk_window_set_default_size (GTK_WINDOW (window), 1500, 200 + 50 * nbCol);
+    gtk_window_set_default_size (GTK_WINDOW (window), 1500, 200 + 50 * dbData->size);
 
     grid = gtk_grid_new() ;
     gtk_container_add(GTK_CONTAINER(window), grid) ;
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
 
-    columns = createColInputs(nbCol, grid) ;
+    columns = createColInputs(dbData->size, grid) ;
+    dbData->columns = columns ;
 
     button = gtk_button_new_with_label((const gchar *)"Send") ;
-    gtk_grid_attach(GTK_GRID(grid), button, 1, nbCol + 1, 1, 1) ;
-    g_signal_connect (button, "clicked", G_CALLBACK (fxTmp), columns[0].type);
+    gtk_grid_attach(GTK_GRID(grid), button, 1, dbData->size + 1, 1, 1) ;
+    printf("%p * %p *\n", dbData, &(dbData->name)) ;
+    g_signal_connect(button, "clicked", G_CALLBACK(addTableNode), dbData) ;
 
     free(columns) ;
 
@@ -292,6 +296,7 @@ void retrieveData(GtkWidget *widget, GtkWidget *input, char **str)
     if (input == NULL)
         return ;
     *str = (char *)gtk_entry_get_text (GTK_ENTRY (input));
+    printf("%s\n", *str) ;
 }
 
 /*

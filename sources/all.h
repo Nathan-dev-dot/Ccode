@@ -20,11 +20,11 @@ typedef struct Conf {
     char prop[20] ;
 } Conf ;
 
-typedef struct XMLdbParams {
+typedef struct GtkDualInputs {
     GtkWidget *name;
     GtkWidget *nb;
     GtkWidget *window ;
-} XMLdbParams ;
+} GtkDualInputs ;
 
 typedef struct GtkColumn {
     GtkWidget *name ;
@@ -37,6 +37,16 @@ typedef struct GtkColumn {
     GtkWidget *ref ; //references another table
     GtkWidget *refd ; //is referenced by another table
 } GtkColumn ;
+
+typedef struct XMLdbData {
+    xmlDocPtr doc ;
+    xmlNodePtr root ;
+    char *name;
+    size_t size ;
+    GtkColumn *columns;
+    Conf *conf ;
+    GtkDualInputs *dualInputs;
+} XMLdbData ;
 
 #include "gtk.h"
 #include "db.h"

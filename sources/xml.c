@@ -192,21 +192,19 @@ int countForeignKeys (xmlNodePtr start) {
 
 /*
 */
-void createXMLFile (GtkWidget *widget, XMLdbParams *dbParams) {
+void createXMLFile (GtkWidget *widget, GtkDualInputs *dbParams) {
     int kill ;
     kill = createDoc(widget, dbParams) ;
 }
 
 /*
 */
-int createDoc (GtkWidget *widget, XMLdbParams *dbParams) {
-    Conf *colConf ;
-    xmlDocPtr doc;
-    xmlNodePtr root ;
+int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
     char path[50] = "" ;
     int kill ;
-    int nbTables = 0 ;
+    size_t nbTables = 0 ;
     int i ;
+    XMLdbData xmlData ;
 
     if ((kill = setXMLDatabase(widget, dbParams->name, (char *)path)) != 0)
         return kill ;
@@ -217,37 +215,38 @@ int createDoc (GtkWidget *widget, XMLdbParams *dbParams) {
     if (kill != 0)
         return kill ;
 
-    doc = xmlParseFile(path) ;
-    if (doc == NULL) {
+    xmlData.doc = xmlParseFile(path) ;
+    if (xmlData.doc == NULL) {
          fprintf(stderr, "Invalid XML document\n") ;
          return EXIT_FAILURE ;
     }
 
-    root = xmlDocGetRootElement(doc);
-    kill = setRoot(root) ;
+    xmlData.root = xmlDocGetRootElement(xmlData.doc);
+    kill = setRoot(xmlData.root) ;
     if (kill != 0)
         return kill ;
 
-    if ((colConf = initConf()) == NULL){
-        xmlFreeDoc(doc) ;
+    if ((xmlData.conf = initConf()) == NULL){
+        xmlFreeDoc(xmlData.doc) ;
         return ERR_CONF ;
     }
 
     closeWindow(dbParams->window) ;
 
     for (i = 0 ; i < nbTables ; ++i) {
-        tableData(widget) ;
+        tableData(widget, &xmlData) ;
         printf("No\n") ;
     //     kill = addTableNode(root, colConf) ;
     }
-    xmlFreeDoc(doc) ;
+    xmlFreeDoc(xmlData.doc) ;
     return 0 ;
-    kill = writeXMLFile(path, doc) ;
+
+    kill = writeXMLFile(path, xmlData.doc) ;
     if (kill == -1) {
-        xmlFreeDoc(doc) ;
+        xmlFreeDoc(xmlData.doc) ;
         return ERR_CREA ;
     }
-    xmlFreeDoc(doc) ;
+    xmlFreeDoc(xmlData.doc) ;
     return 0 ;
 }
 
@@ -266,19 +265,16 @@ int setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) {
     return 0 ;
 }
 
-void setTableData (GtkWidget *widget, XMLdbParams *tableParams) {
-    int nbCol = 0 ;
-    char *tName ;
-
-    retrieveInteger(widget, tableParams->nb, &nbCol) ;
-    retrieveData(widget, tableParams->name, &tName) ;
-    closeWindow(tableParams->window) ;
-    getTableColumns(nbCol, tName) ;
+void setTableData (GtkWidget *widget, XMLdbData *dbData) {
+    retrieveInteger(widget, dbData->dualInputs->nb, &(dbData->size)) ;
+    retrieveData(widget, dbData->dualInputs->name, &(dbData->name)) ;
+    closeWindow(dbData->dualInputs->window) ;
+    getTableColumns(dbData) ;
 }
 
 /*
 */
-int retrieveInteger (GtkWidget *widget, GtkWidget *input, int *integer) {
+int retrieveInteger (GtkWidget *widget, GtkWidget *input, size_t *integer) {
     char *tmp = "" ;
     retrieveData(widget, input, &tmp) ;
 
@@ -324,84 +320,78 @@ int setRoot (xmlNodePtr root) {
 
 /*
 */
-int addTableNode (xmlNodePtr root, Conf *conf) {
-    char tname[50] = "" ;
+
+int addTableNode (GtkWidget *widget, XMLdbData *tableData) {
     xmlNodePtr newNode ;
     xmlAttrPtr attr ;
     int kill ;
-    int nbCol = 0 ;
     int i ;
 
-    while (strlen(tname) == 0) {
-        printf("Enter table name : ") ;
-        fgets(tname, 50, stdin) ;
-        removeChariot(tname) ;
-        trimWhiteSpace(tname) ;
-    }
+    printf("%p * %s *\n", tableData, tableData->name) ;
+    return 0 ;
 
-    newNode = xmlNewNode(NULL, (const xmlChar *)"table") ;
-    if (newNode == NULL)
-        return ERR_CREA ;
+    // newNode = xmlNewNode(NULL, (const xmlChar *)"table") ;
+    // if (newNode == NULL)
+    //     return ERR_CREA ;
+    //
+    // attr = xmlSetProp(newNode, (const xmlChar *)"tname", (const xmlChar *)tableData->name) ;
+    // if (attr == NULL)
+    //     return ERR_CREA ;
+    //
+    // for (i = 0 ; i < tableData->size ; ++i) {
+    //     kill = addColumnNode(newNode, tableData) ;
+    // }
 
-    attr = xmlSetProp(newNode, (const xmlChar *)"tname", (const xmlChar *)tname) ;
-    if (attr == NULL)
-        return ERR_CREA ;
-
-    while (nbCol <= 0) {
-        printf("Enter number of columns : ") ;
-        scanf("%d", &nbCol) ;
-        fflush(stdin) ;
-    }
-    for (i = 0 ; i < nbCol ; ++i) {
-        kill = addColumnNode(newNode, conf) ;
-    }
-
-    xmlAddChild(root, newNode) ;
+    //xmlAddChild(root, newNode) ;
     return 0 ;
 }
 
 /*
 */
-int addColumnNode (xmlNodePtr table, Conf *conf) {
-    char cname[50] = "" ;
-    xmlNodePtr newNode ;
-    int kill ;
-    int i = 0 ;
-    int primKeys = 0 ;
+int addColumnNode (xmlNodePtr table, XMLdbData *tableData) {
+    printf("Here\n") ;
+    return 1 ;
+    // char cname[50] = "" ;
+    // xmlNodePtr newNode ;
+    // int kill ;
+    // int i = 0 ;
+    // int primKeys = 0 ;
+    //
+    // printf("Ok till here\n") ;
 
-    while (strlen(cname) == 0) {
-        printf("Enter column name : ") ;
-        fgets(cname, 50, stdin) ;
-        removeChariot(cname) ;
-        trimWhiteSpace(cname) ;
-    }
-
-    newNode = xmlNewNode(NULL, (const xmlChar *)"column") ;
-    if (newNode == NULL)
-        return ERR_CREA ;
-
-    xmlNodeSetContent(newNode, (const xmlChar *)cname) ;
-    while (strcmp(conf[i].prop, "STOP") != 0) {
-        if (conf[i].mand == 1) {
-            if ((kill = addMandatory(newNode, conf, i)) != 0)
-                return kill ;
-            i++ ;
-        }
-        if (conf[i].mand == 0) {
-            addNotMandatory(newNode, conf, i) ;
-        }
-        i++ ;
-    }
-    kill = addPrimaryKey(newNode) ;
-    if (kill == 0)
-        return ERR_CREA ;
-    else primKeys += kill ;
-
-    kill = addForeignKey(newNode) ;
-    if (kill == ERR_CREA)
-        return kill ;
-
-    xmlAddChild(table, newNode) ;
+    // while (strlen(cname) == 0) {
+    //     printf("Enter column name : ") ;
+    //     fgets(cname, 50, stdin) ;
+    //     removeChariot(cname) ;
+    //     trimWhiteSpace(cname) ;
+    // }
+    //
+    // newNode = xmlNewNode(NULL, (const xmlChar *)"column") ;
+    // if (newNode == NULL)
+    //     return ERR_CREA ;
+    //
+    // xmlNodeSetContent(newNode, (const xmlChar *)cname) ;
+    // while (strcmp(conf[i].prop, "STOP") != 0) {
+    //     if (conf[i].mand == 1) {
+    //         if ((kill = addMandatory(newNode, conf, i)) != 0)
+    //             return kill ;
+    //         i++ ;
+    //     }
+    //     if (conf[i].mand == 0) {
+    //         addNotMandatory(newNode, conf, i) ;
+    //     }
+    //     i++ ;
+    // }
+    // kill = addPrimaryKey(newNode) ;
+    // if (kill == 0)
+    //     return ERR_CREA ;
+    // else primKeys += kill ;
+    //
+    // kill = addForeignKey(newNode) ;
+    // if (kill == ERR_CREA)
+    //     return kill ;
+    //
+    // xmlAddChild(table, newNode) ;
     return 0 ;
 }
 

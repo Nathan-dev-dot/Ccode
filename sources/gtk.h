@@ -1,7 +1,7 @@
 #ifndef GTK_H
 #define GTK_H
 
-void hello (GtkWidget *widget) ;
+void hello (GtkWidget *widget, XMLdbData *data) ;
 int initProg (int argc, char **argv) ;
 void destroy(GtkWidget *widget, gpointer data) ;
 void closeWindow (GtkWidget *window) ;
@@ -13,8 +13,8 @@ void retrieveComboBoxContent (GtkWidget *widget, GtkWidget *box, char **str) ;
 void dbFromXMLWindow (GtkWidget *widget) ;
 
 void xmlFromEntries (GtkWidget *widget);
-void tableData (GtkWidget *widget) ;
-void getTableColumns (int nbCol, char *tName) ;
+void tableData (GtkWidget *widget, XMLdbData *dbData) ;
+void getTableColumns (XMLdbData *dbData) ;
 GtkColumn * createColInputs (int nbCol, GtkWidget *grid) ;
 
 void fxTmp (GtkWidget *widget, GtkWidget *box) ;
