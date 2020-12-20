@@ -14,7 +14,7 @@ void dbFromXMLWindow (GtkWidget *widget) ;
 
 void xmlFromEntries (GtkWidget *widget);
 void tableData (GtkWidget *widget, XMLdbData *dbData) ;
-void getTableColumns (XMLdbData *dbData) ;
+void getTableColumns (GtkWidget *widget, XMLdbData *dbData) ;
 GtkColumn * createColInputs (int nbCol, GtkWidget *grid) ;
 
 void fxTmp (GtkWidget *widget, GtkWidget *box) ;

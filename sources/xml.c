@@ -266,10 +266,13 @@ int setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) {
 }
 
 void setTableData (GtkWidget *widget, XMLdbData *dbData) {
+    char *tmp ;
     retrieveInteger(widget, dbData->dualInputs->nb, &(dbData->size)) ;
-    retrieveData(widget, dbData->dualInputs->name, &(dbData->name)) ;
+    retrieveData(widget, dbData->dualInputs->name, &tmp) ;
+    strcpy(dbData->name, tmp) ;
+    printf("Table name : %s\n", dbData->name) ;
     closeWindow(dbData->dualInputs->window) ;
-    getTableColumns(dbData) ;
+    getTableColumns(widget, dbData) ;
 }
 
 /*
@@ -327,7 +330,7 @@ int addTableNode (GtkWidget *widget, XMLdbData *tableData) {
     int kill ;
     int i ;
 
-    printf("%p * %s *\n", tableData, tableData->name) ;
+    printf("%p * %s %zd*\n", tableData, tableData->name, tableData->size) ;
     return 0 ;
 
     // newNode = xmlNewNode(NULL, (const xmlChar *)"table") ;

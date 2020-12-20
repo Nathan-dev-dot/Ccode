@@ -175,13 +175,12 @@ void tableData (GtkWidget *widget, XMLdbData *dbData) {
 
 /*
 */
-void getTableColumns (XMLdbData *dbData) {
+void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
     GtkWidget *window ;
     GtkWidget *grid ;
     GtkColumn *columns ;
     GtkWidget *button ;
     char tmp[30] = "Table " ;
-
     strcat(tmp, dbData->name) ;
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -193,11 +192,10 @@ void getTableColumns (XMLdbData *dbData) {
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
 
     columns = createColInputs(dbData->size, grid) ;
-    dbData->columns = columns ;
 
     button = gtk_button_new_with_label((const gchar *)"Send") ;
     gtk_grid_attach(GTK_GRID(grid), button, 1, dbData->size + 1, 1, 1) ;
-    printf("%p * %p *\n", dbData, &(dbData->name)) ;
+    printf("%p * %s *\n", dbData, dbData->name) ;
     g_signal_connect(button, "clicked", G_CALLBACK(addTableNode), dbData) ;
 
     free(columns) ;
@@ -296,7 +294,6 @@ void retrieveData(GtkWidget *widget, GtkWidget *input, char **str)
     if (input == NULL)
         return ;
     *str = (char *)gtk_entry_get_text (GTK_ENTRY (input));
-    printf("%s\n", *str) ;
 }
 
 /*

@@ -14,3 +14,4 @@ n :default
 5 :Not enough memory available
 6 :Error in creating the file
 7 :XML parsing error
+8 :Can't set an empty entry

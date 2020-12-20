@@ -41,7 +41,7 @@ typedef struct GtkColumn {
 typedef struct XMLdbData {
     xmlDocPtr doc ;
     xmlNodePtr root ;
-    char *name;
+    char name[30];
     size_t size ;
     GtkColumn *columns;
     Conf *conf ;
