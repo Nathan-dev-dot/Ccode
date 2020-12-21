@@ -133,6 +133,23 @@ void xmlFromEntries (GtkWidget *widget) {
     gtk_main() ;
 }
 
+int writeTables (GtkWidget *widget, char *path, int nbTables, XMLdbData *xmlData) {
+    int i ;
+    int kill ;
+    for (i = 0 ; i < nbTables ; ++i) {
+        tableData(widget, xmlData) ;
+        printf("No\n") ;
+    }
+
+    kill = writeXMLFile(path, xmlData->doc) ;
+    if (kill == -1) {
+        xmlFreeDoc(xmlData->doc) ;
+        return ERR_CREA ;
+    }
+    xmlFreeDoc(xmlData->doc) ;
+    return 0 ;
+}
+
 /*
 */
 void tableData (GtkWidget *widget, XMLdbData *dbData) {
@@ -146,6 +163,7 @@ void tableData (GtkWidget *widget, XMLdbData *dbData) {
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Number of columns") ;
     gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+
     dbParams.window = window ;
 
     grid = gtk_grid_new() ;
@@ -178,9 +196,9 @@ void tableData (GtkWidget *widget, XMLdbData *dbData) {
 void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
     GtkWidget *window ;
     GtkWidget *grid ;
-    GtkColumn *columns ;
     GtkWidget *button ;
     char tmp[30] = "Table " ;
+
     strcat(tmp, dbData->name) ;
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -191,14 +209,12 @@ void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
     gtk_container_add(GTK_CONTAINER(window), grid) ;
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
 
-    columns = createColInputs(dbData->size, grid) ;
+    dbData->columns = createColInputs(dbData->size, grid) ;
+    dbData->dualInputs->window = window ;
 
     button = gtk_button_new_with_label((const gchar *)"Send") ;
     gtk_grid_attach(GTK_GRID(grid), button, 1, dbData->size + 1, 1, 1) ;
-    printf("%p * %s *\n", dbData, dbData->name) ;
     g_signal_connect(button, "clicked", G_CALLBACK(addTableNode), dbData) ;
-
-    free(columns) ;
 
     background_color(&window, "#999999") ;
     gtk_widget_show_all(window) ;
@@ -235,7 +251,7 @@ GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
         gtk_grid_attach(GTK_GRID(grid), columns[i].def, 5, i, 1, 1) ;
         columns[i].primKey = createComboBoxYN();
         gtk_grid_attach(GTK_GRID(grid), columns[i].primKey, 6, i, 1, 1) ;
-        columns[i].ref = createInput("References") ;
+        columns[i].ref = createInput("References table(col)") ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].ref, 7, i, 1, 1) ;
         columns[i].refd = createComboBoxYN() ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].refd, 8, i, 1, 1) ;
@@ -284,7 +300,8 @@ GtkWidget * createInput (char *placeholder) {
 void retrieveComboBoxContent (GtkWidget *widget, GtkWidget *box, char **str) {
     if (box == NULL)
         return ;
-    *str = (char *)gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box)) ;
+    if (gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box)) != NULL)
+        *str = (char *)gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box)) ;
 }
 
 /*
@@ -293,7 +310,11 @@ void retrieveData(GtkWidget *widget, GtkWidget *input, char **str)
 {
     if (input == NULL)
         return ;
-    *str = (char *)gtk_entry_get_text (GTK_ENTRY (input));
+    printf("%p\n", input) ;
+    if (gtk_entry_get_text (GTK_ENTRY (input)) != NULL)
+        *str = (char *)gtk_entry_get_text (GTK_ENTRY (input));
+    else
+        strcpy(*str, "") ;
 }
 
 /*
@@ -302,7 +323,7 @@ void background_color (GtkWidget **widget, char *color) {
   GtkCssProvider * cssProvider = gtk_css_provider_new();    //store the css
 
   char css[64] = "* { background-image:none; background-color:";
-  strcat( strcat( css , color ), ";}" );
+  strcat(strcat(css, color), ";}");
 
   gtk_css_provider_load_from_data(cssProvider, css,-1,NULL);
   GtkStyleContext * context = gtk_widget_get_style_context(*widget);   //manage CSS provider

@@ -202,8 +202,8 @@ void createXMLFile (GtkWidget *widget, GtkDualInputs *dbParams) {
 int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
     char path[50] = "" ;
     int kill ;
-    size_t nbTables = 0 ;
     int i ;
+    size_t nbTables = 0 ;
     XMLdbData xmlData ;
 
     if ((kill = setXMLDatabase(widget, dbParams->name, (char *)path)) != 0)
@@ -232,14 +232,10 @@ int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
     }
 
     closeWindow(dbParams->window) ;
-
     for (i = 0 ; i < nbTables ; ++i) {
         tableData(widget, &xmlData) ;
         printf("No\n") ;
-    //     kill = addTableNode(root, colConf) ;
     }
-    xmlFreeDoc(xmlData.doc) ;
-    return 0 ;
 
     kill = writeXMLFile(path, xmlData.doc) ;
     if (kill == -1) {
@@ -247,6 +243,7 @@ int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
         return ERR_CREA ;
     }
     xmlFreeDoc(xmlData.doc) ;
+
     return 0 ;
 }
 
@@ -267,8 +264,11 @@ int setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) {
 
 void setTableData (GtkWidget *widget, XMLdbData *dbData) {
     char *tmp ;
-    retrieveInteger(widget, dbData->dualInputs->nb, &(dbData->size)) ;
+    if (retrieveInteger(widget, dbData->dualInputs->nb, &(dbData->size)) != 0)
+        return ;
     retrieveData(widget, dbData->dualInputs->name, &tmp) ;
+    if (strlen(tmp) == 0)
+        return ;
     strcpy(dbData->name, tmp) ;
     printf("Table name : %s\n", dbData->name) ;
     closeWindow(dbData->dualInputs->window) ;
@@ -277,9 +277,16 @@ void setTableData (GtkWidget *widget, XMLdbData *dbData) {
 
 /*
 */
-int retrieveInteger (GtkWidget *widget, GtkWidget *input, size_t *integer) {
+int retrieveInteger (GtkWidget *widget, GtkWidget *input, int *integer) {
     char *tmp = "" ;
+    printf("Up to retrieve\n") ;
     retrieveData(widget, input, &tmp) ;
+
+    if (strlen(tmp) == 0) {
+        *integer = 0 ;
+        return 0 ;
+    }
+    trimWhiteSpace(tmp) ;
 
     *integer = atoi(tmp) ;
     if (*integer <= 0) {
@@ -325,148 +332,142 @@ int setRoot (xmlNodePtr root) {
 */
 
 int addTableNode (GtkWidget *widget, XMLdbData *tableData) {
-    xmlNodePtr newNode ;
+    xmlNodePtr tNode ;
+    xmlNodePtr child ;
     xmlAttrPtr attr ;
     int kill ;
-    int i ;
+    size_t i = 0 ;
+    int nbCol = tableData->size ;
 
-    printf("%p * %s %zd*\n", tableData, tableData->name, tableData->size) ;
-    return 0 ;
+    tNode = xmlNewNode(NULL, (const xmlChar *)"table") ;
+    if (tNode == NULL)
+        return ERR_CREA ;
 
-    // newNode = xmlNewNode(NULL, (const xmlChar *)"table") ;
-    // if (newNode == NULL)
-    //     return ERR_CREA ;
-    //
-    // attr = xmlSetProp(newNode, (const xmlChar *)"tname", (const xmlChar *)tableData->name) ;
-    // if (attr == NULL)
-    //     return ERR_CREA ;
-    //
-    // for (i = 0 ; i < tableData->size ; ++i) {
-    //     kill = addColumnNode(newNode, tableData) ;
-    // }
+    attr = xmlSetProp(tNode, (const xmlChar *)"tname", (const xmlChar *)tableData->name) ;
+    if (attr == NULL)
+        return ERR_CREA ;
 
-    //xmlAddChild(root, newNode) ;
+    for (i = 0 ; i < nbCol ; ++i) {
+        child = addColumnNode(widget, tableData->columns[i]) ;
+        if (child == NULL)
+            return ERR_CREA ;
+        xmlAddChild(tNode, child) ;
+    }
+    if (kill == 0) {
+        printf("Ok\n") ;
+        printf("*%p*", tNode) ;
+    }
+
+    closeWindow(tableData->dualInputs->window) ;
+    free(tableData->columns) ;
+    xmlAddChild(tableData->root, tNode) ;
     return 0 ;
 }
 
 /*
 */
-int addColumnNode (xmlNodePtr table, XMLdbData *tableData) {
-    printf("Here\n") ;
-    return 1 ;
-    // char cname[50] = "" ;
-    // xmlNodePtr newNode ;
-    // int kill ;
-    // int i = 0 ;
-    // int primKeys = 0 ;
-    //
-    // printf("Ok till here\n") ;
+xmlNodePtr addColumnNode (GtkWidget *widget, GtkColumn colInputs) {
+    char *tmp = "" ;
+    xmlNodePtr cNode ;
+    int kill ;
+    int primKeys = 0 ;
 
-    // while (strlen(cname) == 0) {
-    //     printf("Enter column name : ") ;
-    //     fgets(cname, 50, stdin) ;
-    //     removeChariot(cname) ;
-    //     trimWhiteSpace(cname) ;
-    // }
+    cNode = xmlNewNode(NULL, (const xmlChar *)"column") ;
+    if (cNode == NULL)
+        return NULL ;
+
+    retrieveData(widget, colInputs.name, &tmp) ;
+    xmlNodeSetContent(cNode, (const xmlChar *)tmp) ;
+
+    if ((kill = addMandatory(widget, cNode, colInputs)) != 0)
+        return NULL ;
+    printf("Add mand ok\n") ;
+
+    addNotMandatory(widget, cNode, colInputs) ;
+    printf("Add not mand ok\n");
+
+    kill = addPrimaryKey(widget, cNode, colInputs.primKey) ;
+    if (kill == -1)
+        return NULL ;
+    else primKeys += kill ;
     //
-    // newNode = xmlNewNode(NULL, (const xmlChar *)"column") ;
-    // if (newNode == NULL)
-    //     return ERR_CREA ;
-    //
-    // xmlNodeSetContent(newNode, (const xmlChar *)cname) ;
-    // while (strcmp(conf[i].prop, "STOP") != 0) {
-    //     if (conf[i].mand == 1) {
-    //         if ((kill = addMandatory(newNode, conf, i)) != 0)
-    //             return kill ;
-    //         i++ ;
-    //     }
-    //     if (conf[i].mand == 0) {
-    //         addNotMandatory(newNode, conf, i) ;
-    //     }
-    //     i++ ;
-    // }
-    // kill = addPrimaryKey(newNode) ;
-    // if (kill == 0)
-    //     return ERR_CREA ;
-    // else primKeys += kill ;
-    //
-    // kill = addForeignKey(newNode) ;
+    // kill = addForeignKey(cNode) ;
     // if (kill == ERR_CREA)
     //     return kill ;
     //
-    // xmlAddChild(table, newNode) ;
-    return 0 ;
+    return cNode ;
 }
 
-/*
-*/
-int addMandatory (xmlNodePtr col, Conf *conf, int i) {
-    char prop[30] = "" ;
+int addMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
+    char *prop = "" ;
+    int size ;
     xmlAttrPtr attr ;
-    int size = -1 ;
 
-    while (strlen(prop) == 0) {
-        printf("Enter %s : ", conf[i].prop) ;
-        fflush(stdin) ;
-        fgets(prop, 30, stdin) ;
-        removeChariot(prop) ;
-        trimWhiteSpace(prop) ;
-    }
-
-    attr = xmlSetProp(col, (const xmlChar *)conf[i].prop, (const xmlChar *)prop) ;
+    retrieveComboBoxContent(widget, colInputs.type, &prop) ;
+    attr = xmlSetProp(col, (const xmlChar *)"type", (const xmlChar *)prop) ;
     if (attr == NULL)
         return ERR_CREA ;
 
-    if (strcmp(prop, "varchar") == 0 || strcmp(prop, "char") == 0) {
-        strcpy(prop, "") ;
-        while (size <= 0) {
-            printf("Enter %s : ", conf[i+1].prop) ;
-            scanf("%d", &size) ;
-            fflush(stdin) ;
-        }
+    if (strcmp(prop, "VARCHAR") == 0 || strcmp(prop, "CHAR") == 0) {
+        retrieveInteger(widget, colInputs.size, &size) ;
+        if (size <= 0)
+            return ERR_ENTRY ;
         sprintf(prop, "%d", size) ;
-        attr = xmlSetProp(col, (const xmlChar *)conf[i+1].prop, (const xmlChar *)prop) ;
+        attr = xmlSetProp(col, (const xmlChar *)"size", (const xmlChar *)prop) ;
         if (attr == NULL)
             return ERR_CREA ;
+        printf("Size : %s\n", xmlGetProp(col, "size")) ;
     }
     return 0 ;
 }
 
-/*
-*/
-int addNotMandatory (xmlNodePtr col, Conf *conf, int i) {
-    char prop[30] ;
-    xmlAttrPtr attr = NULL ;
+int addNotMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
+    char *prop = "" ;
+    xmlAttrPtr attr ;
 
-    printf("Enter %s : ", conf[i].prop) ;
-    fflush(stdin) ;
-    fgets(prop, 30, stdin) ;
-    removeChariot(prop) ;
-
-    if (strlen(prop) != 0)
-        attr = xmlSetProp(col, (const xmlChar *)conf[i].prop, (const xmlChar *)prop) ;
+    retrieveData(widget, colInputs.constraints, &prop) ;
+    attr = xmlSetProp(col, (const xmlChar *)"constraints", (const xmlChar *)prop) ;
     if (attr == NULL)
         return ERR_CREA ;
 
+    retrieveData(widget, colInputs.check, &prop) ;
+    attr = xmlSetProp(col, (const xmlChar *)"check", (const xmlChar *)prop) ;
+    if (attr == NULL)
+        return ERR_CREA ;
+
+    retrieveData(widget, colInputs.def, &prop) ;
+    attr = xmlSetProp(col, (const xmlChar *)"default", (const xmlChar *)prop) ;
+    if (attr == NULL)
+        return ERR_CREA ;
+
+    // retrieveData(widget, colInputs.ref, &prop) ;
+    // attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)prop) ;
+    // if (attr == NULL)
+    //     return ERR_CREA ;
+    //
+    // retrieveData(widget, colInputs.refd, &prop) ;
+    // attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)prop) ;
+    // if (attr == NULL)
+    //     return ERR_CREA ;
     return 0 ;
 }
 
 /*
 */
-int addPrimaryKey (xmlNodePtr col) {
-    int yn = -1 ;
+int addPrimaryKey (GtkWidget *widget, xmlNodePtr col, GtkWidget *primKeyInput) {
+    char *yn = "" ;
     xmlAttrPtr attr ;
-    while (yn != 0 && yn != 1) {
-        printf("Primary key ? (0 : no / 1 : yes) ") ;
-        scanf("%d", &yn) ;
-        fflush(stdin) ;
-    }
-    if (yn == 1) {
+    retrieveComboBoxContent(widget, primKeyInput, &yn) ;
+    printf("%s\n", yn) ;
+
+    if (strcmp(yn, "YES") == 0) {
         attr = xmlSetProp(col, (const xmlChar *)"attribute", (const xmlChar *)"primary key") ;
         if (attr == NULL)
-            return 0 ;
+            return -1 ;
+        printf("Prim key attr : %p\n", attr) ;
+        return 1 ;
     }
-    return 1 ;
+    return 0 ;
 }
 
 /*

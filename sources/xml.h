@@ -18,13 +18,13 @@ int setRoot (xmlNodePtr root) ;
 void setTableData (GtkWidget *widget, XMLdbData *dbData) ;
 
 int addTableNode (GtkWidget *widget, XMLdbData *dbData) ;
-int addColumnNode (xmlNodePtr table, XMLdbData *tableData) ;
-int addMandatory (xmlNodePtr col, Conf *conf, int i) ;
-int addNotMandatory (xmlNodePtr col, Conf *conf, int i) ;
-int addPrimaryKey (xmlNodePtr col)  ;
+xmlNodePtr addColumnNode (GtkWidget *widget, GtkColumn colInputs) ;
+int addMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) ;
+int addNotMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) ;
+int addPrimaryKey (GtkWidget *widget, xmlNodePtr col, GtkWidget *primKeyInput) ;
 int addForeignKey (xmlNodePtr col) ;
 
-int retrieveInteger (GtkWidget *widget, GtkWidget *input, size_t *integer) ;
+int retrieveInteger (GtkWidget *widget, GtkWidget *input, int *integer) ;
 
 int writeXMLFile (char *fileName, xmlDocPtr doc) ;
 
