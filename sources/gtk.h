@@ -16,10 +16,10 @@ void xmlFromEntries (GtkWidget *widget);
 void writeTables (GtkWidget *widget, XMLdbData *xmlData) ;
 void tableData (GtkWidget *widget, XMLdbData *dbData) ;
 void getTableColumns (GtkWidget *widget, XMLdbData *dbData) ;
+
+void dbManagerWindow (GtkWidget *widget) ;
+
 GtkColumn * createColInputs (int nbCol, GtkWidget *grid) ;
-
-void fxTmp (GtkWidget *widget, GtkWidget *box) ;
-
 GtkWidget * createComboBoxType (void) ;
 GtkWidget * createComboBoxYN (void) ;
 GtkWidget * createInput (char *placeholder) ;

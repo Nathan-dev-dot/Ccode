@@ -424,9 +424,11 @@ int addMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
     xmlAttrPtr attr ;
 
     retrieveComboBoxContent(widget, colInputs.type, &prop) ;
-    attr = xmlSetProp(col, (const xmlChar *)"type", (const xmlChar *)prop) ;
-    if (attr == NULL)
-        return ERR_CREA ;
+    if (strlen(prop) != 0) {
+        attr = xmlSetProp(col, (const xmlChar *)"type", (const xmlChar *)prop) ;
+        if (attr == NULL)
+            return ERR_CREA ;
+    }
 
     if (strcmp(prop, "VARCHAR") == 0 || strcmp(prop, "CHAR") == 0) {
         retrieveInteger(widget, colInputs.size, &size) ;
@@ -445,19 +447,25 @@ int addNotMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
     xmlAttrPtr attr ;
 
     retrieveData(widget, colInputs.constraints, &prop) ;
-    attr = xmlSetProp(col, (const xmlChar *)"constraints", (const xmlChar *)prop) ;
-    if (attr == NULL)
-        return ERR_CREA ;
+    if (strlen(prop) != 0) {
+        attr = xmlSetProp(col, (const xmlChar *)"constraints", (const xmlChar *)prop) ;
+        if (attr == NULL)
+            return ERR_CREA ;
+    }
 
     retrieveData(widget, colInputs.check, &prop) ;
-    attr = xmlSetProp(col, (const xmlChar *)"check", (const xmlChar *)prop) ;
-    if (attr == NULL)
-        return ERR_CREA ;
+    if (strlen(prop) != 0) {
+        attr = xmlSetProp(col, (const xmlChar *)"check", (const xmlChar *)prop) ;
+        if (attr == NULL)
+            return ERR_CREA ;
+    }
 
     retrieveData(widget, colInputs.def, &prop) ;
-    attr = xmlSetProp(col, (const xmlChar *)"default", (const xmlChar *)prop) ;
-    if (attr == NULL)
+    if (strlen(prop) != 0) {
+        attr = xmlSetProp(col, (const xmlChar *)"default", (const xmlChar *)prop) ;
+        if (attr == NULL)
         return ERR_CREA ;
+    }
 
     return 0 ;
 }
@@ -485,9 +493,11 @@ int addForeignKey (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
     char *prop ;
 
     retrieveData(widget, colInputs.ref, &prop) ;
-    attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)prop) ;
-    if (attr == NULL)
-        return ERR_CREA ;
+    if (strlen(prop) != 0) {
+        attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)prop) ;
+        if (attr == NULL)
+            return ERR_CREA ;
+    }
 
     if (strlen(prop) == 0) {
         retrieveComboBoxContent(widget, colInputs.refd, &prop) ;

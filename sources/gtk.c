@@ -56,16 +56,16 @@ int initProg (int argc, char **argv) {
 void mainMenu (GtkBuilder *builder, GtkWidget *window) {
     GtkWidget *option1;
     GtkWidget *option2;
-    //GtkWidget *option3;
+    GtkWidget *option3;
 
     option1 = GTK_WIDGET(gtk_builder_get_object(builder, "dbFromXml"));
     g_signal_connect(option1, "clicked", G_CALLBACK(dbFromXMLWindow), NULL);
 
     option2 = GTK_WIDGET(gtk_builder_get_object(builder, "createXml"));
-    g_signal_connect(option2, "clicked", G_CALLBACK(xmlFromEntries), window);
+    g_signal_connect(option2, "clicked", G_CALLBACK(xmlFromEntries), NULL);
 
-    // option3 = GTK_WIDGET(gtk_builder_get_object(builder, "manageDatabase"));
-    // g_signal_connect(option3, "clicked", G_CALLBACK(dbFromXMLWindow), window);
+    option3 = GTK_WIDGET(gtk_builder_get_object(builder, "manageDatabase"));
+    g_signal_connect(option3, "clicked", G_CALLBACK(dbManagerWindow), NULL);
 }
 
 /*
@@ -217,10 +217,9 @@ void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
     gtk_main() ;
 }
 
-void fxTmp (GtkWidget *widget, GtkWidget *box) {
-    char *tmp ;
-    retrieveComboBoxContent(widget, box, &tmp) ;
-    printf("%s\n", tmp) ;
+void dbManagerWindow (GtkWidget *widget) {
+    printf("coucou\n") ;
+    return ;
 }
 
 
