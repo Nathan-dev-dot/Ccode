@@ -17,7 +17,6 @@ void dbFromXML (GtkWidget *widget, GtkWidget *input) {
     int kill ;
     char *path = "" ;
     retrieveData(widget, input, &path) ;
-    printf("Path : %s\n", path) ;
     kill = parseDoc(path);
     if (kill != 0)
         printError (kill) ;
@@ -270,7 +269,6 @@ void setTableData (GtkWidget *widget, XMLdbData *dbData) {
     if (strlen(tmp) == 0)
         return ;
     strcpy(dbData->name, tmp) ;
-    printf("Table name : %s\n", dbData->name) ;
     closeWindow(dbData->dualInputs->window) ;
     getTableColumns(widget, dbData) ;
 }
@@ -279,7 +277,6 @@ void setTableData (GtkWidget *widget, XMLdbData *dbData) {
 */
 int retrieveInteger (GtkWidget *widget, GtkWidget *input, int *integer) {
     char *tmp = "" ;
-    printf("Up to retrieve\n") ;
     retrieveData(widget, input, &tmp) ;
 
     if (strlen(tmp) == 0) {
@@ -330,14 +327,14 @@ int setRoot (xmlNodePtr root) {
 
 /*
 */
-
 int addTableNode (GtkWidget *widget, XMLdbData *tableData) {
     xmlNodePtr tNode ;
     xmlNodePtr child ;
     xmlAttrPtr attr ;
-    int kill ;
+    int kill = 0 ;
     size_t i = 0 ;
     int nbCol = tableData->size ;
+    char path[50] = "" ;
 
     tNode = xmlNewNode(NULL, (const xmlChar *)"table") ;
     if (tNode == NULL)
@@ -361,6 +358,15 @@ int addTableNode (GtkWidget *widget, XMLdbData *tableData) {
     closeWindow(tableData->dualInputs->window) ;
     free(tableData->columns) ;
     xmlAddChild(tableData->root, tNode) ;
+    xmlDocFormatDump(stdout, tableData->doc, 1);
+
+    strcat(strcat(strcat(path, "../outputs/"), (const char *)xmlGetProp(tableData->root, (const xmlChar *)"dbname")), ".xml") ;
+    kill = writeXMLFile(path, tableData->doc) ;
+    if (kill == -1) {
+        xmlFreeDoc(tableData->doc) ;
+        return ERR_CREA ;
+    }
+    xmlFreeDoc(tableData->doc) ;
     return 0 ;
 }
 
@@ -368,7 +374,7 @@ int addTableNode (GtkWidget *widget, XMLdbData *tableData) {
 */
 xmlNodePtr addColumnNode (GtkWidget *widget, GtkColumn colInputs) {
     char *tmp = "" ;
-    xmlNodePtr cNode ;
+    xmlNodePtr cNode = NULL ;
     int kill ;
     int primKeys = 0 ;
 
@@ -390,11 +396,11 @@ xmlNodePtr addColumnNode (GtkWidget *widget, GtkColumn colInputs) {
     if (kill == -1)
         return NULL ;
     else primKeys += kill ;
-    //
-    // kill = addForeignKey(cNode) ;
-    // if (kill == ERR_CREA)
-    //     return kill ;
-    //
+
+    kill = addForeignKey(widget, cNode, colInputs) ;
+    if (kill == ERR_CREA)
+        return NULL ;
+
     return cNode ;
 }
 
@@ -440,15 +446,6 @@ int addNotMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
     if (attr == NULL)
         return ERR_CREA ;
 
-    // retrieveData(widget, colInputs.ref, &prop) ;
-    // attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)prop) ;
-    // if (attr == NULL)
-    //     return ERR_CREA ;
-    //
-    // retrieveData(widget, colInputs.refd, &prop) ;
-    // attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)prop) ;
-    // if (attr == NULL)
-    //     return ERR_CREA ;
     return 0 ;
 }
 
@@ -472,35 +469,22 @@ int addPrimaryKey (GtkWidget *widget, xmlNodePtr col, GtkWidget *primKeyInput) {
 
 /*
 */
-int addForeignKey (xmlNodePtr col) {
-    int yn = -1 ;
-    char ref[50] = "" ;
+int addForeignKey (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
     xmlAttrPtr attr ;
+    char *prop ;
 
-    while (yn != 0 && yn != 1) {
-        printf("Referenced table ? (0 : no / 1 : yes) ") ;
-        scanf("%d", &yn) ;
-        fflush(stdin) ;
-    }
-    if (yn == 1) {
-        attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)"target") ;
-        if (attr == NULL)
-            return ERR_CREA ;
-    }
+    retrieveData(widget, colInputs.ref, &prop) ;
+    attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)prop) ;
+    if (attr == NULL)
+        return ERR_CREA ;
 
-    yn = -1 ;
-    while (yn != 0 && yn != 1) {
-        printf("References another table ? (0 : no / 1 : yes) ") ;
-        scanf("%d", &yn) ;
-        fflush(stdin) ;
-    }
-    if (yn == 1) {
-        printf("Referenced table name : ") ;
-        fgets(ref, 50, stdin) ;
-        removeChariot(ref) ;
-        attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)ref) ;
-        if (attr == NULL)
-            return ERR_CREA ;
+    if (strlen(prop) == 0) {
+        retrieveComboBoxContent(widget, colInputs.refd, &prop) ;
+        if (strcmp(prop, "YES") == 0) {
+            attr = xmlSetProp(col, (const xmlChar *)"reference", (const xmlChar *)"target") ;
+            if (attr == NULL)
+                return ERR_CREA ;
+        }
     }
     return 0 ;
 }

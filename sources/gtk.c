@@ -256,7 +256,7 @@ GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
         columns[i].refd = createComboBoxYN() ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].refd, 8, i, 1, 1) ;
     }
-
+    
     return columns ;
 }
 
@@ -310,7 +310,6 @@ void retrieveData(GtkWidget *widget, GtkWidget *input, char **str)
 {
     if (input == NULL)
         return ;
-    printf("%p\n", input) ;
     if (gtk_entry_get_text (GTK_ENTRY (input)) != NULL)
         *str = (char *)gtk_entry_get_text (GTK_ENTRY (input));
     else

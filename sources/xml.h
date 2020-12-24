@@ -22,7 +22,7 @@ xmlNodePtr addColumnNode (GtkWidget *widget, GtkColumn colInputs) ;
 int addMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) ;
 int addNotMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) ;
 int addPrimaryKey (GtkWidget *widget, xmlNodePtr col, GtkWidget *primKeyInput) ;
-int addForeignKey (xmlNodePtr col) ;
+int addForeignKey (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) ;
 
 int retrieveInteger (GtkWidget *widget, GtkWidget *input, int *integer) ;
 
