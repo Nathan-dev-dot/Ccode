@@ -54,6 +54,11 @@ typedef struct XMLdbData {
     GtkDualInputs *dualInputs;
 } XMLdbData ;
 
+typedef struct MysqlCoAndRes {
+    MYSQL *mysql ;
+    MYSQL_RES *results ;
+} MysqlCoAndRes ;
+
 #include "gtk.h"
 #include "db.h"
 #include "sql.h"

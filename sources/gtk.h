@@ -19,9 +19,14 @@ void getTableColumns (GtkWidget *widget, XMLdbData *dbData) ;
 
 void dbManagerWindow (GtkWidget *widget) ;
 
+void setDBName (GtkWidget *widget, GtkWidget *comboBox);
+void showTables (GtkWidget *widget) ;
+
 GtkColumn * createColInputs (int nbCol, GtkWidget *grid) ;
 GtkWidget * createComboBoxType (void) ;
 GtkWidget * createComboBoxYN (void) ;
+GtkWidget * createComboBoxDBQuery (void) ;
+GtkWidget * createComboBoxTables (void) ;
 GtkWidget * createInput (char *placeholder) ;
 void background_color( GtkWidget **widget, char *color ) ;
 

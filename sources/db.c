@@ -17,7 +17,7 @@ char *name : name of the database
 
 returns :
 0 if ok
-1 if something went wrong
+ERR_DB if something went wrong
 */
 int initDB (char *name) {
     MYSQL mysql ;
@@ -54,7 +54,7 @@ MYSQL_RES *results : structure of results (used only if output required)
 
 returns :
 0 if ok
-1 if something went wrong
+ERR_DB if something went wrong
 */
 int connectDB (char *command, MYSQL_RES *results) {
     MYSQL mysql ;
@@ -69,7 +69,39 @@ int connectDB (char *command, MYSQL_RES *results) {
         return ERR_DB ;
     }
     success = mysql_query(&mysql, command) == 0 ? 0 : 3;
+    results = mysql_use_result(&mysql) ;
+
     mysql_close(&mysql);
+    return 0 ;
+}
+
+/*
+Function : reachMysql
+-------------------
+Connects to the Mysql
+Sends a commands to Mysql
+
+char *command : command sent to be executed
+MYSQL_RES *results : structure of results (used only if output required)
+
+returns :
+0 if ok
+ERR_DB if something went wrong
+*/
+ int reachMysql (MysqlCoAndRes *db, char *command) {
+    int success ;
+
+    mysql_init(db->mysql) ;
+    mysql_options(db->mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
+
+    if(mysql_real_connect(db->mysql, "localhost", "root", "root", nameDB, 3306, NULL, 0) == NULL) {
+        printf("\nConnection to mysql database failed\n");
+        mysql_close(db->mysql);
+        return ERR_DB ;
+    }
+    success = mysql_query(db->mysql, command) == 0 ? 0 : 3;
+    db->results = mysql_use_result(db->mysql) ;
+
     return 0 ;
 }
 

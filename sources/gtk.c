@@ -9,6 +9,8 @@
 
 #include "all.h"
 
+extern char nameDB[30] ;
+
 void hello (GtkWidget *widget, XMLdbData *data) {
     printf("Hello %p\n", data) ;
 }
@@ -124,7 +126,7 @@ void xmlFromEntries (GtkWidget *widget) {
     dbParams.nb = createInput("Number") ;
     gtk_grid_attach(GTK_GRID(grid), dbParams.nb, 0, 4, 1, 1) ;
 
-    button = gtk_button_new_with_label((const gchar *)"button") ;
+    button = gtk_button_new_with_label((const gchar *)"Send") ;
     g_signal_connect (button, "clicked", G_CALLBACK (createXMLFile), &dbParams);
     gtk_grid_attach(GTK_GRID(grid), button, 0, 6, 1, 1) ;
 
@@ -178,7 +180,7 @@ void tableData (GtkWidget *widget, XMLdbData *dbData) {
 
     dbData->dualInputs = &dbParams ;
 
-    button = gtk_button_new_with_label((const gchar *)"button") ;
+    button = gtk_button_new_with_label((const gchar *)"Send") ;
     g_signal_connect (button, "clicked", G_CALLBACK (setTableData), dbData);
     gtk_grid_attach(GTK_GRID(grid), button, 0, 6, 1, 1) ;
 
@@ -217,9 +219,70 @@ void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
     gtk_main() ;
 }
 
+/*
+*/
 void dbManagerWindow (GtkWidget *widget) {
-    printf("coucou\n") ;
+    GtkWidget *window;
+    GtkWidget *grid;
+    GtkWidget *button ;
+    GtkWidget *combo ;
+
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Select your database") ;
+    gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+
+    grid = gtk_grid_new() ;
+    gtk_container_add(GTK_CONTAINER(window), grid) ;
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
+
+    combo = createComboBoxDBQuery();
+    gtk_grid_attach(GTK_GRID(grid), combo, 0, 0, 1, 1) ;
+
+    button = gtk_button_new_with_label((const gchar *)"Select") ;
+    g_signal_connect (button, "clicked", G_CALLBACK (setDBName), combo);
+    gtk_grid_attach(GTK_GRID(grid), button, 0, 1, 1, 1) ;
+
+    background_color(&window, "#999999") ;
+    gtk_widget_show_all(window) ;
+    gtk_main() ;
+
     return ;
+}
+
+void setDBName (GtkWidget *widget, GtkWidget *comboBox) {
+    char *tmp = "" ;
+    retrieveComboBoxContent(widget, comboBox, &tmp) ;
+    strcpy(nameDB, tmp) ;
+    showTables(widget) ;
+}
+
+void showTables (GtkWidget *widget) {
+    GtkWidget *window;
+    GtkWidget *grid;
+    GtkWidget *button ;
+    GtkWidget *combo ;
+    char str[50] = "Using database " ;
+
+    strcat(str, nameDB) ;
+
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)str) ;
+    gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+
+    grid = gtk_grid_new() ;
+    gtk_container_add(GTK_CONTAINER(window), grid) ;
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
+
+    combo = createComboBoxTables();
+    gtk_grid_attach(GTK_GRID(grid), combo, 0, 0, 1, 1) ;
+
+    button = gtk_button_new_with_label((const gchar *)"Select") ;
+    g_signal_connect (button, "clicked", G_CALLBACK (hello), NULL);
+    gtk_grid_attach(GTK_GRID(grid), button, 0, 1, 1, 1) ;
+
+    background_color(&window, "#999999") ;
+    gtk_widget_show_all(window) ;
+    gtk_main() ;
 }
 
 
@@ -280,6 +343,55 @@ GtkWidget * createComboBoxYN (void) {
     box = gtk_combo_box_text_new() ;
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "yes", "YES") ;
     gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), "no", "NO") ;
+
+    return box ;
+}
+
+GtkWidget * createComboBoxDBQuery () {
+    GtkWidget *box ;
+    MYSQL mysql ;
+    MysqlCoAndRes db ;
+    MYSQL_ROW row ;
+    char *command = "SHOW DATABASES" ;
+
+    strcpy(nameDB, "") ;
+    box = gtk_combo_box_text_new() ;
+    db.mysql = &mysql ;
+    reachMysql(&db, command) ;
+
+    if (db.results == NULL) {
+        return box ;
+    }
+
+    while ((row = mysql_fetch_row(db.results)) != NULL)
+        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), *row, *row) ;
+
+    mysql_close(&mysql) ;
+
+    return box ;
+}
+
+GtkWidget * createComboBoxTables (void) {
+    GtkWidget *box ;
+    MYSQL mysql ;
+    MysqlCoAndRes db ;
+    MYSQL_ROW row ;
+    char command[40] = "USE " ;
+
+    strcat(command, nameDB) ;
+    box = gtk_combo_box_text_new() ;
+    db.mysql = &mysql ;
+    reachMysql(&db, command) ;
+    reachMysql(&db, "SHOW TABLES") ;
+
+    if (db.results == NULL) {
+        return box ;
+    }
+
+    while ((row = mysql_fetch_row(db.results)) != NULL)
+        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), *row, *row) ;
+
+    mysql_close(&mysql) ;
 
     return box ;
 }
