@@ -13,7 +13,7 @@ void retrieveComboBoxContent (GtkWidget *widget, GtkWidget *box, char **str) ;
 void dbFromXMLWindow (GtkWidget *widget) ;
 
 void xmlFromEntries (GtkWidget *widget);
-int writeTables (GtkWidget *widget, char *path, int nbTables, XMLdbData *xmlData) ;
+void writeTables (GtkWidget *widget, XMLdbData *xmlData) ;
 void tableData (GtkWidget *widget, XMLdbData *dbData) ;
 void getTableColumns (GtkWidget *widget, XMLdbData *dbData) ;
 GtkColumn * createColInputs (int nbCol, GtkWidget *grid) ;

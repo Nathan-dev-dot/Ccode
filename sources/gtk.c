@@ -133,21 +133,17 @@ void xmlFromEntries (GtkWidget *widget) {
     gtk_main() ;
 }
 
-int writeTables (GtkWidget *widget, char *path, int nbTables, XMLdbData *xmlData) {
-    int i ;
-    int kill ;
-    for (i = 0 ; i < nbTables ; ++i) {
-        tableData(widget, xmlData) ;
-        printf("No\n") ;
-    }
+/*
 
-    kill = writeXMLFile(path, xmlData->doc) ;
-    if (kill == -1) {
+*/
+void writeTables (GtkWidget *widget, XMLdbData *xmlData) {
+    xmlData->pos.current++ ;
+    if (xmlData->pos.current <= xmlData->pos.total) {
+        tableData(widget, xmlData) ;
+    } else {
         xmlFreeDoc(xmlData->doc) ;
-        return ERR_CREA ;
     }
-    xmlFreeDoc(xmlData->doc) ;
-    return 0 ;
+    return ;
 }
 
 /*
@@ -256,7 +252,7 @@ GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
         columns[i].refd = createComboBoxYN() ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].refd, 8, i, 1, 1) ;
     }
-    
+
     return columns ;
 }
 

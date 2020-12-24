@@ -38,9 +38,15 @@ typedef struct GtkColumn {
     GtkWidget *refd ; //is referenced by another table
 } GtkColumn ;
 
+typedef struct TablePosition {
+    size_t current ;
+    size_t total ;
+} TablePosition ;
+
 typedef struct XMLdbData {
     xmlDocPtr doc ;
     xmlNodePtr root ;
+    TablePosition pos ;
     char name[30];
     size_t size ;
     GtkColumn *columns;

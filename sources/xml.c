@@ -190,6 +190,12 @@ int countForeignKeys (xmlNodePtr start) {
 }
 
 /*
+Function : createXMLFile
+-------------------
+Calls for createDoc
+
+GtkWidget *widget : widget sent by GTK
+GtkDualInputs *dbParams: structure of inputs defining the name and number of tables in the database
 */
 void createXMLFile (GtkWidget *widget, GtkDualInputs *dbParams) {
     int kill ;
@@ -197,11 +203,20 @@ void createXMLFile (GtkWidget *widget, GtkDualInputs *dbParams) {
 }
 
 /*
+Function : createDoc
+-------------------
+Creates the XML document and sets it's basic data (root)
+Calls for tableData which will handle GTK display
+
+GtkWidget *widget : widget sent by GTK
+GtkDualInputs *dbParams : structure of inputs defining the name and number of tables in the database
+
+returns
+0 if all good good
 */
 int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
     char path[50] = "" ;
     int kill ;
-    int i ;
     size_t nbTables = 0 ;
     XMLdbData xmlData ;
 
@@ -230,23 +245,26 @@ int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
         return ERR_CONF ;
     }
 
+    xmlData.pos.total = nbTables ;
+    xmlData.pos.current = 0 ;
     closeWindow(dbParams->window) ;
-    for (i = 0 ; i < nbTables ; ++i) {
-        tableData(widget, &xmlData) ;
-        printf("No\n") ;
-    }
-
-    kill = writeXMLFile(path, xmlData.doc) ;
-    if (kill == -1) {
-        xmlFreeDoc(xmlData.doc) ;
-        return ERR_CREA ;
-    }
-    xmlFreeDoc(xmlData.doc) ;
-
+    writeTables(widget, &xmlData) ;
     return 0 ;
 }
 
 /*
+Function : setXMLDatabase
+-------------------
+Creates the XML document and sets it's basic data (root)
+Calls for tableData which will handle GTK display
+
+GtkWidget *widget : widget sent by GTK
+GtkWidget *input : GTK input used to get the name of the database
+char *path : path of the xml file
+
+returns
+0 if all good
+ERR_ENTRY if couldn't get the input
 */
 int setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) {
     char *tmp ;
@@ -261,6 +279,14 @@ int setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) {
     return 0 ;
 }
 
+/*
+Function : setTableData
+-------------------
+Gets the table name and the number of columns of the table from GTK inputs
+
+GtkWidget *widget : widget sent by GTK
+XMLdbData *dbData : structure containing the setup of the database
+*/
 void setTableData (GtkWidget *widget, XMLdbData *dbData) {
     char *tmp ;
     if (retrieveInteger(widget, dbData->dualInputs->nb, &(dbData->size)) != 0)
@@ -331,7 +357,6 @@ int addTableNode (GtkWidget *widget, XMLdbData *tableData) {
     xmlNodePtr tNode ;
     xmlNodePtr child ;
     xmlAttrPtr attr ;
-    int kill = 0 ;
     size_t i = 0 ;
     int nbCol = tableData->size ;
     char path[50] = "" ;
@@ -350,23 +375,14 @@ int addTableNode (GtkWidget *widget, XMLdbData *tableData) {
             return ERR_CREA ;
         xmlAddChild(tNode, child) ;
     }
-    if (kill == 0) {
-        printf("Ok\n") ;
-        printf("*%p*", tNode) ;
-    }
 
-    closeWindow(tableData->dualInputs->window) ;
     free(tableData->columns) ;
     xmlAddChild(tableData->root, tNode) ;
-    xmlDocFormatDump(stdout, tableData->doc, 1);
 
     strcat(strcat(strcat(path, "../outputs/"), (const char *)xmlGetProp(tableData->root, (const xmlChar *)"dbname")), ".xml") ;
-    kill = writeXMLFile(path, tableData->doc) ;
-    if (kill == -1) {
-        xmlFreeDoc(tableData->doc) ;
-        return ERR_CREA ;
-    }
-    xmlFreeDoc(tableData->doc) ;
+    writeXMLFile(path, tableData->doc) ;
+    closeWindow(tableData->dualInputs->window) ;
+    writeTables(widget, tableData) ;
     return 0 ;
 }
 
@@ -387,10 +403,8 @@ xmlNodePtr addColumnNode (GtkWidget *widget, GtkColumn colInputs) {
 
     if ((kill = addMandatory(widget, cNode, colInputs)) != 0)
         return NULL ;
-    printf("Add mand ok\n") ;
 
     addNotMandatory(widget, cNode, colInputs) ;
-    printf("Add not mand ok\n");
 
     kill = addPrimaryKey(widget, cNode, colInputs.primKey) ;
     if (kill == -1)
@@ -422,7 +436,6 @@ int addMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
         attr = xmlSetProp(col, (const xmlChar *)"size", (const xmlChar *)prop) ;
         if (attr == NULL)
             return ERR_CREA ;
-        printf("Size : %s\n", xmlGetProp(col, "size")) ;
     }
     return 0 ;
 }
@@ -455,13 +468,11 @@ int addPrimaryKey (GtkWidget *widget, xmlNodePtr col, GtkWidget *primKeyInput) {
     char *yn = "" ;
     xmlAttrPtr attr ;
     retrieveComboBoxContent(widget, primKeyInput, &yn) ;
-    printf("%s\n", yn) ;
 
     if (strcmp(yn, "YES") == 0) {
         attr = xmlSetProp(col, (const xmlChar *)"attribute", (const xmlChar *)"primary key") ;
         if (attr == NULL)
             return -1 ;
-        printf("Prim key attr : %p\n", attr) ;
         return 1 ;
     }
     return 0 ;
