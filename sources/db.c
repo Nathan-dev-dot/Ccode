@@ -56,7 +56,7 @@ returns :
 0 if ok
 ERR_DB if something went wrong
 */
-int connectDB (char *command, MYSQL_RES *results) {
+int connectDB (char *command) {
     MYSQL mysql ;
     int success ;
 
@@ -69,7 +69,6 @@ int connectDB (char *command, MYSQL_RES *results) {
         return ERR_DB ;
     }
     success = mysql_query(&mysql, command) == 0 ? 0 : 3;
-    results = mysql_use_result(&mysql) ;
 
     mysql_close(&mysql);
     return 0 ;
@@ -99,10 +98,15 @@ ERR_DB if something went wrong
         mysql_close(db->mysql);
         return ERR_DB ;
     }
+    
     success = mysql_query(db->mysql, command) == 0 ? 0 : 3;
     db->results = mysql_use_result(db->mysql) ;
+    if (strncmp(command, "USE ", 4) != 0)
+        db->nbFields = mysql_num_fields(db->results);
+    else
+        db->nbFields = 1 ;
 
-    return 0 ;
+    return success ;
 }
 
 /*

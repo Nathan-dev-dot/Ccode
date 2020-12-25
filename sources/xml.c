@@ -124,7 +124,6 @@ int writeSQLTables (xmlNodePtr node) {
     ForeignKey *foreignKeys = NULL ;
     int size ;
     char command[500] ;
-    MYSQL_RES *res = NULL ;
 
     if ((colConf = initConf()) == NULL)
          return ERR_CONF ;
@@ -148,7 +147,7 @@ int writeSQLTables (xmlNodePtr node) {
                 return kill ;
             strcat(command, ")") ;
 
-            if ((kill = connectDB(command, res)) != 0)
+            if ((kill = connectDB(command)) != 0)
                 return kill ;
 
             if ((kill = writeSQLFile(command, 1)) < 0)

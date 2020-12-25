@@ -57,6 +57,7 @@ typedef struct XMLdbData {
 typedef struct MysqlCoAndRes {
     MYSQL *mysql ;
     MYSQL_RES *results ;
+    unsigned int nbFields ;
 } MysqlCoAndRes ;
 
 #include "gtk.h"

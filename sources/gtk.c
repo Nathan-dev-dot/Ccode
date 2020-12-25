@@ -42,7 +42,7 @@ int initProg (int argc, char **argv) {
     gtk_builder_connect_signals(builder, NULL);
     g_signal_connect(window, "delete_event", G_CALLBACK(destroy), NULL) ;
 
-    background_color(&window, "#999999" );
+    background_color(window, "#999999" );
     mainMenu(builder, window) ;
 
     g_object_unref(builder);
@@ -88,7 +88,7 @@ void dbFromXMLWindow (GtkWidget *widget) {
     okButton = GTK_WIDGET(gtk_builder_get_object(builder, "validate")) ;
     g_signal_connect(okButton, "clicked", G_CALLBACK(dbFromXML), input);
 
-    background_color(&window, "#999999" );
+    background_color(window, "#999999" );
 
     g_object_unref(builder);
 
@@ -113,6 +113,7 @@ void xmlFromEntries (GtkWidget *widget) {
 
     grid = gtk_grid_new() ;
     gtk_container_add(GTK_CONTAINER(window), grid) ;
+    g_object_set(grid, "margin", 12, NULL);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
 
 
@@ -130,7 +131,7 @@ void xmlFromEntries (GtkWidget *widget) {
     g_signal_connect (button, "clicked", G_CALLBACK (createXMLFile), &dbParams);
     gtk_grid_attach(GTK_GRID(grid), button, 0, 6, 1, 1) ;
 
-    background_color(&window, "#999999") ;
+    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -166,6 +167,7 @@ void tableData (GtkWidget *widget, XMLdbData *dbData) {
 
     grid = gtk_grid_new() ;
     gtk_container_add(GTK_CONTAINER(window), grid) ;
+    g_object_set(grid, "margin", 12, NULL);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
 
     tLabel = gtk_label_new((const gchar *)"Enter the table name") ;
@@ -184,7 +186,7 @@ void tableData (GtkWidget *widget, XMLdbData *dbData) {
     g_signal_connect (button, "clicked", G_CALLBACK (setTableData), dbData);
     gtk_grid_attach(GTK_GRID(grid), button, 0, 6, 1, 1) ;
 
-    background_color(&window, "#999999") ;
+    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -205,16 +207,18 @@ void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
 
     grid = gtk_grid_new() ;
     gtk_container_add(GTK_CONTAINER(window), grid) ;
+    g_object_set(grid, "margin", 12, NULL);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10) ;
 
     dbData->columns = createColInputs(dbData->size, grid) ;
     dbData->dualInputs->window = window ;
 
     button = gtk_button_new_with_label((const gchar *)"Send") ;
-    gtk_grid_attach(GTK_GRID(grid), button, 1, dbData->size + 1, 1, 1) ;
+    gtk_grid_attach(GTK_GRID(grid), button, 8, dbData->size + 1, 1, 1) ;
     g_signal_connect(button, "clicked", G_CALLBACK(addTableNode), dbData) ;
 
-    background_color(&window, "#999999") ;
+    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -226,23 +230,28 @@ void dbManagerWindow (GtkWidget *widget) {
     GtkWidget *grid;
     GtkWidget *button ;
     GtkWidget *combo ;
+    GtkWidget *label ;
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Select your database") ;
+    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Database") ;
     gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
 
     grid = gtk_grid_new() ;
     gtk_container_add(GTK_CONTAINER(window), grid) ;
+    g_object_set(grid, "margin", 12, NULL);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
 
+    label = gtk_label_new((const gchar *)"Select your database") ;
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1) ;
+
     combo = createComboBoxDBQuery();
-    gtk_grid_attach(GTK_GRID(grid), combo, 0, 0, 1, 1) ;
+    gtk_grid_attach(GTK_GRID(grid), combo, 0, 1, 1, 1) ;
 
     button = gtk_button_new_with_label((const gchar *)"Select") ;
     g_signal_connect (button, "clicked", G_CALLBACK (setDBName), combo);
-    gtk_grid_attach(GTK_GRID(grid), button, 0, 1, 1, 1) ;
+    gtk_grid_attach(GTK_GRID(grid), button, 0, 2, 1, 1) ;
 
-    background_color(&window, "#999999") ;
+    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 
@@ -261,7 +270,8 @@ void showTables (GtkWidget *widget) {
     GtkWidget *grid;
     GtkWidget *button ;
     GtkWidget *combo ;
-    char str[50] = "Using database " ;
+    GtkWidget *label ;
+    char str[50] = "Using db " ;
 
     strcat(str, nameDB) ;
 
@@ -271,21 +281,90 @@ void showTables (GtkWidget *widget) {
 
     grid = gtk_grid_new() ;
     gtk_container_add(GTK_CONTAINER(window), grid) ;
+    g_object_set(grid, "margin", 20, NULL);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
 
+    label = gtk_label_new((const gchar *)"Select your table") ;
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1) ;
+
     combo = createComboBoxTables();
-    gtk_grid_attach(GTK_GRID(grid), combo, 0, 0, 1, 1) ;
+    gtk_grid_attach(GTK_GRID(grid), combo, 0, 1, 1, 1) ;
 
     button = gtk_button_new_with_label((const gchar *)"Select") ;
-    g_signal_connect (button, "clicked", G_CALLBACK (hello), NULL);
-    gtk_grid_attach(GTK_GRID(grid), button, 0, 1, 1, 1) ;
+    g_signal_connect (button, "clicked", G_CALLBACK (setTableName), combo);
+    gtk_grid_attach(GTK_GRID(grid), button, 0, 2, 1, 1) ;
 
-    background_color(&window, "#999999") ;
+    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
 
+void setTableName (GtkWidget *widget, GtkWidget *comboBox) {
+    char *table = "" ;
+    retrieveComboBoxContent(widget, comboBox, &table) ;
+    actionOnTable(widget, table) ;
+}
 
+void actionOnTable (GtkWidget *widget, char *tName) {
+    GtkBuilder *builder;
+    GtkWidget *window;
+    GtkWidget *showCol ;
+    GtkWidget *alterT ;
+    GtkWidget *inputData ;
+
+    builder = gtk_builder_new();
+    gtk_builder_add_from_file (builder, "main.glade", NULL);
+
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "window_table"));
+    gtk_builder_connect_signals(builder, NULL);
+
+    showCol = GTK_WIDGET(gtk_builder_get_object(builder, "showCol"));
+    g_signal_connect(showCol, "clicked", G_CALLBACK(describeTable), tName);
+
+    alterT = GTK_WIDGET(gtk_builder_get_object(builder, "alterT"));
+    g_signal_connect(alterT, "clicked", G_CALLBACK(hello), NULL);
+
+    inputData = GTK_WIDGET(gtk_builder_get_object(builder, "inputData"));
+    g_signal_connect(inputData, "clicked", G_CALLBACK(hello), NULL);
+
+    background_color(window, "#999999" );
+    mainMenu(builder, window) ;
+
+    g_object_unref(builder);
+
+    gtk_widget_show(window);
+    gtk_main();
+}
+
+void describeTable (GtkWidget *widget, char *tName) {
+    GtkWidget *window;
+    GtkWidget *grid;
+    char str[50] = "Showing table " ;
+    int nbLin ;
+
+    strcat(str, tName) ;
+
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)str) ;
+
+    grid = gtk_grid_new() ;
+    gtk_container_add(GTK_CONTAINER(window), grid) ;
+    g_object_set(grid, "margin", 12, NULL);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10) ;
+
+    nbLin = retrieveColData(tName, grid) ;
+    if (nbLin == 0)
+        closeWindow(window) ;
+    gtk_window_set_default_size(GTK_WINDOW (window), 600, 200 + 15 * nbLin);
+
+    background_color(window, "#999999") ;
+    gtk_widget_show_all(window) ;
+    gtk_main() ;
+}
+
+/*
+*/
 GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
     GtkColumn *columns ;
     int i ;
@@ -294,14 +373,16 @@ GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
     if (columns == NULL)
         return NULL ;
 
-    for (i = 0 ; i < nbCol ; ++i) {
+    createColLabels(grid) ;
+
+    for (i = 1 ; i < nbCol ; ++i) {
         columns[i].name = createInput("Name") ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].name, 0, i, 1, 1) ;
         columns[i].type = createComboBoxType() ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].type, 1, i, 1, 1) ;
         columns[i].size = createInput("Size") ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].size, 2, i, 1, 1) ;
-        columns[i].constraints = createInput("Constraints (auto_increment, etc.)") ;
+        columns[i].constraints = createInput("auto_increment, etc.") ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].constraints, 3, i, 1, 1) ;
         columns[i].check = createInput("Check") ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].check, 4, i, 1, 1) ;
@@ -309,13 +390,25 @@ GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
         gtk_grid_attach(GTK_GRID(grid), columns[i].def, 5, i, 1, 1) ;
         columns[i].primKey = createComboBoxYN();
         gtk_grid_attach(GTK_GRID(grid), columns[i].primKey, 6, i, 1, 1) ;
-        columns[i].ref = createInput("References table(col)") ;
+        columns[i].ref = createInput("table(col)") ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].ref, 7, i, 1, 1) ;
         columns[i].refd = createComboBoxYN() ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].refd, 8, i, 1, 1) ;
     }
 
     return columns ;
+}
+
+void createColLabels (GtkWidget *grid) {
+    addLabel(grid, 0, 0, "Column name") ;
+    addLabel(grid, 0, 1, "Type") ;
+    addLabel(grid, 0, 2, "Size") ;
+    addLabel(grid, 0, 3, "Constraints") ;
+    addLabel(grid, 0, 4, "Check") ;
+    addLabel(grid, 0, 5, "Default") ;
+    addLabel(grid, 0, 6, "Primary key") ;
+    addLabel(grid, 0, 7, "References") ;
+    addLabel(grid, 0, 8, "Is referenced") ;
 }
 
 /*
@@ -366,6 +459,7 @@ GtkWidget * createComboBoxDBQuery () {
     while ((row = mysql_fetch_row(db.results)) != NULL)
         gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), *row, *row) ;
 
+    mysql_free_result(db.results);
     mysql_close(&mysql) ;
 
     return box ;
@@ -391,9 +485,57 @@ GtkWidget * createComboBoxTables (void) {
     while ((row = mysql_fetch_row(db.results)) != NULL)
         gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), *row, *row) ;
 
+    mysql_free_result(db.results);
     mysql_close(&mysql) ;
 
     return box ;
+}
+
+int retrieveColData(char *tName, GtkWidget *grid) {
+    MYSQL mysql ;
+    MysqlCoAndRes db ;
+    MYSQL_ROW row ;
+    char command[40] = "DESCRIBE " ;
+    int col = 0 ;
+    int lin = 0 ;
+
+    db.mysql = &mysql ;
+    strcat(command, tName) ;
+    reachMysql(&db, command) ;
+
+    if (db.results == NULL) {
+        return 0 ;
+    }
+
+    while ((row = mysql_fetch_row(db.results)) != NULL) {
+        addLabel(grid, 0, col, *row) ;
+        col++;
+    }
+    lin++ ;
+
+    strcat(strcpy(command, "SELECT * FROM "), tName) ;
+    reachMysql(&db, command) ;
+
+    if (db.results == NULL) {
+        return 0 ;
+    }
+
+    while ((row = mysql_fetch_row(db.results)) != NULL) {
+        for (col = 0 ; col < db.nbFields ; col++) {
+            addLabel(grid, lin, col, row[col]) ;
+        }
+        lin++ ;
+    }
+    mysql_free_result(db.results);
+    mysql_close(&mysql) ;
+
+    return lin ;
+}
+
+void addLabel (GtkWidget *grid, int lin, int col, char *str) {
+    GtkWidget *label ;
+    label = gtk_label_new((const gchar *)str) ;
+    gtk_grid_attach(GTK_GRID(grid), label, col, lin, 1, 1) ;
 }
 
 /*
@@ -425,13 +567,13 @@ void retrieveData(GtkWidget *widget, GtkWidget *input, char **str)
 
 /*
 */
-void background_color (GtkWidget **widget, char *color) {
+void background_color (GtkWidget *widget, char *color) {
   GtkCssProvider * cssProvider = gtk_css_provider_new();    //store the css
 
   char css[64] = "* { background-image:none; background-color:";
   strcat(strcat(css, color), ";}");
 
   gtk_css_provider_load_from_data(cssProvider, css,-1,NULL);
-  GtkStyleContext * context = gtk_widget_get_style_context(*widget);   //manage CSS provider
+  GtkStyleContext * context = gtk_widget_get_style_context(widget);   //manage CSS provider
   gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(cssProvider),GTK_STYLE_PROVIDER_PRIORITY_USER);
 }
