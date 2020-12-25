@@ -322,7 +322,7 @@ void actionOnTable (GtkWidget *widget, char *tName) {
     g_signal_connect(showCol, "clicked", G_CALLBACK(describeTable), tName);
 
     alterT = GTK_WIDGET(gtk_builder_get_object(builder, "alterT"));
-    g_signal_connect(alterT, "clicked", G_CALLBACK(hello), NULL);
+    g_signal_connect(alterT, "clicked", G_CALLBACK(alterTable), tName);
 
     inputData = GTK_WIDGET(gtk_builder_get_object(builder, "inputData"));
     g_signal_connect(inputData, "clicked", G_CALLBACK(hello), NULL);
@@ -363,6 +363,70 @@ void describeTable (GtkWidget *widget, char *tName) {
     gtk_main() ;
 }
 
+void alterTable (GtkWidget *widget, char *tName) {
+    GtkWidget *window;
+    GtkWidget *grid;
+    GtkWidget *button ;
+    GtkWidget *label ;
+
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Alter table") ;
+    gtk_window_set_default_size (GTK_WINDOW (window), 1000, 600);
+
+    grid = gtk_grid_new() ;
+    gtk_container_add(GTK_CONTAINER(window), grid) ;
+    g_object_set(grid, "margin", 12, NULL);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10) ;
+
+    getColStructure(grid, tName) ;
+    addLabel(grid, 0, 9, "Drop column") ;
+
+    background_color(window, "#999999") ;
+    gtk_widget_show_all(window) ;
+    gtk_main() ;
+}
+
+void getColStructure (GtkWidget *grid, char *tName) {
+    GtkColumn *columns ;
+    MYSQL mysql ;
+    MysqlCoAndRes db ;
+    MYSQL_ROW row ;
+    char command[30] = "DESCRIBE " ;
+    int nbCol = 0 ;
+    int lin = 0 ;
+    int col = 0 ;
+    strcat(command, tName) ;
+    db.mysql = &mysql ;
+    reachMysql(&db, command) ;
+
+    if (db.results == NULL) {
+        return ;
+    }
+
+    nbCol = countLin(db.results) ;
+    columns = createColInputs(nbCol, grid) ;
+    reachMysql(&db, command) ;
+
+    while ((row = mysql_fetch_row(db.results)) != NULL) {
+        col = 0 ;
+        gtk_entry_set_text(GTK_ENTRY(columns[lin].name), row[col]) ;
+        lin++ ;
+    }
+
+    mysql_free_result(db.results);
+    mysql_close(&mysql) ;
+    free(columns) ;
+}
+
+int countLin (MYSQL_RES *res) {
+    int count = 0 ;
+    MYSQL_ROW row ;
+    while ((row = mysql_fetch_row(res)) != NULL)
+        count++;
+    return count ;
+}
+
 /*
 */
 GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
@@ -375,25 +439,25 @@ GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
 
     createColLabels(grid) ;
 
-    for (i = 1 ; i < nbCol ; ++i) {
+    for (i = 0 ; i < nbCol ; ++i) {
         columns[i].name = createInput("Name") ;
-        gtk_grid_attach(GTK_GRID(grid), columns[i].name, 0, i, 1, 1) ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].name, 0, i+1, 1, 1) ;
         columns[i].type = createComboBoxType() ;
-        gtk_grid_attach(GTK_GRID(grid), columns[i].type, 1, i, 1, 1) ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].type, 1, i+1, 1, 1) ;
         columns[i].size = createInput("Size") ;
-        gtk_grid_attach(GTK_GRID(grid), columns[i].size, 2, i, 1, 1) ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].size, 2, i+1, 1, 1) ;
         columns[i].constraints = createInput("auto_increment, etc.") ;
-        gtk_grid_attach(GTK_GRID(grid), columns[i].constraints, 3, i, 1, 1) ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].constraints, 3, i+1, 1, 1) ;
         columns[i].check = createInput("Check") ;
-        gtk_grid_attach(GTK_GRID(grid), columns[i].check, 4, i, 1, 1) ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].check, 4, i+1, 1, 1) ;
         columns[i].def = createInput("Default") ;
-        gtk_grid_attach(GTK_GRID(grid), columns[i].def, 5, i, 1, 1) ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].def, 5, i+1, 1, 1) ;
         columns[i].primKey = createComboBoxYN();
-        gtk_grid_attach(GTK_GRID(grid), columns[i].primKey, 6, i, 1, 1) ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].primKey, 6, i+1, 1, 1) ;
         columns[i].ref = createInput("table(col)") ;
-        gtk_grid_attach(GTK_GRID(grid), columns[i].ref, 7, i, 1, 1) ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].ref, 7, i+1, 1, 1) ;
         columns[i].refd = createComboBoxYN() ;
-        gtk_grid_attach(GTK_GRID(grid), columns[i].refd, 8, i, 1, 1) ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].refd, 8, i+1, 1, 1) ;
     }
 
     return columns ;

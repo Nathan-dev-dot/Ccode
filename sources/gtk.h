@@ -24,9 +24,12 @@ void showTables (GtkWidget *widget) ;
 void setTableName (GtkWidget *widget, GtkWidget *comboBox) ;
 void actionOnTable (GtkWidget *widget, char *tName) ;
 void describeTable (GtkWidget *widget, char *tName) ;
-int retrieveColData(char *tName, GtkWidget *grid) ;
-void addLabel (GtkWidget *grid, int lin, int col, char *str) ;
 
+void alterTable (GtkWidget *widget, char *tName) ;
+int retrieveColData(char *tName, GtkWidget *grid) ;
+void getColStructure (GtkWidget *grid, char *tName) ;
+
+int countLin (MYSQL_RES *res) ;
 GtkColumn * createColInputs (int nbCol, GtkWidget *grid) ;
 void createColLabels (GtkWidget *grid) ;
 GtkWidget * createComboBoxType (void) ;
@@ -34,6 +37,7 @@ GtkWidget * createComboBoxYN (void) ;
 GtkWidget * createComboBoxDBQuery (void) ;
 GtkWidget * createComboBoxTables (void) ;
 GtkWidget * createInput (char *placeholder) ;
+void addLabel (GtkWidget *grid, int lin, int col, char *str) ;
 void background_color (GtkWidget *widget, char *color) ;
 
 #endif
