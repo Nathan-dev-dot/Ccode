@@ -60,6 +60,11 @@ typedef struct MysqlCoAndRes {
     unsigned int nbFields ;
 } MysqlCoAndRes ;
 
+typedef struct TableCol {
+    char tName[30] ;
+    char cName[30] ;
+} TableCol ;
+
 #include "gtk.h"
 #include "db.h"
 #include "sql.h"

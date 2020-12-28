@@ -86,5 +86,6 @@ Removes the last character of a string
 char *str : string to be modified
 */
 void removeLastChar (char *str) {
-    str[strlen(str) - 1] = '\0' ;
+    if (strlen(str) != 0)
+        str[strlen(str) - 1] = '\0' ;
 }

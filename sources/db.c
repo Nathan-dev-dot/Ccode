@@ -68,7 +68,9 @@ int connectDB (char *command) {
         mysql_close(&mysql);
         return ERR_DB ;
     }
-    success = mysql_query(&mysql, command) == 0 ? 0 : 3;
+    success = mysql_query(&mysql, command) ;
+    if (success != 0)
+        return 3 ;
 
     mysql_close(&mysql);
     return 0 ;
@@ -98,7 +100,7 @@ ERR_DB if something went wrong
         mysql_close(db->mysql);
         return ERR_DB ;
     }
-    
+
     success = mysql_query(db->mysql, command) == 0 ? 0 : 3;
     db->results = mysql_use_result(db->mysql) ;
     if (strncmp(command, "USE ", 4) != 0)

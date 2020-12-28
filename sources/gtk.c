@@ -11,7 +11,7 @@
 
 extern char nameDB[30] ;
 
-void hello (GtkWidget *widget, XMLdbData *data) {
+void hello (GtkWidget *widget, gpointer data) {
     printf("Hello %p\n", data) ;
 }
 
@@ -211,7 +211,7 @@ void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
     gtk_grid_set_column_spacing(GTK_GRID(grid), 10) ;
 
-    dbData->columns = createColInputs(dbData->size, grid) ;
+    dbData->columns = createXmlColInputs(dbData->size, grid) ;
     dbData->dualInputs->window = window ;
 
     button = gtk_button_new_with_label((const gchar *)"Send") ;
@@ -322,7 +322,7 @@ void actionOnTable (GtkWidget *widget, char *tName) {
     g_signal_connect(showCol, "clicked", G_CALLBACK(describeTable), tName);
 
     alterT = GTK_WIDGET(gtk_builder_get_object(builder, "alterT"));
-    g_signal_connect(alterT, "clicked", G_CALLBACK(alterTable), tName);
+    g_signal_connect(alterT, "clicked", G_CALLBACK(alterTableWindow), tName);
 
     inputData = GTK_WIDGET(gtk_builder_get_object(builder, "inputData"));
     g_signal_connect(inputData, "clicked", G_CALLBACK(hello), NULL);
@@ -363,11 +363,13 @@ void describeTable (GtkWidget *widget, char *tName) {
     gtk_main() ;
 }
 
-void alterTable (GtkWidget *widget, char *tName) {
+void alterTableWindow (GtkWidget *widget, char *tName) {
     GtkWidget *window;
     GtkWidget *grid;
     GtkWidget *button ;
-    GtkWidget *label ;
+    XMLdbData table ;
+    GtkDualInputs di ;
+    GtkWidget **dropButtons = NULL ;
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Alter table") ;
@@ -379,24 +381,33 @@ void alterTable (GtkWidget *widget, char *tName) {
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
     gtk_grid_set_column_spacing(GTK_GRID(grid), 10) ;
 
-    getColStructure(grid, tName) ;
-    addLabel(grid, 0, 9, "Drop column") ;
+    strcpy(table.name, tName) ;
+    di.window = window ;
+    table.dualInputs = &di ;
+    getColStructure(grid, &table, dropButtons) ;
+    addLabel(grid, 0, 5, "Drop column") ;
+
+    button = gtk_button_new_with_label((const gchar *)"Alter") ;
+    gtk_grid_attach(GTK_GRID(grid), button, 5, table.size + 1, 1, 1) ;
+    g_signal_connect(button, "clicked", G_CALLBACK(alterTable), &table) ;
 
     background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
 
-void getColStructure (GtkWidget *grid, char *tName) {
-    GtkColumn *columns ;
+/*
+À découper en SOUS-fonctions !
+*/
+void getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons) {
     MYSQL mysql ;
     MysqlCoAndRes db ;
     MYSQL_ROW row ;
     char command[30] = "DESCRIBE " ;
-    int nbCol = 0 ;
     int lin = 0 ;
     int col = 0 ;
-    strcat(command, tName) ;
+    TableCol *colNames ;
+    strcat(command, table->name) ;
     db.mysql = &mysql ;
     reachMysql(&db, command) ;
 
@@ -404,19 +415,172 @@ void getColStructure (GtkWidget *grid, char *tName) {
         return ;
     }
 
-    nbCol = countLin(db.results) ;
-    columns = createColInputs(nbCol, grid) ;
-    reachMysql(&db, command) ;
+    table->size = countLin(db.results) ;
+    table->columns = createSqlColInputs(table->size, grid) ;
+    dropButtons = malloc(table->size * sizeof(GtkWidget *)) ;
+    colNames = malloc(table->size * sizeof(TableCol)) ;
+    if (dropButtons == NULL)
+        return ;
 
+    reachMysql(&db, command) ;
     while ((row = mysql_fetch_row(db.results)) != NULL) {
         col = 0 ;
-        gtk_entry_set_text(GTK_ENTRY(columns[lin].name), row[col]) ;
+        gtk_entry_set_text(GTK_ENTRY(table->columns[lin].name), row[0]) ;
+        strcpy(colNames[lin].cName, row[0]) ;
+        strcpy(colNames[lin].tName, table->name) ;
+        gtk_entry_set_text(GTK_ENTRY(table->columns[lin].size), row[1]) ;
+        if (row[4] != NULL)
+            gtk_entry_set_text(GTK_ENTRY(table->columns[lin].def), row[4]) ;
+        if (row[5] != NULL)
+            gtk_entry_set_text(GTK_ENTRY(table->columns[lin].constraints), row[5]) ;
+        if (row[3] != NULL && strcmp(row[3], "PRI") == 0)
+            gtk_combo_box_set_active_id(GTK_COMBO_BOX(table->columns[lin].primKey), "yes") ;
+
+        dropButtons[lin] = gtk_button_new_with_label((const gchar *)"Drop") ;
+        gtk_grid_attach(GTK_GRID(grid), dropButtons[lin], 5, lin + 1, 1, 1) ;
+        g_signal_connect(dropButtons[lin], "clicked", G_CALLBACK(dropColumn), &colNames[lin]) ;
         lin++ ;
     }
 
     mysql_free_result(db.results);
     mysql_close(&mysql) ;
-    free(columns) ;
+    return;
+}
+
+void dropColumn (GtkWidget *widget, TableCol *drop) {
+    char command[100] = "ALTER TABLE ";
+    int deleted ;
+    strcat(strcat(strcat(command, drop->tName), " DROP "), drop->cName) ;
+
+    if ((deleted = connectDB(command)) != 0)
+        printf("Can't drop this column, bound to a primary key\n");
+    else printf("Column dropped\n") ;
+}
+
+void alterTable (GtkWidget *widget, XMLdbData *tableData) {
+    char command[100] = "DESCRIBE " ;
+    MYSQL mysql ;
+    MysqlCoAndRes db ;
+    MYSQL_ROW row ;
+
+    int i = 0 ;
+    int modified ;
+
+    db.mysql = &mysql ;
+    strcat(command, tableData->name) ;
+    reachMysql(&db, command) ;
+
+    managePrimKeys(widget, db.results, tableData) ;
+
+    reachMysql(&db, command) ;
+    while ((row = mysql_fetch_row(db.results)) != NULL) {
+        modified = checkIfModified(widget, tableData, i, command, row) ;
+        if (modified == 1) {
+            connectDB(command) ;
+            free(tableData->columns) ;
+            closeWindow(tableData->dualInputs->window) ;
+            //mettre un message de succès
+        }
+        i++ ;
+    }
+
+    mysql_free_result(db.results);
+    mysql_close(&mysql) ;
+}
+
+int checkIfModified (GtkWidget *widget, XMLdbData *tableData, int i, char *command, MYSQL_ROW row) {
+    int modified = 0 ;
+    char *newName ;
+    char *type ;
+    char *extra ;
+    char *def ;
+
+    retrieveData(widget, tableData->columns[i].name, &newName) ;
+    retrieveData(widget, tableData->columns[i].size, &type) ;
+    retrieveData(widget, tableData->columns[i].def, &def) ;
+    retrieveData(widget, tableData->columns[i].constraints, &extra) ;
+
+    strcat(strcpy(command, "ALTER TABLE "), tableData->name) ;
+    strcat(strcat(strcat(strcat(strcat(strcat(command, " CHANGE "), row[0]), " "), newName), " "), type) ;
+
+    if (strcmp(row[0], newName) != 0 || strcmp(row[1], type) != 0)
+        modified = 1 ;
+    if (strcmp(row[5], extra) != 0) {
+        strcat(strcat(command, " "), extra) ;
+        modified = 1 ;
+    }
+
+    if ((row[4] == NULL && strlen(def) != 0) || (row[4] != NULL && strcmp(row[4], def) != 0)) {
+        if ((strncmp(type, "char", 4) == 0 || strncmp(type, "varchar", 7) == 0) && strcmp(def, "null") != 0) {
+            strcat(strcat(strcat(command, " DEFAULT \""), def), "\"") ;
+        } else {
+            strcat(strcat(command, " DEFAULT "), def) ;
+        }
+        modified = 1 ;
+    }
+    return modified ;
+}
+
+int managePrimKeys (GtkWidget *widget, MYSQL_RES *results, XMLdbData *table) {
+    MYSQL_ROW row ;
+    char *pk ;
+    int i = 0 ;
+    int diff = 0 ;
+    char primKeys[50] = "" ;
+    char ai[30] = "" ;
+    while ((row = mysql_fetch_row(results)) != NULL) {
+        pk = NULL ;
+        retrieveComboBoxContent(widget, table->columns[i].primKey, &pk) ;
+        if (pk != NULL) {
+            if (strcmp(pk, "YES") == 0) {  //if is being set as primary key
+                strcat(strcat(primKeys, row[0]), ",") ;
+                if (strcmp(row[5], "auto_increment") == 0) { //if has an AI constraint
+                    strcpy(ai, row[0]) ;
+                }
+
+                if (strcmp(row[3], "PRI") != 0) //if wasn't set as primary key
+                    diff = 1 ;
+            } else { //if is not being set as primary key
+                if (strcmp(row[5], "auto_increment") == 0) { //if has an AI constraint
+                    strcpy(ai, row[0]) ;
+                }
+                if (strcmp(row[3], "PRI") == 0) //if was set as primary key
+                    diff = 1 ;
+            }
+        }
+        i++ ;
+    }
+    removeLastChar(primKeys) ;
+    if (strlen(primKeys) == 0)
+        return 1 ;
+
+    if (diff == 1) {
+        unsetAI(ai, table->name) ;
+        dropAddPrimKeys(primKeys, ai, table->name) ;
+    }
+    return 0 ;
+}
+
+void unsetAI (char *ai, char *tName) {
+    char unsetAI[100] = "ALTER TABLE " ;
+    strcat(unsetAI, tName) ;
+    if (strlen(ai) != 0) {
+        strcat(strcat(strcat(strcat(strcat(unsetAI, " CHANGE "), ai), " "), ai), " INTEGER") ;
+        connectDB(unsetAI) ;
+    }
+}
+
+void dropAddPrimKeys (char *primKeys, char *ai, char *tName) {
+    char str[50] = "ALTER TABLE " ;
+    char add[100] = "" ;
+    char drop[100] = "" ;
+
+    strcat(str, tName) ;
+    strcat(strcpy(drop, str), " DROP PRIMARY KEY") ;
+    strcat(strcat(strcat(strcpy(add, str), " ADD PRIMARY KEY("), primKeys), ")") ;
+
+    connectDB(drop) ;
+    connectDB(add) ;
 }
 
 int countLin (MYSQL_RES *res) {
@@ -429,7 +593,7 @@ int countLin (MYSQL_RES *res) {
 
 /*
 */
-GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
+GtkColumn * createXmlColInputs (int nbCol, GtkWidget *grid) {
     GtkColumn *columns ;
     int i ;
 
@@ -437,7 +601,7 @@ GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
     if (columns == NULL)
         return NULL ;
 
-    createColLabels(grid) ;
+    createXmlColLabels(grid) ;
 
     for (i = 0 ; i < nbCol ; ++i) {
         columns[i].name = createInput("Name") ;
@@ -450,7 +614,7 @@ GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
         gtk_grid_attach(GTK_GRID(grid), columns[i].constraints, 3, i+1, 1, 1) ;
         columns[i].check = createInput("Check") ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].check, 4, i+1, 1, 1) ;
-        columns[i].def = createInput("Default") ;
+        columns[i].def = createInput("null") ;
         gtk_grid_attach(GTK_GRID(grid), columns[i].def, 5, i+1, 1, 1) ;
         columns[i].primKey = createComboBoxYN();
         gtk_grid_attach(GTK_GRID(grid), columns[i].primKey, 6, i+1, 1, 1) ;
@@ -463,7 +627,7 @@ GtkColumn * createColInputs (int nbCol, GtkWidget *grid) {
     return columns ;
 }
 
-void createColLabels (GtkWidget *grid) {
+void createXmlColLabels (GtkWidget *grid) {
     addLabel(grid, 0, 0, "Column name") ;
     addLabel(grid, 0, 1, "Type") ;
     addLabel(grid, 0, 2, "Size") ;
@@ -473,6 +637,41 @@ void createColLabels (GtkWidget *grid) {
     addLabel(grid, 0, 6, "Primary key") ;
     addLabel(grid, 0, 7, "References") ;
     addLabel(grid, 0, 8, "Is referenced") ;
+}
+
+GtkColumn * createSqlColInputs (int nbCol, GtkWidget *grid) {
+    GtkColumn *columns ;
+    int i ;
+
+    columns = malloc(sizeof(GtkColumn) * nbCol) ;
+    if (columns == NULL)
+        return NULL ;
+
+    createSqlColLabels(grid) ;
+
+    for (i = 0 ; i < nbCol ; ++i) {
+        columns[i].name = createInput("Name") ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].name, 0, i+1, 1, 1) ;
+        columns[i].size = createInput("Size") ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].size, 1, i+1, 1, 1) ;
+        columns[i].constraints = createInput("auto_increment, etc.") ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].constraints, 2, i+1, 1, 1) ;
+        columns[i].def = createInput("null") ;
+        gtk_grid_attach(GTK_GRID(grid), columns[i].def, 3, i+1, 1, 1) ;
+        columns[i].primKey = createComboBoxYN();
+        gtk_grid_attach(GTK_GRID(grid), columns[i].primKey, 4, i+1, 1, 1) ;
+        columns[i].ref = createInput("table(col)") ;
+    }
+
+    return columns ;
+}
+
+void createSqlColLabels (GtkWidget *grid) {
+    addLabel(grid, 0, 0, "Column name") ;
+    addLabel(grid, 0, 1, "Type") ;
+    addLabel(grid, 0, 2, "Extra") ;
+    addLabel(grid, 0, 3, "Default") ;
+    addLabel(grid, 0, 4, "Primary key") ;
 }
 
 /*
@@ -615,12 +814,13 @@ void retrieveComboBoxContent (GtkWidget *widget, GtkWidget *box, char **str) {
         return ;
     if (gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box)) != NULL)
         *str = (char *)gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box)) ;
+    else
+        str = NULL ;
 }
 
 /*
 */
-void retrieveData(GtkWidget *widget, GtkWidget *input, char **str)
-{
+void retrieveData(GtkWidget *widget, GtkWidget *input, char **str) {
     if (input == NULL)
         return ;
     if (gtk_entry_get_text (GTK_ENTRY (input)) != NULL)
