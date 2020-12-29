@@ -25,17 +25,21 @@ void showTables (GtkWidget *widget) ;
 int addTable (GtkWidget *widget, XMLdbData *table) ;
 void setTableName (GtkWidget *widget, GtkWidget *comboBox) ;
 void actionOnTable (GtkWidget *widget, char *tName) ;
-void describeTable (GtkWidget *widget, char *tName) ;
+void showTableContent (GtkWidget *widget, char *tName) ;
 
 void alterTableWindow (GtkWidget *widget, char *tName) ;
 int retrieveColData(char *tName, GtkWidget *grid) ;
 void getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons) ;
 void dropColumn (GtkWidget *widget, TableCol *drop) ;
+void retrieveColNb (GtkWidget *widget, XMLdbData *table) ;
+int addColumns (GtkWidget *widget, XMLdbData *table) ;
 void alterTable (GtkWidget *widget, XMLdbData *tableData) ;
 int checkIfModified (GtkWidget *widget, XMLdbData *tableData, int i, char *command, MYSQL_ROW row) ;
+
+void retrievePrimKeys (GtkWidget *widget, char *pk, XMLdbData *tableData, char *newAi) ;
 int managePrimKeys (GtkWidget *widget, MYSQL_RES *results, XMLdbData *table) ;
 void unsetAI (char *ai, char *tName) ;
-void dropAddPrimKeys (char *primKeys, char *ai, char *tName) ;
+void dropAddPrimKeys (char *primKeys, char *tName) ;
 
 int countLin (MYSQL_RES *res) ;
 GtkColumn * createXmlColInputs (int nbCol, GtkWidget *grid) ;

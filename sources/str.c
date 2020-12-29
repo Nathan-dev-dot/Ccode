@@ -132,3 +132,17 @@ int addForeignKeyCommand (GtkWidget *widget, char *command, GtkWidget *input) {
 
     return 0 ;
 }
+
+int retrieveAI (GtkWidget *widget, GtkColumn col, char *aiName) {
+    char *tmp ;
+    retrieveData(widget, col.constraints, &tmp) ;
+    if (strcmp(tmp, "auto_increment") == 0) {
+        if (strlen(aiName) != 0) {
+            printf("Multiples AI !") ;
+            return 1 ;
+        }
+        retrieveData(widget, col.name, &tmp) ;
+        strcpy(aiName, tmp) ;
+    }
+    return 0 ;
+}
