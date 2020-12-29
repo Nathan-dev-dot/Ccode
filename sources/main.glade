@@ -2,13 +2,17 @@
 <!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow">
+  <object class="GtkWindow" id="window_popup">
     <property name="can_focus">False</property>
     <child type="titlebar">
       <placeholder/>
     </child>
     <child>
-      <placeholder/>
+      <object class="GtkLabel" id="label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">coucou toi</property>
+      </object>
     </child>
   </object>
   <object class="GtkWindow" id="window_main">

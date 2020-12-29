@@ -2,6 +2,7 @@
 #define GTK_H
 
 void hello (GtkWidget *widget, gpointer data) ;
+void printError (GtkWidget *widget, int errNo, char *message) ;
 int initProg (int argc, char **argv) ;
 void destroy(GtkWidget *widget, gpointer data) ;
 void closeWindow (GtkWidget *window) ;
@@ -21,6 +22,7 @@ void dbManagerWindow (GtkWidget *widget) ;
 
 void setDBName (GtkWidget *widget, GtkWidget *comboBox);
 void showTables (GtkWidget *widget) ;
+int addTable (GtkWidget *widget, XMLdbData *table) ;
 void setTableName (GtkWidget *widget, GtkWidget *comboBox) ;
 void actionOnTable (GtkWidget *widget, char *tName) ;
 void describeTable (GtkWidget *widget, char *tName) ;

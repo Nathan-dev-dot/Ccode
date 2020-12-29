@@ -12,7 +12,68 @@
 extern char nameDB[30] ;
 
 void hello (GtkWidget *widget, gpointer data) {
-    printf("Hello %p\n", data) ;
+    printf("Hello %s\n", data) ;
+}
+
+
+
+/*
+Function : printError                                   ///comm à modifier
+-------------------------
+Prints the errors reading from the config file
+
+int errorNo : error number given by the previous functions
+*/
+void printError (GtkWidget *widget, int errNo, char *message) {
+    FILE *confFile ;
+    char str[150] ;
+    int errCode ;
+    int found = 0;
+    GtkBuilder *builder;
+    GtkWidget *window;
+    GtkWidget *label ;
+
+    builder = gtk_builder_new();
+    gtk_builder_add_from_file (builder, "main.glade", NULL);
+
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "window_popup"));
+    gtk_builder_connect_signals(builder, NULL);
+    gtk_window_set_default_size (GTK_WINDOW (window), 200, 100);
+
+    label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
+    if (strlen(message) == 0) {
+        confFile = fopen("../config", "r") ;
+        if (confFile == NULL){
+            gtk_label_set_text(GTK_LABEL(label), (const gchar *)"Error in opening the configuration file") ;
+        }
+
+        while (fgets(str, 150, confFile) != NULL) {
+            if (strcmp(str, "[error_codes]\n") == 0) {
+                while (fgets(str, 150, confFile) != NULL && strcmp(str, "\n") != 0) {
+                    sscanf(str, "%d", &errCode) ;
+                    if (errCode == errNo) {
+                        found = 1 ;
+                        gtk_label_set_text(GTK_LABEL(label), (const gchar *)strchr(str, ':') + 1) ;
+                        break ;
+                    }
+                }
+            }
+        }
+        fclose(confFile) ;
+
+        if (found == 0)
+            gtk_label_set_text(GTK_LABEL(label), (const gchar *)"Error code not found") ;
+    } else {
+        gtk_label_set_text(GTK_LABEL(label), (const gchar *)message) ;
+    }
+
+    background_color(window, "#999999" );
+    mainMenu(builder, window) ;
+
+    g_object_unref(builder);
+
+    gtk_widget_show(window);
+    gtk_main();
 }
 
 /*
@@ -137,13 +198,13 @@ void xmlFromEntries (GtkWidget *widget) {
 }
 
 /*
-
 */
 void writeTables (GtkWidget *widget, XMLdbData *xmlData) {
     xmlData->pos.current++ ;
     if (xmlData->pos.current <= xmlData->pos.total) {
         tableData(widget, xmlData) ;
     } else {
+        printError(widget, 0, "XML file created in Outputs folder") ;
         xmlFreeDoc(xmlData->doc) ;
     }
     return ;
@@ -159,8 +220,11 @@ void tableData (GtkWidget *widget, XMLdbData *dbData) {
     GtkWidget *tLabel ;
     GtkDualInputs dbParams;
 
+    if (dbData->dualInputs->window != NULL)
+        closeWindow(dbData->dualInputs->window) ;
+
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Number of columns") ;
+    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Table data") ;
     gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
 
     dbParams.window = window ;
@@ -213,10 +277,11 @@ void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
 
     dbData->columns = createXmlColInputs(dbData->size, grid) ;
     dbData->dualInputs->window = window ;
+    printf("%p\n", window) ;
 
     button = gtk_button_new_with_label((const gchar *)"Send") ;
     gtk_grid_attach(GTK_GRID(grid), button, 8, dbData->size + 1, 1, 1) ;
-    g_signal_connect(button, "clicked", G_CALLBACK(addTableNode), dbData) ;
+    g_signal_connect(button, "clicked", G_CALLBACK(dbData->colFunc), dbData) ;
 
     background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
@@ -268,16 +333,24 @@ void setDBName (GtkWidget *widget, GtkWidget *comboBox) {
 void showTables (GtkWidget *widget) {
     GtkWidget *window;
     GtkWidget *grid;
-    GtkWidget *button ;
+    GtkWidget *selectButton ;
+    GtkWidget *addButton ;
     GtkWidget *combo ;
     GtkWidget *label ;
     char str[50] = "Using db " ;
+    XMLdbData table ;
+    GtkDualInputs di ;
+
+    table.colFunc = &addTable ;
 
     strcat(str, nameDB) ;
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), (const gchar *)str) ;
     gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+
+    di.window = window ;
+    table.dualInputs = &di ;
 
     grid = gtk_grid_new() ;
     gtk_container_add(GTK_CONTAINER(window), grid) ;
@@ -290,13 +363,52 @@ void showTables (GtkWidget *widget) {
     combo = createComboBoxTables();
     gtk_grid_attach(GTK_GRID(grid), combo, 0, 1, 1, 1) ;
 
-    button = gtk_button_new_with_label((const gchar *)"Select") ;
-    g_signal_connect (button, "clicked", G_CALLBACK (setTableName), combo);
-    gtk_grid_attach(GTK_GRID(grid), button, 0, 2, 1, 1) ;
+    selectButton = gtk_button_new_with_label((const gchar *)"Select") ;
+    g_signal_connect (selectButton, "clicked", G_CALLBACK (setTableName), combo);
+    gtk_grid_attach(GTK_GRID(grid), selectButton, 0, 2, 1, 1) ;
+
+    addButton = gtk_button_new_with_label((const gchar *)"Add a table") ;
+    g_signal_connect (addButton, "clicked", G_CALLBACK (tableData), &table);
+    gtk_grid_attach(GTK_GRID(grid), addButton, 0, 3, 1, 1) ;
 
     background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
+}
+
+int addTable (GtkWidget *widget, XMLdbData *table) {
+    int nbCol = table->size ;
+    char command[500] = "CREATE TABLE " ;
+    char pk[100] = "PRIMARY KEY(" ;
+    int i ;
+    int kill ;
+    size_t pkNb = 0 ;
+
+    strcat(strcat(command, table->name),"(") ;
+
+    for (i = 0 ; i < nbCol ; ++i) {
+        kill = addColumnCommand(widget, command, table->columns[i], pk) ;
+        if (kill != 0 && kill != 1)
+            return kill ;
+        pkNb += kill ;
+    }
+
+    if (pkNb == 0) {
+        printError(widget, ERR_XML, "") ;
+        return ERR_XML ;
+    }
+
+    removeLastChar(pk) ;
+    strcat(strcat(command, pk), "))") ;
+    kill = connectDB(command) ;
+    if (kill != 0) {
+        printError(widget, kill, "") ;
+    } else {
+        closeWindow(table->dualInputs->window) ;
+        showTables(widget) ;
+        printError(widget, 0, "Table added !") ;
+    }
+    return 0 ;
 }
 
 void setTableName (GtkWidget *widget, GtkWidget *comboBox) {
@@ -428,6 +540,7 @@ void getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons
         gtk_entry_set_text(GTK_ENTRY(table->columns[lin].name), row[0]) ;
         strcpy(colNames[lin].cName, row[0]) ;
         strcpy(colNames[lin].tName, table->name) ;
+        colNames[lin].window = table->dualInputs->window ;
         gtk_entry_set_text(GTK_ENTRY(table->columns[lin].size), row[1]) ;
         if (row[4] != NULL)
             gtk_entry_set_text(GTK_ENTRY(table->columns[lin].def), row[4]) ;
@@ -452,9 +565,14 @@ void dropColumn (GtkWidget *widget, TableCol *drop) {
     int deleted ;
     strcat(strcat(strcat(command, drop->tName), " DROP "), drop->cName) ;
 
-    if ((deleted = connectDB(command)) != 0)
-        printf("Can't drop this column, bound to a primary key\n");
-    else printf("Column dropped\n") ;
+    if ((deleted = connectDB(command)) != 0) {
+        printError(widget, 0, "Can't drop this column, bound to a primary key") ;
+    }
+    else {
+        printError(widget, 0, "Column dropped") ;
+        closeWindow(drop->window) ;
+    }
+
 }
 
 void alterTable (GtkWidget *widget, XMLdbData *tableData) {
@@ -479,7 +597,7 @@ void alterTable (GtkWidget *widget, XMLdbData *tableData) {
             connectDB(command) ;
             free(tableData->columns) ;
             closeWindow(tableData->dualInputs->window) ;
-            //mettre un message de succès
+            printError(widget, 0, "Table altered") ;
         }
         i++ ;
     }

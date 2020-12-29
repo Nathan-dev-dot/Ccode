@@ -109,11 +109,13 @@ void catNotMandatory (xmlNodePtr n, Conf *colConf, int i, char *command) {
         if (strcmp(colConf[i].prop, "default") == 0) {
             strcat(command, "default ") ;
             if ((!strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "varchar") ||
-                    !strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "char")) && strcmp(prop, "null")) {
+                    !strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "char")) && strcmp(prop, "null") && strcmp(prop, "NULL")) {
                 addSpace(strcat(strcat(strcat(command, "\""), prop), "\"")) ;
             } else {
                 addSpace(strcat(command, prop)) ;
             }
+        } else if (strcmp(colConf[i].prop, "check") == 0) {
+            addSpace(strcat(strcat(strcat(command, "check ("), prop), ")")) ;
         } else {
             addSpace(strcat(command, prop)) ;
         }
@@ -219,14 +221,14 @@ int catForeignKeys(ForeignKey *foreignKeys, xmlNodePtr n, char *command) {
             strcpy(strTmp, (const char *)xmlGetProp(n, (const xmlChar *)"reference")) ;
             strncat(tmp.tableName, strTmp, strchr(strTmp, '(') - strTmp) ;
             strncat(tmp.colName, strchr(strTmp, '(') + 1, strchr(strTmp, ')') - strchr(strTmp, '(') - 1) ;
-            if (xmlGetProp(n, (const xmlChar *)"type") == NULL){
-                printf("type\n") ;
-                return ERR_XML ;}
+            if (xmlGetProp(n, (const xmlChar *)"type") == NULL) {
+                return ERR_XML ;
+            }
             strcpy(tmp.type, (const char *)xmlGetProp(n, (const xmlChar *)"type")) ;
             if (strcmp(tmp.type, "varchar") == 0 || strcmp(tmp.type, "char") == 0) {
-                if (xmlGetProp(n, (const xmlChar *)"size") == NULL){
-                    printf("size\n") ;
-                    return ERR_XML;}
+                if (xmlGetProp(n, (const xmlChar *)"size") == NULL) {
+                    return ERR_XML;
+                }
                 strcat(tmp.type, (const char *)xmlGetProp(n, (const xmlChar *)"size")) ;
             }
 
@@ -262,7 +264,7 @@ int writeSQLFile(char *command, int first) {
         sqlFile = fopen(filePath, "a+") ;
     }
     if (sqlFile == NULL) {
-        fprintf(stderr, "Error in creating the sql file\n") ;
+        printError(NULL, 0, "Error in creating the sql file") ;
         return EXIT_FAILURE ;
     }
 

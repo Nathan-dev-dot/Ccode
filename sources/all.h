@@ -52,6 +52,7 @@ typedef struct XMLdbData {
     GtkColumn *columns;
     Conf *conf ;
     GtkDualInputs *dualInputs;
+    int (*colFunc) (GtkWidget *, struct XMLdbData *) ;
 } XMLdbData ;
 
 typedef struct MysqlCoAndRes {
@@ -63,6 +64,7 @@ typedef struct MysqlCoAndRes {
 typedef struct TableCol {
     char tName[30] ;
     char cName[30] ;
+    GtkWidget *window ;
 } TableCol ;
 
 #include "gtk.h"

@@ -19,9 +19,9 @@ void dbFromXML (GtkWidget *widget, GtkWidget *input) {
     retrieveData(widget, input, &path) ;
     kill = parseDoc(path);
     if (kill != 0)
-        printError (kill) ;
+        printError(widget, kill, "") ;
     else
-        printf("Database created\n") ;
+        printError(widget, 0, "Database created") ;
 }
 
 /*
@@ -50,7 +50,7 @@ Conf * initConf () {
 
     colConf = (Conf *)malloc(sizeof(Conf) * (lines + 1)) ;
     if (colConf == NULL) {
-        fprintf(stderr, "Not enough memory available\n") ;
+        printError(NULL, 0, "Not enough memory available") ;
         return NULL ;
     }
 
@@ -84,8 +84,8 @@ int parseDoc (char *path) {
     doc = xmlParseFile(path) ;
 
     if (doc == NULL) {
-         fprintf(stderr, "Invalid XML document\n") ;
-         return EXIT_FAILURE ;
+        printError(NULL, 0, "Invalid XML document") ;
+        return EXIT_FAILURE ;
     }
 
     root = xmlDocGetRootElement(doc);
@@ -218,6 +218,7 @@ int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
     int kill ;
     size_t nbTables = 0 ;
     XMLdbData xmlData ;
+    GtkDualInputs di ;
 
     if ((kill = setXMLDatabase(widget, dbParams->name, (char *)path)) != 0)
         return kill ;
@@ -230,8 +231,8 @@ int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
 
     xmlData.doc = xmlParseFile(path) ;
     if (xmlData.doc == NULL) {
-         fprintf(stderr, "Invalid XML document\n") ;
-         return EXIT_FAILURE ;
+        printError(widget, 0, "Invalid XML document") ;
+        return EXIT_FAILURE ;
     }
 
     xmlData.root = xmlDocGetRootElement(xmlData.doc);
@@ -244,9 +245,12 @@ int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
         return ERR_CONF ;
     }
 
+    xmlData.colFunc = &addTableNode ;
     xmlData.pos.total = nbTables ;
     xmlData.pos.current = 0 ;
     closeWindow(dbParams->window) ;
+    di.window = NULL ;
+    xmlData.dualInputs = &di ;
     writeTables(widget, &xmlData) ;
     return 0 ;
 }
@@ -327,7 +331,7 @@ int duplicateTemplate (char *fileName) {
 
     origin = fopen("../ressources/template.xml", "r") ;
     if (origin == NULL) {
-        printf("Erreur d'ouverture du fichier d'origine\n") ;
+        printError(NULL, 0, "Erreur d'ouverture du fichier d'origine") ;
         return ERR_FILE ;
     }
     duplicate = fopen(fileName, "w+") ;

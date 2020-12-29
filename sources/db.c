@@ -96,7 +96,7 @@ ERR_DB if something went wrong
     mysql_options(db->mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
 
     if(mysql_real_connect(db->mysql, "localhost", "root", "root", nameDB, 3306, NULL, 0) == NULL) {
-        printf("\nConnection to mysql database failed\n");
+        printError(NULL, 0, "Connection to mysql database failed") ;
         mysql_close(db->mysql);
         return ERR_DB ;
     }
@@ -126,15 +126,10 @@ void dropDB (void) {
     mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
 
     if(mysql_real_connect(&mysql, "localhost", "root", "root", nameDB, 3306, NULL, 0) == NULL){
-        printf("\nConnection to mysql database failed\n");
+        printError(NULL, 0, "Connection to mysql database failed") ;
         mysql_close(&mysql);
         return ;
     }
     mysql_query(&mysql,command);
     mysql_close(&mysql);
-}
-
-
-void xmlFromDB (void) {
-    printf("Hello\n") ;
 }
