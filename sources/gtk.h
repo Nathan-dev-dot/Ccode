@@ -41,6 +41,9 @@ int managePrimKeys (GtkWidget *widget, MYSQL_RES *results, XMLdbData *table) ;
 void unsetAI (char *ai, char *tName) ;
 void dropAddPrimKeys (char *primKeys, char *tName) ;
 
+void inputDataSpeedRush (GtkWidget *widget) ;
+void getCommand (GtkWidget *widget, GtkWidget *input) ;
+
 int countLin (MYSQL_RES *res) ;
 GtkColumn * createXmlColInputs (int nbCol, GtkWidget *grid) ;
 void createXmlColLabels (GtkWidget *grid) ;

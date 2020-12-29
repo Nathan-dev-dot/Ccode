@@ -436,7 +436,7 @@ void actionOnTable (GtkWidget *widget, char *tName) {
     g_signal_connect(alterT, "clicked", G_CALLBACK(alterTableWindow), tName);
 
     inputData = GTK_WIDGET(gtk_builder_get_object(builder, "inputData"));
-    g_signal_connect(inputData, "clicked", G_CALLBACK(hello), NULL);
+    g_signal_connect(inputData, "clicked", G_CALLBACK(inputDataSpeedRush), NULL);
 
     background_color(window, "#999999" );
     mainMenu(builder, window) ;
@@ -445,6 +445,39 @@ void actionOnTable (GtkWidget *widget, char *tName) {
 
     gtk_widget_show(window);
     gtk_main();
+}
+
+void inputDataSpeedRush (GtkWidget *widget) {
+    GtkBuilder *builder;
+    GtkWidget *window;
+    GtkWidget *label ;
+    GtkWidget *button ;
+    GtkWidget *input ;
+
+    builder = gtk_builder_new();
+    gtk_builder_add_from_file (builder, "main.glade", NULL);
+
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "window_sql"));
+    gtk_builder_connect_signals(builder, NULL);
+
+    label = GTK_WIDGET(gtk_builder_get_object(builder, "label_cmd")) ;
+    input = GTK_WIDGET(gtk_builder_get_object(builder, "sql_input")) ;
+    button = GTK_WIDGET(gtk_builder_get_object(builder, "sql_send")) ;
+    g_signal_connect(button, "clicked", G_CALLBACK(getCommand), input);
+
+    background_color(window, "#999999" );
+    g_object_unref(builder);
+    gtk_widget_show(window);
+    gtk_main();
+}
+
+void getCommand (GtkWidget *widget, GtkWidget *input) {
+    char *command ;
+    int kill ;
+    retrieveData(widget, input, &command) ;
+    printf("%s\n", command) ;
+    kill = connectDB(command) ;
+    printf("All good ? %d\n", kill) ;
 }
 
 void showTableContent (GtkWidget *widget, char *tName) {
@@ -650,7 +683,7 @@ int retrieveColData(char *tName, GtkWidget *grid) {
         }
         lin++ ;
     }
-
+    reachMysql(&db, command) ;
     lin = countLin(db.results) ;
 
     mysql_free_result(db.results);
