@@ -2,10 +2,13 @@
 #define GTK_H
 
 void hello (GtkWidget *widget, gpointer data) ;
-void printError (GtkWidget *widget, int errNo, char *message) ;
+void printError (GtkWidget *widget, size_t errNo, char *message) ;
+GtkWidget * createWindow (char *windowTitle, unsigned int width, unsigned int height) ;
+GtkWidget * createGrid (GtkWidget *window) ;
+
 int initProg (int argc, char **argv) ;
 void destroy(GtkWidget *widget, gpointer data) ;
-void closeWindow (GtkWidget *window) ;
+void closeWindow (GtkWidget *widget, GtkWidget *window) ;
 
 void mainMenu (GtkBuilder *builder, GtkWidget *window) ;
 void retrieveData(GtkWidget *widget, GtkWidget *input, char **str);
@@ -31,6 +34,9 @@ void alterTableWindow (GtkWidget *widget, char *tName) ;
 int retrieveColData(char *tName, GtkWidget *grid) ;
 void getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons) ;
 void dropColumn (GtkWidget *widget, TableCol *drop) ;
+
+void dropVerify (GtkWidget *widget, char *tName) ;
+void dropTable (GtkWidget *widget, char *tName) ;
 
 int retrieveColNames (char *tName, GtkWidget *grid) ;
 void retrieveColNb (GtkWidget *widget, XMLdbData *table) ;

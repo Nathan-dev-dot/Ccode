@@ -222,7 +222,7 @@ int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
 
     if ((kill = setXMLDatabase(widget, dbParams->name, (char *)path)) != 0)
         return kill ;
-    if ((kill = retrieveInteger(widget, dbParams->nb, &nbTables)) != 0)
+    if ((kill = retrieveInteger(widget, dbParams->nb, (int *)&nbTables)) != 0)
         return kill ;
 
     kill = duplicateTemplate(path) ;
@@ -248,7 +248,7 @@ int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
     xmlData.colFunc = &addTableNode ;
     xmlData.pos.total = nbTables ;
     xmlData.pos.current = 0 ;
-    closeWindow(dbParams->window) ;
+    closeWindow(NULL, dbParams->window) ;
     di.window = NULL ;
     xmlData.dualInputs = &di ;
     writeTables(widget, &xmlData) ;
@@ -292,13 +292,13 @@ XMLdbData *dbData : structure containing the setup of the database
 */
 void setTableData (GtkWidget *widget, XMLdbData *dbData) {
     char *tmp ;
-    if (retrieveInteger(widget, dbData->dualInputs->nb, &(dbData->size)) != 0)
+    if (retrieveInteger(widget, dbData->dualInputs->nb, (int *)&(dbData->size)) != 0)
         return ;
     retrieveData(widget, dbData->dualInputs->name, &tmp) ;
     if (strlen(tmp) == 0)
         return ;
     strcpy(dbData->name, tmp) ;
-    closeWindow(dbData->dualInputs->window) ;
+    closeWindow(NULL, dbData->dualInputs->window) ;
     getTableColumns(widget, dbData) ;
 }
 
@@ -384,7 +384,7 @@ int addTableNode (GtkWidget *widget, XMLdbData *tableData) {
 
     strcat(strcat(strcat(path, "../outputs/"), (const char *)xmlGetProp(tableData->root, (const xmlChar *)"dbname")), ".xml") ;
     writeXMLFile(path, tableData->doc) ;
-    closeWindow(tableData->dualInputs->window) ;
+    closeWindow(NULL, tableData->dualInputs->window) ;
     writeTables(widget, tableData) ;
     return 0 ;
 }

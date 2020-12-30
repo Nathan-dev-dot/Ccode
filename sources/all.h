@@ -12,7 +12,6 @@ typedef struct ForeignKey {
     char tableName[30] ;
     char colName[30] ;
     char type[30] ;
-    struct ForeignKey *next ;
 } ForeignKey ;
 
 typedef struct Conf {

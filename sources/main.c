@@ -9,7 +9,6 @@
 char nameDB[30] ;
 
 int main(int argc, char **argv) {
-    //createXMLFile() ;
     initProg(argc, argv) ;
     return 0 ;
 }

@@ -16,6 +16,23 @@ void hello (GtkWidget *widget, gpointer data) {
 }
 
 
+GtkWidget * createWindow (char *windowTitle, unsigned int width, unsigned int height) {
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)windowTitle) ;
+    gtk_window_set_default_size(GTK_WINDOW (window), width, height);
+    background_color(window, "#999999" );
+    return window ;
+}
+
+GtkWidget * createGrid (GtkWidget *window) {
+    GtkWidget *grid = gtk_grid_new() ;
+    gtk_container_add(GTK_CONTAINER(window), grid) ;
+    g_object_set(grid, "margin", 12, NULL);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10) ;
+    return grid ;
+}
+
 
 /*
 Function : printError                                   ///comm à modifier
@@ -24,11 +41,11 @@ Prints the errors reading from the config file
 
 int errorNo : error number given by the previous functions
 */
-void printError (GtkWidget *widget, int errNo, char *message) {
+void printError (GtkWidget *widget, size_t errNo, char *message) {
     FILE *confFile ;
     char str[150] ;
-    int errCode ;
-    int found = 0;
+    size_t errCode ;
+    size_t found = 0;
     GtkBuilder *builder;
     GtkWidget *window;
     GtkWidget *label ;
@@ -39,6 +56,7 @@ void printError (GtkWidget *widget, int errNo, char *message) {
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_popup"));
     gtk_builder_connect_signals(builder, NULL);
     gtk_window_set_default_size (GTK_WINDOW (window), 200, 100);
+    background_color(window, "#999999" );
 
     label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
     if (strlen(message) == 0) {
@@ -67,12 +85,10 @@ void printError (GtkWidget *widget, int errNo, char *message) {
         gtk_label_set_text(GTK_LABEL(label), (const gchar *)message) ;
     }
 
-    background_color(window, "#999999" );
     mainMenu(builder, window) ;
 
     g_object_unref(builder);
-
-    gtk_widget_show(window);
+    gtk_widget_show_all(window);
     gtk_main();
 }
 
@@ -84,7 +100,7 @@ void destroy (GtkWidget *widget, gpointer data) {
 
 /*
 */
-void closeWindow (GtkWidget *window) {
+void closeWindow (GtkWidget *widget, GtkWidget *window) {
     gtk_window_close(GTK_WINDOW(window)) ;
 }
 
@@ -102,13 +118,12 @@ int initProg (int argc, char **argv) {
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_main"));
     gtk_builder_connect_signals(builder, NULL);
     g_signal_connect(window, "delete_event", G_CALLBACK(destroy), NULL) ;
-
     background_color(window, "#999999" );
+
     mainMenu(builder, window) ;
 
     g_object_unref(builder);
-
-    gtk_widget_show(window);
+    gtk_widget_show_all(window);
     gtk_main();
 
     return 0;
@@ -144,16 +159,14 @@ void dbFromXMLWindow (GtkWidget *widget) {
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_xml"));
     gtk_builder_connect_signals(builder, NULL);
+    background_color(window, "#999999");
 
     input = GTK_WIDGET(gtk_builder_get_object(builder, "XMLPath")) ;
     okButton = GTK_WIDGET(gtk_builder_get_object(builder, "validate")) ;
     g_signal_connect(okButton, "clicked", G_CALLBACK(dbFromXML), input);
 
-    background_color(window, "#999999" );
-
     g_object_unref(builder);
-
-    gtk_widget_show(window);
+    gtk_widget_show_all(window);
     gtk_main();
 }
 
@@ -167,16 +180,10 @@ void xmlFromEntries (GtkWidget *widget) {
     GtkWidget *dbLabel ;
     GtkDualInputs dbParams;
 
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Create an XML file") ;
-    gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+    window = createWindow("Create an XML file", 200, 200) ;
+    grid = createGrid(window) ;
+
     dbParams.window = window ;
-
-    grid = gtk_grid_new() ;
-    gtk_container_add(GTK_CONTAINER(window), grid) ;
-    g_object_set(grid, "margin", 12, NULL);
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
-
 
     dbLabel = gtk_label_new((const gchar *)"Enter the database name") ;
     gtk_grid_attach(GTK_GRID(grid), dbLabel, 0, 0, 1, 1) ;
@@ -192,7 +199,6 @@ void xmlFromEntries (GtkWidget *widget) {
     g_signal_connect (button, "clicked", G_CALLBACK (createXMLFile), &dbParams);
     gtk_grid_attach(GTK_GRID(grid), button, 0, 6, 1, 1) ;
 
-    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -221,18 +227,12 @@ void tableData (GtkWidget *widget, XMLdbData *dbData) {
     GtkDualInputs dbParams;
 
     if (dbData->dualInputs->window != NULL)
-        closeWindow(dbData->dualInputs->window) ;
+        closeWindow(NULL, dbData->dualInputs->window) ;
 
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Table data") ;
-    gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+    window = createWindow("Table data", 200, 200) ;
+    grid = createGrid(window) ;
 
     dbParams.window = window ;
-
-    grid = gtk_grid_new() ;
-    gtk_container_add(GTK_CONTAINER(window), grid) ;
-    g_object_set(grid, "margin", 12, NULL);
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
 
     tLabel = gtk_label_new((const gchar *)"Enter the table name") ;
     gtk_grid_attach(GTK_GRID(grid), tLabel, 0, 0, 1, 1) ;
@@ -250,7 +250,6 @@ void tableData (GtkWidget *widget, XMLdbData *dbData) {
     g_signal_connect (button, "clicked", G_CALLBACK (setTableData), dbData);
     gtk_grid_attach(GTK_GRID(grid), button, 0, 6, 1, 1) ;
 
-    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -265,15 +264,8 @@ void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
 
     strcat(tmp, dbData->name) ;
 
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)tmp) ;
-    gtk_window_set_default_size (GTK_WINDOW (window), 1500, 200 + 50 * dbData->size);
-
-    grid = gtk_grid_new() ;
-    gtk_container_add(GTK_CONTAINER(window), grid) ;
-    g_object_set(grid, "margin", 12, NULL);
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
-    gtk_grid_set_column_spacing(GTK_GRID(grid), 10) ;
+    window = createWindow(tmp, 1500,  200 + 50 * dbData->size) ;
+    grid = createGrid(window) ;
 
     dbData->columns = createXmlColInputs(dbData->size, grid) ;
     dbData->dualInputs->window = window ;
@@ -282,7 +274,6 @@ void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
     gtk_grid_attach(GTK_GRID(grid), button, 8, dbData->size + 1, 1, 1) ;
     g_signal_connect(button, "clicked", G_CALLBACK(dbData->colFunc), dbData) ;
 
-    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -296,14 +287,8 @@ void dbManagerWindow (GtkWidget *widget) {
     GtkWidget *combo ;
     GtkWidget *label ;
 
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Database") ;
-    gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
-
-    grid = gtk_grid_new() ;
-    gtk_container_add(GTK_CONTAINER(window), grid) ;
-    g_object_set(grid, "margin", 12, NULL);
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
+    window = createWindow("Database", 200, 200) ;
+    grid = createGrid(window) ;
 
     label = gtk_label_new((const gchar *)"Select your database") ;
     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1) ;
@@ -315,7 +300,6 @@ void dbManagerWindow (GtkWidget *widget) {
     g_signal_connect (button, "clicked", G_CALLBACK (setDBName), combo);
     gtk_grid_attach(GTK_GRID(grid), button, 0, 2, 1, 1) ;
 
-    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 
@@ -344,17 +328,11 @@ void showTables (GtkWidget *widget) {
 
     strcat(str, nameDB) ;
 
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)str) ;
-    gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+    window = createWindow(str, 200, 200) ;
+    grid = createGrid(window) ;
 
     di.window = window ;
     table.dualInputs = &di ;
-
-    grid = gtk_grid_new() ;
-    gtk_container_add(GTK_CONTAINER(window), grid) ;
-    g_object_set(grid, "margin", 20, NULL);
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
 
     label = gtk_label_new((const gchar *)"Select your table") ;
     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1) ;
@@ -370,7 +348,6 @@ void showTables (GtkWidget *widget) {
     g_signal_connect (addButton, "clicked", G_CALLBACK (tableData), &table);
     gtk_grid_attach(GTK_GRID(grid), addButton, 0, 3, 1, 1) ;
 
-    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -403,7 +380,7 @@ int addTable (GtkWidget *widget, XMLdbData *table) {
     if (kill != 0) {
         printError(widget, kill, "") ;
     } else {
-        closeWindow(table->dualInputs->window) ;
+        closeWindow(NULL, table->dualInputs->window) ;
         showTables(widget) ;
         printError(widget, 0, "Table added !") ;
     }
@@ -422,12 +399,14 @@ void actionOnTable (GtkWidget *widget, char *tName) {
     GtkWidget *showCol ;
     GtkWidget *alterT ;
     GtkWidget *input ;
+    GtkWidget *dropT ;
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file (builder, "main.glade", NULL);
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_table"));
     gtk_builder_connect_signals(builder, NULL);
+    background_color(window, "#999999" );
 
     showCol = GTK_WIDGET(gtk_builder_get_object(builder, "showCol"));
     g_signal_connect(showCol, "clicked", G_CALLBACK(showTableContent), tName);
@@ -438,13 +417,52 @@ void actionOnTable (GtkWidget *widget, char *tName) {
     input = GTK_WIDGET(gtk_builder_get_object(builder, "inputData"));
     g_signal_connect(input, "clicked", G_CALLBACK(inputData), tName);
 
-    background_color(window, "#999999" );
-    mainMenu(builder, window) ;
+    dropT = GTK_WIDGET(gtk_builder_get_object(builder, "drop_table"));
+    g_signal_connect(dropT, "clicked", G_CALLBACK(dropVerify), tName);
 
     g_object_unref(builder);
-
-    gtk_widget_show(window);
+    gtk_widget_show_all(window);
     gtk_main();
+}
+
+void dropVerify (GtkWidget *widget, char *tName) {
+    GtkWidget *window ;
+    GtkWidget *grid ;
+    GtkWidget *yes ;
+    GtkWidget *no ;
+    GtkWidget *label ;
+    char str[50] = "Dropping table " ;
+
+    strcat(str, tName) ;
+
+    window = createWindow(str, 200, 200) ;
+    grid = createGrid(window) ;
+
+    label = gtk_label_new("Are you sure ?") ;
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 2, 1) ;
+
+    yes = gtk_button_new_with_label((const gchar *)"yes") ;
+    gtk_grid_attach(GTK_GRID(grid), yes, 0, 1, 1, 1) ;
+    g_signal_connect(yes, "clicked", G_CALLBACK(closeWindow), window) ;
+    g_signal_connect(yes, "clicked", G_CALLBACK(dropTable), tName) ;
+
+    no = gtk_button_new_with_label((const gchar *)"no") ;
+    gtk_grid_attach(GTK_GRID(grid), no, 1, 1, 1, 1) ;
+    g_signal_connect(no, "clicked", G_CALLBACK(closeWindow), window) ;
+
+    gtk_widget_show_all(window);
+    gtk_main();
+}
+
+void dropTable (GtkWidget *widget, char *tName) {
+    char command[50] = "DROP TABLE ";
+    int kill ;
+    strcat(command, tName) ;
+    kill = connectDB(command) ;
+    if (kill != 0)
+        printError(NULL, 0, "An error occurred") ;
+    else
+        printError(NULL, 0, "Table dropped !") ;
 }
 
 void inputData (GtkWidget *widget, char *tName) {
@@ -459,6 +477,7 @@ void inputData (GtkWidget *widget, char *tName) {
 
     tInput.window = GTK_WIDGET(gtk_builder_get_object(builder, "window_input"));
     gtk_builder_connect_signals(builder, NULL);
+    background_color(tInput.window, "#999999" );
 
     strcpy(tData.name, tName) ;
 
@@ -468,9 +487,8 @@ void inputData (GtkWidget *widget, char *tName) {
     okButton = GTK_WIDGET(gtk_builder_get_object(builder, "validate_input")) ;
     g_signal_connect(okButton, "clicked", G_CALLBACK(inputDataWindow), &tData);
 
-    background_color(tInput.window, "#999999" );
     g_object_unref(builder);
-    gtk_widget_show(tInput.window);
+    gtk_widget_show_all(tInput.window);
     gtk_main();
 }
 
@@ -485,18 +503,12 @@ void inputDataWindow (GtkWidget *widget, Inserts *table) {
     strcat(str, table->name) ;
     retrieveInteger(widget, table->dualInputs->nb, &nbRows) ;
     table->nbRows = nbRows ;
-    closeWindow(table->dualInputs->window) ;
+    closeWindow(NULL, table->dualInputs->window) ;
 
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)str) ;
-    gtk_window_set_default_size(GTK_WINDOW (window), 600, 200);
+    window = createWindow(str, 600, 200) ;
+    grid = createGrid(window) ;
+
     table->dualInputs->window = window ;
-
-    grid = gtk_grid_new() ;
-    gtk_container_add(GTK_CONTAINER(window), grid) ;
-    g_object_set(grid, "margin", 12, NULL);
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
-    gtk_grid_set_column_spacing(GTK_GRID(grid), 10) ;
 
     table->nbCols = retrieveColNames(table->name, grid) ;
     createInsertInputs(table, grid) ;
@@ -508,7 +520,6 @@ void inputDataWindow (GtkWidget *widget, Inserts *table) {
     label = gtk_label_new("Don't forget the quotes around char/varchar/text/date(time) values !") ;
     gtk_grid_attach(GTK_GRID(grid), label, 0, nbRows+3, 2, 1) ;
 
-    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -524,7 +535,6 @@ void insertData (GtkWidget *widget, Inserts *table) {
         strcat(strcat(strcpy(command, "INSERT INTO "), table->name), " VALUES (") ;
         for (j = 0 ; j < table->nbCols ; ++j) {
             retrieveData(widget, table->inputs[i][j], &data) ;
-            printf("%s\n", data) ;
             if (strlen(data) != 0)
                 strcat(strcat(command, data), ",") ;
             else
@@ -539,7 +549,7 @@ void insertData (GtkWidget *widget, Inserts *table) {
         }
     }
     freeDoubleWidgets(table->inputs, table->nbRows) ;
-    closeWindow(table->dualInputs->window) ;
+    closeWindow(NULL, table->dualInputs->window) ;
     printError(NULL, 0, "Data inserted !") ;
 }
 
@@ -586,15 +596,15 @@ void inputDataSpeedRush (GtkWidget *widget) {
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_sql"));
     gtk_builder_connect_signals(builder, NULL);
+    background_color(window, "#999999" );
 
     label = GTK_WIDGET(gtk_builder_get_object(builder, "label_cmd")) ;
     input = GTK_WIDGET(gtk_builder_get_object(builder, "sql_input")) ;
     button = GTK_WIDGET(gtk_builder_get_object(builder, "sql_send")) ;
     g_signal_connect(button, "clicked", G_CALLBACK(getCommand), input);
 
-    background_color(window, "#999999" );
     g_object_unref(builder);
-    gtk_widget_show(window);
+    gtk_widget_show_all(window);
     gtk_main();
 }
 
@@ -602,9 +612,7 @@ void getCommand (GtkWidget *widget, GtkWidget *input) {
     char *command ;
     int kill ;
     retrieveData(widget, input, &command) ;
-    printf("%s\n", command) ;
     kill = connectDB(command) ;
-    printf("All good ? %d\n", kill) ;
 }
 
 void showTableContent (GtkWidget *widget, char *tName) {
@@ -617,21 +625,21 @@ void showTableContent (GtkWidget *widget, char *tName) {
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), (const gchar *)str) ;
+    background_color(window, "#999999" );
 
     grid = gtk_grid_new() ;
     gtk_container_add(GTK_CONTAINER(window), grid) ;
     g_object_set(grid, "margin", 12, NULL);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
     gtk_grid_set_column_spacing(GTK_GRID(grid), 10) ;
-
     nbLin = retrieveColData(tName, grid) ;
     if (nbLin == 0) {
-        closeWindow(window) ;
         printError(widget, 0, "Sorry, there's no data in this table") ;
+        return ;
     }
+
     gtk_window_set_default_size(GTK_WINDOW (window), 600, 200 + 15 * nbLin);
 
-    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -646,15 +654,8 @@ void alterTableWindow (GtkWidget *widget, char *tName) {
     GtkDualInputs di ;
     GtkWidget **dropButtons = NULL ;
 
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)"Alter table") ;
-    gtk_window_set_default_size (GTK_WINDOW (window), 1000, 600);
-
-    grid = gtk_grid_new() ;
-    gtk_container_add(GTK_CONTAINER(window), grid) ;
-    g_object_set(grid, "margin", 12, NULL);
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
-    gtk_grid_set_column_spacing(GTK_GRID(grid), 10) ;
+    window = createWindow("Alter table", 1000, 600) ;
+    grid = createGrid(window) ;
 
     strcpy(table.name, tName) ;
     di.window = window ;
@@ -676,7 +677,6 @@ void alterTableWindow (GtkWidget *widget, char *tName) {
     gtk_grid_attach(GTK_GRID(grid), addColButton, 1, table.size + 2, 1, 1) ;
     g_signal_connect(addColButton, "clicked", G_CALLBACK(retrieveColNb), &table) ;
 
-    background_color(window, "#999999") ;
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -687,7 +687,7 @@ void retrieveColNb (GtkWidget *widget, XMLdbData *table) {
     if (nbCol <= 0)
         return ;
     table->size = nbCol ;
-    closeWindow(table->dualInputs->window) ;
+    closeWindow(NULL, table->dualInputs->window) ;
     getTableColumns(widget, table) ;
 }
 
@@ -717,7 +717,7 @@ int addColumns (GtkWidget *widget, XMLdbData *table) {
         retrievePrimKeys(widget, pk, table, aiName) ;
 
     free(table->columns) ;
-    closeWindow(table->dualInputs->window) ;
+    closeWindow(NULL, table->dualInputs->window) ;
     printError(widget, 0, "Columns added !") ;
     return 0 ;
 }
@@ -819,7 +819,7 @@ int retrieveColData (char *tName, GtkWidget *grid) {
     db.mysql = &mysql ;
     kill = reachMysql(&db, command) ;
     if (kill != 0)
-        printf("Erreur Mysql\n") ;
+        printError(NULL, 1, "") ;
 
     if (db.results == NULL) {
         return 0 ;
@@ -851,7 +851,7 @@ void dropColumn (GtkWidget *widget, TableCol *drop) {
     }
     else {
         printError(widget, 0, "Column dropped") ;
-        closeWindow(drop->window) ;
+        closeWindow(NULL, drop->window) ;
     }
 
 }
@@ -885,7 +885,7 @@ void alterTable (GtkWidget *widget, XMLdbData *tableData) {
 
     if (modified != 0) {
         free(tableData->columns) ;
-        closeWindow(tableData->dualInputs->window) ;
+        closeWindow(NULL, tableData->dualInputs->window) ;
         printError(widget, 0, "Table altered") ;
     }
 
@@ -1019,7 +1019,6 @@ void dropAddPrimKeys (char *primKeys, char *tName) {
     strcat(str, tName) ;
     strcat(strcpy(drop, str), " DROP PRIMARY KEY") ;
     strcat(strcat(strcat(strcpy(add, str), " ADD PRIMARY KEY("), primKeys), ")") ;
-    printf("%s\n", add) ;
 
     connectDB(drop) ;
     connectDB(add) ;
