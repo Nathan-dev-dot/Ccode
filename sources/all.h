@@ -55,6 +55,14 @@ typedef struct XMLdbData {
     int (*colFunc) (GtkWidget *, struct XMLdbData *) ;
 } XMLdbData ;
 
+typedef struct Inserts {
+    char name[30] ;
+    unsigned int nbRows ;
+    unsigned int nbCols ;
+    GtkWidget ***inputs ;
+    GtkDualInputs *dualInputs ;
+} Inserts ;
+
 typedef struct MysqlCoAndRes {
     MYSQL *mysql ;
     MYSQL_RES *results ;

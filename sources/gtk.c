@@ -12,7 +12,7 @@
 extern char nameDB[30] ;
 
 void hello (GtkWidget *widget, gpointer data) {
-    printf("Hello %s\n", data) ;
+    printf("Hello %p\n", data) ;
 }
 
 
@@ -421,7 +421,7 @@ void actionOnTable (GtkWidget *widget, char *tName) {
     GtkWidget *window;
     GtkWidget *showCol ;
     GtkWidget *alterT ;
-    GtkWidget *inputData ;
+    GtkWidget *input ;
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file (builder, "main.glade", NULL);
@@ -435,8 +435,8 @@ void actionOnTable (GtkWidget *widget, char *tName) {
     alterT = GTK_WIDGET(gtk_builder_get_object(builder, "alterT"));
     g_signal_connect(alterT, "clicked", G_CALLBACK(alterTableWindow), tName);
 
-    inputData = GTK_WIDGET(gtk_builder_get_object(builder, "inputData"));
-    g_signal_connect(inputData, "clicked", G_CALLBACK(inputDataSpeedRush), NULL);
+    input = GTK_WIDGET(gtk_builder_get_object(builder, "inputData"));
+    g_signal_connect(input, "clicked", G_CALLBACK(inputData), tName);
 
     background_color(window, "#999999" );
     mainMenu(builder, window) ;
@@ -445,6 +445,133 @@ void actionOnTable (GtkWidget *widget, char *tName) {
 
     gtk_widget_show(window);
     gtk_main();
+}
+
+void inputData (GtkWidget *widget, char *tName) {
+    GtkBuilder *builder;
+    GtkWidget *okButton ;
+    GtkWidget *input ;
+    GtkDualInputs tInput ;
+    Inserts tData ;
+
+    builder = gtk_builder_new();
+    gtk_builder_add_from_file (builder, "main.glade", NULL);
+
+    tInput.window = GTK_WIDGET(gtk_builder_get_object(builder, "window_input"));
+    gtk_builder_connect_signals(builder, NULL);
+
+    strcpy(tData.name, tName) ;
+
+    input = GTK_WIDGET(gtk_builder_get_object(builder, "nbRows")) ;
+    tInput.nb = input ;
+    tData.dualInputs = &tInput ;
+    okButton = GTK_WIDGET(gtk_builder_get_object(builder, "validate_input")) ;
+    g_signal_connect(okButton, "clicked", G_CALLBACK(inputDataWindow), &tData);
+
+    background_color(tInput.window, "#999999" );
+    g_object_unref(builder);
+    gtk_widget_show(tInput.window);
+    gtk_main();
+}
+
+void inputDataWindow (GtkWidget *widget, Inserts *table) {
+    GtkWidget *window ;
+    GtkWidget *grid ;
+    GtkWidget *button ;
+    GtkWidget *label ;
+    int nbRows ;
+    char str[50] = "Input into table " ;
+
+    strcat(str, table->name) ;
+    retrieveInteger(widget, table->dualInputs->nb, &nbRows) ;
+    table->nbRows = nbRows ;
+    closeWindow(table->dualInputs->window) ;
+
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), (const gchar *)str) ;
+    gtk_window_set_default_size(GTK_WINDOW (window), 600, 200);
+    table->dualInputs->window = window ;
+
+    grid = gtk_grid_new() ;
+    gtk_container_add(GTK_CONTAINER(window), grid) ;
+    g_object_set(grid, "margin", 12, NULL);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10) ;
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10) ;
+
+    table->nbCols = retrieveColNames(table->name, grid) ;
+    createInsertInputs(table, grid) ;
+
+    button = gtk_button_new_with_label((const gchar *)"Insert") ;
+    gtk_grid_attach(GTK_GRID(grid), button, 0, nbRows+2, 1, 1) ;
+    g_signal_connect(button, "clicked", G_CALLBACK(insertData), table) ;
+
+    label = gtk_label_new("Don't forget the quotes around char/varchar/text/date(time) values !") ;
+    gtk_grid_attach(GTK_GRID(grid), label, 0, nbRows+3, 2, 1) ;
+
+    background_color(window, "#999999") ;
+    gtk_widget_show_all(window) ;
+    gtk_main() ;
+}
+
+void insertData (GtkWidget *widget, Inserts *table) {
+    char command[500] ;
+    char *data ;
+    int i ;
+    int j ;
+    int kill ;
+
+    for (i = 0 ; i < table->nbRows ; ++i) {
+        strcat(strcat(strcpy(command, "INSERT INTO "), table->name), " VALUES (") ;
+        for (j = 0 ; j < table->nbCols ; ++j) {
+            retrieveData(widget, table->inputs[i][j], &data) ;
+            printf("%s\n", data) ;
+            if (strlen(data) != 0)
+                strcat(strcat(command, data), ",") ;
+            else
+                strcat(strcat(command, "NULL"), ",") ;
+        }
+        removeLastChar(command) ;
+        strcat(command, ")") ;
+        kill = connectDB(command) ;
+        if (kill != 0) {
+            printError(NULL, 0, "Check your values") ;
+            return ;
+        }
+    }
+    freeDoubleWidgets(table->inputs, table->nbRows) ;
+    closeWindow(table->dualInputs->window) ;
+    printError(NULL, 0, "Data inserted !") ;
+}
+
+void freeDoubleWidgets (GtkWidget ***widgets, int nbRows) {
+    int i ;
+    for (i = 0 ; i < nbRows ; ++i) {
+        if (widgets[i] != NULL)
+            free(widgets[i]) ;
+    }
+    if (widgets != NULL)
+        free(widgets) ;
+}
+
+void createInsertInputs(Inserts *table, GtkWidget *grid) {
+    int i ;
+    int j ;
+
+    table->inputs = malloc(sizeof(GtkWidget **) * table->nbRows) ;
+    if (table->inputs == NULL) {
+        printError(NULL, ERR_MEM, "") ;
+    }
+    for (i = 0 ; i < table->nbRows ; ++i) {
+        table->inputs[i] = malloc(sizeof(GtkWidget *) * table->nbCols) ;
+        if (table->inputs[i] == NULL) {
+            printError(NULL, ERR_MEM, "") ;
+        }
+
+        for (j = 0 ; j < table->nbCols ; ++j) {
+            table->inputs[i][j] = gtk_entry_new() ;
+            gtk_grid_attach(GTK_GRID(grid), table->inputs[i][j], j, i+1, 1, 1) ;
+        }
+    }
 }
 
 void inputDataSpeedRush (GtkWidget *widget) {
@@ -647,8 +774,7 @@ void getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons
     return;
 }
 
-
-int retrieveColData(char *tName, GtkWidget *grid) {
+int retrieveColNames (char *tName, GtkWidget *grid) {
     MYSQL mysql ;
     MysqlCoAndRes db ;
     MYSQL_ROW row ;
@@ -670,8 +796,30 @@ int retrieveColData(char *tName, GtkWidget *grid) {
     }
     lin++ ;
 
-    strcat(strcpy(command, "SELECT * FROM "), tName) ;
-    reachMysql(&db, command) ;
+    mysql_free_result(db.results);
+    mysql_close(&mysql) ;
+
+    return col ;
+}
+
+
+int retrieveColData (char *tName, GtkWidget *grid) {
+    MYSQL mysql ;
+    MysqlCoAndRes db ;
+    MYSQL_ROW row ;
+    char command[40] = "SELECT * FROM " ;
+    int col = 0 ;
+    int lin = 1 ;
+    int kill ;
+
+    retrieveColNames(tName, grid) ;
+
+    strcat(command, tName) ;
+
+    db.mysql = &mysql ;
+    kill = reachMysql(&db, command) ;
+    if (kill != 0)
+        printf("Erreur Mysql\n") ;
 
     if (db.results == NULL) {
         return 0 ;
@@ -683,6 +831,7 @@ int retrieveColData(char *tName, GtkWidget *grid) {
         }
         lin++ ;
     }
+
     reachMysql(&db, command) ;
     lin = countLin(db.results) ;
 

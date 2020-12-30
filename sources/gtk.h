@@ -31,6 +31,8 @@ void alterTableWindow (GtkWidget *widget, char *tName) ;
 int retrieveColData(char *tName, GtkWidget *grid) ;
 void getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons) ;
 void dropColumn (GtkWidget *widget, TableCol *drop) ;
+
+int retrieveColNames (char *tName, GtkWidget *grid) ;
 void retrieveColNb (GtkWidget *widget, XMLdbData *table) ;
 int addColumns (GtkWidget *widget, XMLdbData *table) ;
 void alterTable (GtkWidget *widget, XMLdbData *tableData) ;
@@ -43,6 +45,11 @@ void dropAddPrimKeys (char *primKeys, char *tName) ;
 
 void inputDataSpeedRush (GtkWidget *widget) ;
 void getCommand (GtkWidget *widget, GtkWidget *input) ;
+void inputData (GtkWidget *widget, char *tName) ;
+void inputDataWindow (GtkWidget *widget, Inserts *table) ;
+void createInsertInputs(Inserts *table, GtkWidget *grid) ;
+void insertData (GtkWidget *widget, Inserts *table) ;
+void freeDoubleWidgets (GtkWidget ***widgets, int nbRows) ;
 
 int countLin (MYSQL_RES *res) ;
 GtkColumn * createXmlColInputs (int nbCol, GtkWidget *grid) ;
