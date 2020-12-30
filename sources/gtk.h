@@ -32,7 +32,7 @@ void showTableContent (GtkWidget *widget, char *tName) ;
 
 void alterTableWindow (GtkWidget *widget, char *tName) ;
 uint8_t retrieveColData(char *tName, GtkWidget *grid) ;
-void getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons) ;
+TableCol * getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons) ;
 void setColEntries (MYSQL_ROW row, TableCol colNames, GtkColumn col, char *tName) ;
 
 void dropColumn (GtkWidget *widget, TableCol *drop) ;
@@ -57,7 +57,10 @@ void inputData (GtkWidget *widget, char *tName) ;
 void inputDataWindow (GtkWidget *widget, Inserts *table) ;
 void createInsertInputs(Inserts *table, GtkWidget *grid) ;
 void insertData (GtkWidget *widget, Inserts *table) ;
-void freeDoubleWidgets (GtkWidget ***widgets, uint8_t nbRows) ;
+
+void freeInserts (GtkWidget *widget, Inserts *inserts) ;
+void freePointer (GtkWidget *widget, void *ptr) ;
+void freeTableData (GtkWidget *widget, XMLdbData *xmlData) ;
 
 uint8_t countLin (MYSQL_RES *res) ;
 GtkColumn * createXmlColInputs (uint8_t nbCol, GtkWidget *grid) ;

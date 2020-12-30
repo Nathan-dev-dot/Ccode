@@ -154,9 +154,9 @@ uint8_t writeSQLTables (xmlNodePtr node) {
         }
     }
     if (foreignKeys != NULL)
-        free(foreignKeys) ;
+        freePointer(NULL, foreignKeys) ;
     if (colConf != NULL)
-        free(colConf) ;
+        freePointer(NULL, colConf) ;
     return 0 ;
 }
 
@@ -363,7 +363,7 @@ uint8_t addTableNode (GtkWidget *widget, XMLdbData *tableData) {
         xmlAddChild(tNode, child) ;
     }
 
-    free(tableData->columns) ;
+    freePointer(widget, tableData->columns) ;
     xmlAddChild(tableData->root, tNode) ;
 
     strcat(strcat(strcat(path, "../outputs/"), (const char *)xmlGetProp(tableData->root, (const xmlChar *)"dbname")), ".xml") ;

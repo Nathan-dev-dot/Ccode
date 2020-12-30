@@ -185,9 +185,16 @@ void writeTables (GtkWidget *widget, XMLdbData *xmlData) {
         tableData(widget, xmlData) ;
     } else {
         printMessage(widget, 0, "XML file created in Outputs folder") ;
-        xmlFreeDoc(xmlData->doc) ;
+        freeTableData(widget, xmlData) ;
     }
     return ;
+}
+
+void freeTableData (GtkWidget *widget, XMLdbData *xmlData) {
+    printf("I'm called\n") ;
+    freePointer(widget, xmlData->conf) ;
+    if (xmlData->doc != NULL)
+        xmlFreeDoc(xmlData->doc) ;
 }
 
 /*
@@ -489,6 +496,8 @@ void inputDataWindow (GtkWidget *widget, Inserts *table) {
     label = gtk_label_new("Don't forget the quotes around char/varchar/text/date(time) values !") ;
     gtk_grid_attach(GTK_GRID(grid), label, 0, nbRows+3, 2, 1) ;
 
+    g_signal_connect(window, "destroy", G_CALLBACK(freeInserts), table) ;
+
     gtk_widget_show_all(window) ;
     gtk_main() ;
 }
@@ -517,19 +526,24 @@ void insertData (GtkWidget *widget, Inserts *table) {
             return ;
         }
     }
-    freeDoubleWidgets(table->inputs, table->nbRows) ;
+    freeInserts(NULL, table) ;
     closeWindow(NULL, table->dualInputs->window) ;
     printMessage(NULL, 0, "Data inserted !") ;
 }
 
-void freeDoubleWidgets (GtkWidget ***widgets, uint8_t nbRows) {
-    size_t i ;
-    for (i = 0 ; i < nbRows ; ++i) {
-        if (widgets[i] != NULL)
-            free(widgets[i]) ;
+void freePointer (GtkWidget *widget, void *ptr) {
+    if (ptr != NULL) {
+        free(ptr) ;
+        ptr = NULL ;
     }
-    if (widgets != NULL)
-        free(widgets) ;
+}
+
+void freeInserts (GtkWidget *widget, Inserts *inserts) {
+    uint8_t i ;
+    for (i = 0 ; i < inserts->nbRows ; ++i) {
+        freePointer(NULL, inserts->inputs[i]) ;
+    }
+    freePointer(NULL, inserts->inputs) ;
 }
 
 void createInsertInputs(Inserts *table, GtkWidget *grid) {
@@ -616,6 +630,7 @@ void alterTableWindow (GtkWidget *widget, char *tName) {
     XMLdbData table ;
     GtkDualInputs di ;
     GtkWidget **dropButtons = NULL ;
+    TableCol *colNames ;
 
     window = createWindow("Alter table", 1000, 600) ;
     grid = createGrid(window) ;
@@ -623,7 +638,7 @@ void alterTableWindow (GtkWidget *widget, char *tName) {
     strcpy(table.name, tName) ;
     di.window = window ;
     table.dualInputs = &di ;
-    getColStructure(grid, &table, dropButtons) ;
+    colNames = getColStructure(grid, &table, dropButtons) ;
     addLabel(grid, 0, 5, "Drop column") ;
 
     alterButton = gtk_button_new_with_label((const gchar *)"Alter") ;
@@ -639,6 +654,10 @@ void alterTableWindow (GtkWidget *widget, char *tName) {
     addColButton = gtk_button_new_with_label((const gchar *)"Add columns") ;
     gtk_grid_attach(GTK_GRID(grid), addColButton, 1, table.size + 2, 1, 1) ;
     g_signal_connect(addColButton, "clicked", G_CALLBACK(retrieveColNb), &table) ;
+
+    g_signal_connect(window, "destroy", G_CALLBACK(freePointer), dropButtons) ;
+    g_signal_connect(window, "destroy", G_CALLBACK(freePointer), colNames) ;
+    g_signal_connect(window, "destroy", G_CALLBACK(freePointer), table.columns) ;
 
     gtk_widget_show_all(window) ;
     gtk_main() ;
@@ -679,7 +698,7 @@ uint8_t addColumns (GtkWidget *widget, XMLdbData *table) {
     if (strlen(pk) != 0)
         retrievePrimKeys(widget, pk, table, aiName) ;
 
-    free(table->columns) ;
+    freePointer(widget, table->columns) ;
     closeWindow(NULL, table->dualInputs->window) ;
     printMessage(widget, 0, "Columns added !") ;
     return 0 ;
@@ -687,7 +706,7 @@ uint8_t addColumns (GtkWidget *widget, XMLdbData *table) {
 
 /*
 */
-void getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons) {
+TableCol * getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons) {
     MYSQL mysql ;
     MysqlCoAndRes db ;
     MYSQL_ROW row ;
@@ -699,17 +718,17 @@ void getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons
     db.mysql = &mysql ;
     reachMysql(&db, command) ;
     if (db.results == NULL) {
-        return ;
+        return NULL ;
     }
 
     table->size = countLin(db.results) ;
     table->columns = createSqlColInputs(table->size, grid) ;
     dropButtons = malloc(table->size * sizeof(GtkWidget *)) ;
     if (dropButtons == NULL)
-        return ;
+        return NULL ;
     colNames = malloc(table->size * sizeof(TableCol)) ;
     if (colNames == NULL)
-        return ;
+        return NULL ;
 
     reachMysql(&db, command) ;
     while ((row = mysql_fetch_row(db.results)) != NULL) {
@@ -724,7 +743,7 @@ void getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons
 
     mysql_free_result(db.results);
     mysql_close(&mysql) ;
-    return;
+    return colNames;
 }
 
 void setColEntries (MYSQL_ROW row, TableCol colNames, GtkColumn col, char *tName) {
@@ -847,7 +866,7 @@ void alterTable (GtkWidget *widget, XMLdbData *tableData) {
     }
 
     if (modified != 0) {
-        free(tableData->columns) ;
+        freePointer(widget, tableData->columns) ;
         closeWindow(NULL, tableData->dualInputs->window) ;
         printMessage(widget, 0, "Table altered") ;
     }
