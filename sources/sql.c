@@ -260,7 +260,7 @@ Function : writeSQLFile
 Writes a sql command in the sql file
 
 char *command : command to be written
-uint8_t first : first time calling the function
+uint8_t first : first time calling the function (creates the file and overwrites previous content)
 */
 uint8_t writeSQLFile(char *command, uint8_t first) {
     FILE *sqlFile ;
@@ -276,7 +276,7 @@ uint8_t writeSQLFile(char *command, uint8_t first) {
         sqlFile = fopen(filePath, "a+") ;
     }
     if (sqlFile == NULL) {
-        printError(NULL, 0, "Error in creating the sql file") ;
+        printMessage(NULL, 0, "Error in creating the sql file") ;
         return EXIT_FAILURE ;
     }
 

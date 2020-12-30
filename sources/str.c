@@ -56,6 +56,30 @@ void removeLastChar (char *str) {
         str[strlen(str) - 1] = '\0' ;
 }
 
+uint8_t getErrorsFromConf (uint8_t errNo, GtkWidget *label) {
+    FILE *confFile = fopen("../config", "r") ;
+    char str[150] ;
+    size_t errCode ;
+
+    if (confFile == NULL){
+        gtk_label_set_text(GTK_LABEL(label), (const gchar *)"Error in opening the configuration file") ;
+    }
+
+    while (fgets(str, 150, confFile) != NULL) {
+        if (strcmp(str, "[error_codes]\n") == 0) {
+            while (fgets(str, 150, confFile) != NULL && strcmp(str, "\n") != 0) {
+                sscanf(str, "%zd", &errCode) ;
+                if (errCode == errNo) {
+                    gtk_label_set_text(GTK_LABEL(label), (const gchar *)strchr(str, ':') + 1) ;
+                    return 1 ;
+                }
+            }
+        }
+    }
+    fclose(confFile) ;
+    return 0 ;
+}
+
 uint8_t addColumnCommand(GtkWidget *widget, char *command, GtkColumn colInputs, char *pk) {
     char *cName ;
     char *type ;

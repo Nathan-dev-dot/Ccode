@@ -2,7 +2,7 @@
 #define GTK_H
 
 void hello (GtkWidget *widget, gpointer data) ;
-void printError (GtkWidget *widget, size_t errNo, char *message) ;
+void printMessage (GtkWidget *widget, uint8_t errNo, char *message) ;
 GtkWidget * createWindow (char *windowTitle, uint16_t width, uint16_t height) ;
 GtkWidget * createGrid (GtkWidget *window) ;
 
@@ -33,6 +33,8 @@ void showTableContent (GtkWidget *widget, char *tName) ;
 void alterTableWindow (GtkWidget *widget, char *tName) ;
 uint8_t retrieveColData(char *tName, GtkWidget *grid) ;
 void getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons) ;
+void setColEntries (MYSQL_ROW row, TableCol colNames, GtkColumn col, char *tName) ;
+
 void dropColumn (GtkWidget *widget, TableCol *drop) ;
 
 void dropVerify (GtkWidget *widget, char *tName) ;

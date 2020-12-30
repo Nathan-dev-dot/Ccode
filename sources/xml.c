@@ -19,9 +19,9 @@ void dbFromXML (GtkWidget *widget, GtkWidget *input) {
     retrieveData(widget, input, &path) ;
     kill = parseDoc(path);
     if (kill != 0)
-        printError(widget, kill, "") ;
+        printMessage(widget, kill, "") ;
     else
-        printError(widget, 0, "Database created") ;
+        printMessage(widget, 0, "Database created") ;
 }
 
 /*
@@ -50,7 +50,7 @@ Conf * initConf () {
 
     colConf = (Conf *)malloc(sizeof(Conf) * (lines + 1)) ;
     if (colConf == NULL) {
-        printError(NULL, 0, "Not enough memory available") ;
+        printMessage(NULL, 0, "Not enough memory available") ;
         return NULL ;
     }
 
@@ -188,19 +188,6 @@ uint8_t countForeignKeys (xmlNodePtr start) {
 }
 
 /*
-Function : createXMLFile
--------------------
-Calls for createDoc
-
-GtkWidget *widget : widget sent by GTK
-GtkDualInputs *dbParams: structure of inputs defining the name and number of tables in the database
-*/
-void createXMLFile (GtkWidget *widget, GtkDualInputs *dbParams) {
-    uint8_t kill ;
-    kill = createDoc(widget, dbParams) ;
-}
-
-/*
 Function : createDoc
 -------------------
 Creates the XML document and sets it's basic data (root)
@@ -212,7 +199,7 @@ GtkDualInputs *dbParams : structure of inputs defining the name and number of ta
 returns
 0 if all good good
 */
-uint8_t createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
+uint8_t createXMLDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
     char path[50] = "" ;
     uint8_t kill ;
     int16_t nbTables = 0 ;
@@ -229,9 +216,8 @@ uint8_t createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
         return kill ;
 
     xmlData.doc = xmlParseFile(path) ;
-    if (xmlData.doc == NULL) {
+    if (xmlData.doc == NULL)
         return ERR_PATH ;
-    }
 
     xmlData.root = xmlDocGetRootElement(xmlData.doc);
     kill = setRoot(xmlData.root) ;
@@ -329,7 +315,7 @@ uint8_t duplicateTemplate (char *fileName) {
 
     origin = fopen("../ressources/template.xml", "r") ;
     if (origin == NULL) {
-        printError(NULL, 0, "Erreur d'ouverture du fichier d'origine") ;
+        printMessage(NULL, 0, "Erreur d'ouverture du fichier d'origine") ;
         return ERR_FILE ;
     }
     duplicate = fopen(fileName, "w+") ;

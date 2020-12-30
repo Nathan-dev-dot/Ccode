@@ -9,8 +9,7 @@ uint8_t countForeignKeys (xmlNodePtr start) ;
 uint8_t writeSQLTables (xmlNodePtr node) ;
 Conf * initConf () ;
 
-void createXMLFile (GtkWidget *widget, GtkDualInputs *dbParams) ;
-uint8_t createDoc (GtkWidget *widget, GtkDualInputs *dbParams) ;
+uint8_t createXMLDoc (GtkWidget *widget, GtkDualInputs *dbParams) ;
 uint8_t setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) ;
 uint8_t duplicateTemplate (char *fileName) ;
 uint8_t setRoot (xmlNodePtr root) ;
