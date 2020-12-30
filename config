@@ -9,9 +9,10 @@ n :default
 [error_codes]
 1 :Database error
 2 :Configuration file error
-3 :Invalid XML format (check the mandatory attributes, the foreign and primary keys, and the names of the tables, columns and database)
+3 :Invalid format (check the mandatory attributes, the foreign and primary keys, and the names of the tables, columns and database)
 4 :Error in SQL file
 5 :Not enough memory available
 6 :Error in creating the file
 7 :XML parsing error
 8 :Can't set an empty entry
+9 :Invalid file
