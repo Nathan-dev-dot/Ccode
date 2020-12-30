@@ -14,7 +14,7 @@ Function : dbFromXML
 Launches the program that will create a database from an XML file
 */
 void dbFromXML (GtkWidget *widget, GtkWidget *input) {
-    int kill ;
+    uint8_t kill ;
     char *path = "" ;
     retrieveData(widget, input, &path) ;
     kill = parseDoc(path);
@@ -38,8 +38,8 @@ Conf * initConf () {
     FILE *confFile = fopen("../config", "r") ;
     char mand ;
     char str[20] ;
-    int lines = 0 ;
-    int i ;
+    uint8_t lines = 0 ;
+    uint8_t i ;
 
     if (confFile == NULL)
         return NULL ;
@@ -76,16 +76,15 @@ returns :
 0 if ok
 1 if something went wrong
 */
-int parseDoc (char *path) {
-    int kill ;
+uint8_t parseDoc (char *path) {
+    uint8_t kill ;
     xmlDocPtr doc;
     xmlNodePtr root;
 
     doc = xmlParseFile(path) ;
 
     if (doc == NULL) {
-        printError(NULL, 0, "Invalid XML document") ;
-        return EXIT_FAILURE ;
+        return ERR_PATH ;
     }
 
     root = xmlDocGetRootElement(doc);
@@ -117,12 +116,12 @@ returns :
 0 if ok
 1 if something went wrong
 */
-int writeSQLTables (xmlNodePtr node) {
-    int kill ;
+uint8_t writeSQLTables (xmlNodePtr node) {
+    uint8_t kill ;
     xmlNodePtr n ;
     Conf *colConf = NULL ;
     ForeignKey *foreignKeys = NULL ;
-    int size ;
+    uint8_t size ;
     char command[500] ;
 
     if ((colConf = initConf()) == NULL)
@@ -171,8 +170,8 @@ xmlNodePtr start : first table node counting from
 
 returns : the number of foreign keys
 */
-int countForeignKeys (xmlNodePtr start) {
-    int count = 0 ;
+uint8_t countForeignKeys (xmlNodePtr start) {
+    uint8_t count = 0 ;
     xmlNodePtr nColumn ;
     xmlNodePtr nTable ;
 
@@ -197,7 +196,7 @@ GtkWidget *widget : widget sent by GTK
 GtkDualInputs *dbParams: structure of inputs defining the name and number of tables in the database
 */
 void createXMLFile (GtkWidget *widget, GtkDualInputs *dbParams) {
-    int kill ;
+    uint8_t kill ;
     kill = createDoc(widget, dbParams) ;
 }
 
@@ -213,16 +212,16 @@ GtkDualInputs *dbParams : structure of inputs defining the name and number of ta
 returns
 0 if all good good
 */
-int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
+uint8_t createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
     char path[50] = "" ;
-    int kill ;
-    size_t nbTables = 0 ;
+    uint8_t kill ;
+    int16_t nbTables = 0 ;
     XMLdbData xmlData ;
     GtkDualInputs di ;
 
     if ((kill = setXMLDatabase(widget, dbParams->name, (char *)path)) != 0)
         return kill ;
-    if ((kill = retrieveInteger(widget, dbParams->nb, (int *)&nbTables)) != 0)
+    if ((kill = retrieveInteger(widget, dbParams->nb, &nbTables)) != 0)
         return kill ;
 
     kill = duplicateTemplate(path) ;
@@ -231,8 +230,7 @@ int createDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
 
     xmlData.doc = xmlParseFile(path) ;
     if (xmlData.doc == NULL) {
-        printError(widget, 0, "Invalid XML document") ;
-        return EXIT_FAILURE ;
+        return ERR_PATH ;
     }
 
     xmlData.root = xmlDocGetRootElement(xmlData.doc);
@@ -269,7 +267,7 @@ returns
 0 if all good
 ERR_ENTRY if couldn't get the input
 */
-int setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) {
+uint8_t setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) {
     char *tmp ;
     retrieveData(widget, input, &tmp) ;
 
@@ -292,7 +290,7 @@ XMLdbData *dbData : structure containing the setup of the database
 */
 void setTableData (GtkWidget *widget, XMLdbData *dbData) {
     char *tmp ;
-    if (retrieveInteger(widget, dbData->dualInputs->nb, (int *)&(dbData->size)) != 0)
+    if (retrieveInteger(widget, dbData->dualInputs->nb, &(dbData->size)) != 0)
         return ;
     retrieveData(widget, dbData->dualInputs->name, &tmp) ;
     if (strlen(tmp) == 0)
@@ -304,7 +302,7 @@ void setTableData (GtkWidget *widget, XMLdbData *dbData) {
 
 /*
 */
-int retrieveInteger (GtkWidget *widget, GtkWidget *input, int *integer) {
+uint8_t retrieveInteger (GtkWidget *widget, GtkWidget *input, int16_t *integer) {
     char *tmp = "" ;
     retrieveData(widget, input, &tmp) ;
 
@@ -324,7 +322,7 @@ int retrieveInteger (GtkWidget *widget, GtkWidget *input, int *integer) {
 
 /*
 */
-int duplicateTemplate (char *fileName) {
+uint8_t duplicateTemplate (char *fileName) {
     FILE *origin ;
     FILE *duplicate ;
     char str[50] = "" ;
@@ -349,19 +347,19 @@ int duplicateTemplate (char *fileName) {
 
 /*
 */
-int setRoot (xmlNodePtr root) {
+uint8_t setRoot (xmlNodePtr root) {
     xmlAttrPtr attr = xmlSetProp(root, (const xmlChar *)"dbname", (const xmlChar *)nameDB) ;
     return attr != NULL ? 0 : ERR_CREA ;
 }
 
 /*
 */
-int addTableNode (GtkWidget *widget, XMLdbData *tableData) {
+uint8_t addTableNode (GtkWidget *widget, XMLdbData *tableData) {
     xmlNodePtr tNode ;
     xmlNodePtr child ;
     xmlAttrPtr attr ;
-    size_t i = 0 ;
-    int nbCol = tableData->size ;
+    uint8_t i = 0 ;
+    uint8_t nbCol = tableData->size ;
     char path[50] = "" ;
 
     tNode = xmlNewNode(NULL, (const xmlChar *)"table") ;
@@ -394,8 +392,8 @@ int addTableNode (GtkWidget *widget, XMLdbData *tableData) {
 xmlNodePtr addColumnNode (GtkWidget *widget, GtkColumn colInputs) {
     char *tmp = "" ;
     xmlNodePtr cNode = NULL ;
-    int kill ;
-    int primKeys = 0 ;
+    int8_t kill ;
+    uint8_t primKeys = 0 ;
 
     cNode = xmlNewNode(NULL, (const xmlChar *)"column") ;
     if (cNode == NULL)
@@ -421,9 +419,9 @@ xmlNodePtr addColumnNode (GtkWidget *widget, GtkColumn colInputs) {
     return cNode ;
 }
 
-int addMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
+uint8_t addMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
     char *prop = "" ;
-    int size ;
+    int16_t size ;
     xmlAttrPtr attr ;
 
     retrieveComboBoxContent(widget, colInputs.type, &prop) ;
@@ -445,7 +443,7 @@ int addMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
     return 0 ;
 }
 
-int addNotMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
+uint8_t addNotMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
     char *prop = "" ;
     xmlAttrPtr attr ;
 
@@ -475,7 +473,7 @@ int addNotMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
 
 /*
 */
-int addPrimaryKey (GtkWidget *widget, xmlNodePtr col, GtkWidget *primKeyInput) {
+int8_t addPrimaryKey (GtkWidget *widget, xmlNodePtr col, GtkWidget *primKeyInput) {
     char *yn = "" ;
     xmlAttrPtr attr ;
     retrieveComboBoxContent(widget, primKeyInput, &yn) ;
@@ -491,7 +489,7 @@ int addPrimaryKey (GtkWidget *widget, xmlNodePtr col, GtkWidget *primKeyInput) {
 
 /*
 */
-int addForeignKey (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
+uint8_t addForeignKey (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
     xmlAttrPtr attr ;
     char *prop ;
 
@@ -515,9 +513,9 @@ int addForeignKey (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
 
 /*
 */
-int writeXMLFile (char *fileName, xmlDocPtr doc) {
+uint8_t writeXMLFile (char *fileName, xmlDocPtr doc) {
     FILE *file = fopen(fileName, "w+") ;
-    int success ;
+    uint8_t success ;
     if (file == NULL)
         return ERR_FILE ;
     success = xmlDocDump(file, doc) ;

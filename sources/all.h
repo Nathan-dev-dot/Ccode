@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <libxml/parser.h>
 #include <mysql/mysql.h>
 #include <gtk/gtk.h>
@@ -15,7 +16,7 @@ typedef struct ForeignKey {
 } ForeignKey ;
 
 typedef struct Conf {
-    int mand ;
+    uint8_t mand ;
     char prop[20] ;
 } Conf ;
 
@@ -38,8 +39,8 @@ typedef struct GtkColumn {
 } GtkColumn ;
 
 typedef struct TablePosition {
-    size_t current ;
-    size_t total ;
+    uint8_t current ;
+    uint8_t total ;
 } TablePosition ;
 
 typedef struct XMLdbData {
@@ -47,17 +48,17 @@ typedef struct XMLdbData {
     xmlNodePtr root ;
     TablePosition pos ;
     char name[30];
-    size_t size ;
+    int16_t size ;
     GtkColumn *columns;
     Conf *conf ;
     GtkDualInputs *dualInputs;
-    int (*colFunc) (GtkWidget *, struct XMLdbData *) ;
+    uint8_t (*colFunc) (GtkWidget *, struct XMLdbData *) ;
 } XMLdbData ;
 
 typedef struct Inserts {
     char name[30] ;
-    unsigned int nbRows ;
-    unsigned int nbCols ;
+    int16_t nbRows ;
+    int8_t nbCols ;
     GtkWidget ***inputs ;
     GtkDualInputs *dualInputs ;
 } Inserts ;
@@ -65,7 +66,7 @@ typedef struct Inserts {
 typedef struct MysqlCoAndRes {
     MYSQL *mysql ;
     MYSQL_RES *results ;
-    unsigned int nbFields ;
+    uint16_t nbFields ;
 } MysqlCoAndRes ;
 
 typedef struct TableCol {

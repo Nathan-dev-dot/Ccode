@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow" id="window_input">
+  <object class="GtkWindow" id="windowInput">
     <property name="can_focus">False</property>
     <property name="default_width">400</property>
     <property name="default_height">200</property>
@@ -41,7 +41,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="validate_input">
+          <object class="GtkButton" id="validateInput">
             <property name="label" translatable="yes">ok</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -57,7 +57,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="window_main">
+  <object class="GtkWindow" id="windowMain">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Database manager</property>
     <property name="resizable">False</property>
@@ -122,7 +122,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="window_popup">
+  <object class="GtkWindow" id="windowPopup">
     <property name="can_focus">False</property>
     <child type="titlebar">
       <placeholder/>
@@ -134,7 +134,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="window_sql">
+  <object class="GtkWindow" id="windowSql">
     <property name="can_focus">False</property>
     <child type="titlebar">
       <placeholder/>
@@ -147,7 +147,7 @@
         <property name="valign">center</property>
         <property name="row_spacing">49</property>
         <child>
-          <object class="GtkButton" id="sql_send">
+          <object class="GtkButton" id="sqlSend">
             <property name="label" translatable="yes">coucou toi</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -159,7 +159,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="sql_input">
+          <object class="GtkEntry" id="sqlInput">
             <property name="width_request">300</property>
             <property name="height_request">50</property>
             <property name="visible">True</property>
@@ -171,7 +171,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="label_cmd">
+          <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">label</property>
@@ -184,7 +184,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="window_table">
+  <object class="GtkWindow" id="windowTable">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Table manager</property>
     <property name="default_width">1000</property>
@@ -246,7 +246,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="drop_table">
+          <object class="GtkButton" id="dropTable">
             <property name="label" translatable="yes">Drop table</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -261,7 +261,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="window_xml">
+  <object class="GtkWindow" id="windowXml">
     <property name="can_focus">False</property>
     <property name="default_width">400</property>
     <property name="default_height">200</property>
@@ -269,7 +269,7 @@
       <placeholder/>
     </child>
     <child>
-      <object class="GtkBox" id="boxID">
+      <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="valign">center</property>

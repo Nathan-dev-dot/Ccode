@@ -9,5 +9,6 @@
 #define ERR_FILE 6
 #define ERR_CREA 7
 #define ERR_ENTRY 8
+#define ERR_PATH 9
 
 #endif

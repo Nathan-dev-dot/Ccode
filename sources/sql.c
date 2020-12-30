@@ -24,9 +24,9 @@ returns :
 0 if ok
 1 if something went wrong
 */
-int writeSQLColumn (xmlNodePtr node, Conf *colConf, char *command, ForeignKey *foreignKeys) {
-    int kill ;
-    int i ;
+uint8_t writeSQLColumn (xmlNodePtr node, Conf *colConf, char *command, ForeignKey *foreignKeys) {
+    uint8_t kill ;
+    uint8_t i ;
     xmlNodePtr n ;
     char name[30] ;
 
@@ -64,25 +64,28 @@ Concatenates the mandatory props for the column
 
 xmlNodePtr node : column node
 Conf *colConf : array with the column configuration (mandatory and not mandatory)
-int i : given line in colConf
+uint8_t i : given line in colConf
 char *command : SQL command
 
 returns :
 0 if ok
 1 if something went wrong
 */
-int catMandatory (xmlNodePtr n, Conf *colConf, int i, char *command) {
+uint8_t catMandatory (xmlNodePtr n, Conf *colConf, uint8_t i, char *command) {
     char prop[30] ;
+
     if (xmlGetProp(n, (const xmlChar *)colConf[i].prop) == NULL)
         return ERR_XML ;
     strcpy(prop, (const char *)xmlGetProp(n, (const xmlChar *)colConf[i].prop)) ;
     strcat(command, prop) ;
+
     if (!strcmp((const char *)prop, "varchar") || !strcmp((const char *)prop, "char")) {
         if (xmlGetProp(n, (const xmlChar *)colConf[i+1].prop) == NULL)
             return ERR_XML ;
         strcat(strcat(strcat(command, "("), (const char *)xmlGetProp(n, (const xmlChar *)colConf[i+1].prop)), ")") ;
     }
     addSpace(command) ;
+
     return 0 ;
 }
 
@@ -93,7 +96,7 @@ Concatenates the not mandatory props for the column
 
 xmlNodePtr node : column node
 Conf *colConf : array with the column configuration (mandatory and not mandatory)
-int i : given line in colConf
+uint8_t i : given line in colConf
 char *command : SQL command
 char *primKeys[][20] : array of the primary key of the table
 
@@ -101,8 +104,9 @@ returns :
 0 if ok
 1 if something went wrong
 */
-void catNotMandatory (xmlNodePtr n, Conf *colConf, int i, char *command) {
+void catNotMandatory (xmlNodePtr n, Conf *colConf, uint8_t i, char *command) {
     char prop[30] ;
+
     if (xmlGetProp(n, (const xmlChar *)colConf[i].prop) != NULL) {
         strcpy(prop, (const char *)xmlGetProp(n, (const xmlChar *)colConf[i].prop)) ;
 
@@ -130,22 +134,25 @@ Concatenates the primary keys at the end of the table creation command
 xmlNodePtr parent : node of the table
 char *command : SQL command
 */
-int catPrimaryKeys (xmlNodePtr parent, char *command) {
+uint8_t catPrimaryKeys (xmlNodePtr parent, char *command) {
     xmlNodePtr n ;
-    int i = 0;
+    uint8_t i = 0;
+
     strcat(command, "primary key(") ;
     for (n = parent->children ; n != NULL ; n = n->next) {
         if (n->type == XML_ELEMENT_NODE) {
             if (xmlNodeGetContent(n) != NULL && xmlGetProp(n, (const xmlChar *)"attribute") != NULL
                     && strcmp((const char *)xmlGetProp(n, (const xmlChar *)"attribute"), "primary key") == 0) {
-                strcat(strcat(command, (const char *)xmlNodeGetContent(n)), ", ") ;
+                strcat(strcat(command, (const char *)xmlNodeGetContent(n)), ",") ;
                 i++ ;
             }
         }
     }
+
     if (i == 0)
         return ERR_XML ;
-    command[strlen(command) - 2] = '\0' ;
+
+    removeLastChar(command) ;
     strcat(command, ")") ;
     return 0 ;
 }
@@ -163,8 +170,8 @@ returns :
 0 if ok
 1 in case of an error
 */
-ForeignKey * getForeignKeys (xmlNodePtr parent, int size) {
-    int i = 0 ;
+ForeignKey * getForeignKeys (xmlNodePtr parent, uint8_t size) {
+    uint8_t i = 0 ;
     ForeignKey *foreignKeys ;
     xmlNodePtr nColumn ;
     xmlNodePtr nTable ;
@@ -210,13 +217,15 @@ returns :
 0 if ok
 1 in case of an error
 */
-int catForeignKeys(ForeignKey *foreignKeys, xmlNodePtr n, char *command) {
-    int i = 0 ;
+uint8_t catForeignKeys(ForeignKey *foreignKeys, xmlNodePtr n, char *command) {
+    uint8_t i = 0 ;
     ForeignKey tmp ;
     char strTmp[30] = "" ;
+
     while (strcmp(foreignKeys[i].tableName, "STOP") != 0){
         strcpy(tmp.type, strcpy(tmp.colName, strcpy(tmp.tableName, ""))) ;
         strcpy(strTmp, "") ;
+
         if (xmlGetProp(n, (const xmlChar *)"reference") != NULL && strcmp((const char *)xmlGetProp(n, (const xmlChar *)"reference"), "target") != 0) {
             strcpy(strTmp, (const char *)xmlGetProp(n, (const xmlChar *)"reference")) ;
             strncat(tmp.tableName, strTmp, strchr(strTmp, '(') - strTmp) ;
@@ -248,12 +257,12 @@ Function : writeSQLFile
 Writes a sql command in the sql file
 
 char *command : command to be written
-int first : first time calling the function
+uint8_t first : first time calling the function
 */
-int writeSQLFile(char *command, int first) {
+uint8_t writeSQLFile(char *command, uint8_t first) {
     FILE *sqlFile ;
     char filePath[30] = "../outputs/" ;
-    int print ;
+    uint8_t pruint8_t ;
 
     strcat(strcat(filePath, nameDB), ".sql") ;
 
@@ -271,7 +280,7 @@ int writeSQLFile(char *command, int first) {
     fseek(sqlFile, 0, SEEK_END) ;
 
     strcat(command, ";\n");
-    print = fprintf(sqlFile, "%s", command);
+    pruint8_t = fprintf(sqlFile, "%s", command);
     fclose(sqlFile) ;
     return ERR_SQL ;
 }

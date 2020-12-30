@@ -15,8 +15,8 @@ Trims the white spaces at the beginning and end of a string
 char *str : string to be trimmed
 */
 void trimWhiteSpace (char *str) {
-    int start ;
-    int end ;
+    uint8_t start ;
+    uint8_t end ;
     char *tmp = malloc(sizeof(char) * (strlen(str) + 1)) ;
     strcpy(tmp, str) ;
 
@@ -56,11 +56,11 @@ void removeLastChar (char *str) {
         str[strlen(str) - 1] = '\0' ;
 }
 
-int addColumnCommand(GtkWidget *widget, char *command, GtkColumn colInputs, char *pk) {
+uint8_t addColumnCommand(GtkWidget *widget, char *command, GtkColumn colInputs, char *pk) {
     char *cName ;
     char *type ;
     char sizeChar[5] ;
-    int size ;
+    int16_t size ;
 
     retrieveData(widget, colInputs.name, &cName) ;
     addSpace(strcat(command, cName)) ;
@@ -111,7 +111,7 @@ void addNotMandatoryCommand(GtkWidget *widget, char *command, GtkColumn colInput
     }
 }
 
-int addPrimaryKeyCommand (GtkWidget *widget, char *pk, GtkWidget *primKeyInput, char *name) {
+uint8_t addPrimaryKeyCommand (GtkWidget *widget, char *pk, GtkWidget *primKeyInput, char *name) {
     char *yn = "" ;
     retrieveComboBoxContent(widget, primKeyInput, &yn) ;
 
@@ -122,7 +122,7 @@ int addPrimaryKeyCommand (GtkWidget *widget, char *pk, GtkWidget *primKeyInput, 
     return 0 ;
 }
 
-int addForeignKeyCommand (GtkWidget *widget, char *command, GtkWidget *input) {
+uint8_t addForeignKeyCommand (GtkWidget *widget, char *command, GtkWidget *input) {
     char *prop ;
 
     retrieveData(widget, input, &prop) ;
@@ -133,7 +133,7 @@ int addForeignKeyCommand (GtkWidget *widget, char *command, GtkWidget *input) {
     return 0 ;
 }
 
-int retrieveAI (GtkWidget *widget, GtkColumn col, char *aiName) {
+uint8_t retrieveAI (GtkWidget *widget, GtkColumn col, char *aiName) {
     char *tmp ;
     retrieveData(widget, col.constraints, &tmp) ;
     if (strcmp(tmp, "auto_increment") == 0) {
