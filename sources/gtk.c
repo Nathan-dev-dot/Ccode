@@ -542,7 +542,6 @@ void insertData (GtkWidget *widget, Inserts *table) {
         }
         removeLastChar(command) ;
         strcat(command, ")") ;
-        printf("%s\n", command) ;
         kill = connectDB(command) ;
         if (kill != 0) {
             printError(NULL, 0, "Check your values") ;

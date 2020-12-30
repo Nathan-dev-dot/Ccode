@@ -113,12 +113,15 @@ void catNotMandatory (xmlNodePtr n, Conf *colConf, uint8_t i, char *command) {
         if (strcmp(colConf[i].prop, "default") == 0) {
             strcat(command, "default ") ;
             if ((!strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "varchar") ||
-                    !strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "char")) && strcmp(prop, "null") && strcmp(prop, "NULL")) {
+                    !strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "VARCHAR") ||
+                    !strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "char") ||
+                    !strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "CHAR")
+                    ) && strcmp(prop, "null") && strcmp(prop, "NULL")) {
                 addSpace(strcat(strcat(strcat(command, "\""), prop), "\"")) ;
             } else {
                 addSpace(strcat(command, prop)) ;
             }
-        } else if (strcmp(colConf[i].prop, "check") == 0) {
+        } else if (strcmp(colConf[i].prop, "check") == 0 || strcmp(colConf[i].prop, "CHECK") == 0) {
             addSpace(strcat(strcat(strcat(command, "check ("), prop), ")")) ;
         } else {
             addSpace(strcat(command, prop)) ;

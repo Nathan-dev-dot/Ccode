@@ -431,7 +431,7 @@ uint8_t addMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
             return ERR_CREA ;
     }
 
-    if (strcmp(prop, "VARCHAR") == 0 || strcmp(prop, "CHAR") == 0) {
+    if (strcmp(prop, "VARCHAR") == 0 || strcmp(prop, "CHAR") == 0 || strcmp(prop, "varchar") == 0 || strcmp(prop, "char") == 0) {
         retrieveInteger(widget, colInputs.size, &size) ;
         if (size <= 0)
             return ERR_ENTRY ;
