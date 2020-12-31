@@ -325,6 +325,8 @@ void dbManagerWindow (GtkWidget *widget) {
 void setDBName (GtkWidget *widget, GtkWidget *comboBox) {
     char *tmp = "" ;
     retrieveComboBoxContent(widget, comboBox, &tmp) ;
+    if (tmp == NULL)
+        return ;
     strcpy(nameDB, tmp) ;
     showTables(widget) ;
 }
@@ -404,6 +406,8 @@ uint8_t addTable (GtkWidget *widget, XMLdbData *table) {
 void setTableName (GtkWidget *widget, GtkWidget *comboBox) {
     char *table = "" ;
     retrieveComboBoxContent(widget, comboBox, &table) ;
+    if (table == NULL)
+        return ;
     actionOnTable(widget, table) ;
 }
 
@@ -1233,9 +1237,9 @@ void retrieveComboBoxContent (GtkWidget *widget, GtkWidget *box, char **str) {
     if (box == NULL)
         return ;
     if (gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box)) != NULL)
-       *str = (char *)gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box)) ;
+        *str = (char *)gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box)) ;
     else
-        str = NULL ;
+        *str = NULL ;
 }
 
 /*

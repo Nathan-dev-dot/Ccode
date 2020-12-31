@@ -411,6 +411,8 @@ uint8_t addMandatory (GtkWidget *widget, xmlNodePtr col, GtkColumn colInputs) {
     xmlAttrPtr attr ;
 
     retrieveComboBoxContent(widget, colInputs.type, &prop) ;
+    if (prop == NULL)
+        return ERR_XML ;
     if (strlen(prop) != 0) {
         attr = xmlSetProp(col, (const xmlChar *)"type", (const xmlChar *)prop) ;
         if (attr == NULL)

@@ -10,6 +10,19 @@ extern char nameDB[30] ;
 char userDB[30] = "" ;
 char pwdDB[50] = "" ;
 
+
+/*
+Function : setCredentials
+-------------------
+Sets the global connexion variables
+
+char *username : username to be set
+char *pwd : password to be set
+
+returns :
+0 if ok
+ERR_DB if the connection to the mysql failed
+*/
 int setCredentials (char *username, char *pwd) {
     MYSQL mysql ;
 
@@ -34,12 +47,13 @@ int setCredentials (char *username, char *pwd) {
 Function : initDB
 -------------------
 Initialises the connection to the mysql database
+Sets the value of the global variable nameDB
 
 char *name : name of the database
 
 returns :
 0 if ok
-ERR_DB if something went wrong
+ERR_DB if the connection to mysql failed
 */
 int initDB (char *name) {
     MYSQL mysql ;
@@ -136,7 +150,7 @@ ERR_DB if something went wrong
 /*
 Function : dropDB
 -------------------
-Drops the database if it was created and an error occured
+Drops the database if it was created
 */
 void dropDB (void) {
     MYSQL mysql ;

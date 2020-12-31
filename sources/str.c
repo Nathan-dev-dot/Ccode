@@ -90,6 +90,8 @@ uint8_t addColumnCommand(GtkWidget *widget, char *command, GtkColumn colInputs, 
     addSpace(strcat(command, cName)) ;
 
     retrieveComboBoxContent(widget, colInputs.type, &type) ;
+    if (type == NULL)
+        return ERR_XML ;
     addSpace(strcat(command, type)) ;
 
     if (strcmp(type, "CHAR") == 0 || strcmp(type, "VARCHAR") == 0) {
