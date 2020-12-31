@@ -4,9 +4,6 @@
     Project library with GTK functions
 */
 
-// gcc `pkg-config --cflags gtk+-3.0` main.c -o main `pkg-config --libs gtk+-3.0`
-
-
 #include "all.h"
 
 extern char nameDB[30] ;
@@ -65,8 +62,6 @@ void printMessage (GtkWidget *widget, uint8_t errNo, char *message) {
         gtk_label_set_text(GTK_LABEL(label), (const gchar *)message) ;
     }
 
-    mainMenu(builder, window) ;
-
     g_object_unref(builder);
     gtk_widget_show_all(window);
     gtk_main();
@@ -87,10 +82,64 @@ void closeWindow (GtkWidget *widget, GtkWidget *window) {
 /*
 */
 void initProg (int argc, char **argv) {
+    gtk_init(&argc, &argv);
+    askCredentials() ;
+}
+
+void askCredentials () {
+    GtkWidget *window;
+    GtkWidget *grid;
+    GtkWidget *button ;
+    GtkDualInputs dbCredentials;
+
+    window = createWindow("Input your credentials", 200, 200) ;
+    grid = createGrid(window) ;
+
+    dbCredentials.window = window ;
+
+    addLabel(grid, 0, 0, "Enter your MYSQL username") ;
+    dbCredentials.name = createInput("Username") ;
+    gtk_grid_attach(GTK_GRID(grid), dbCredentials.name, 0, 2, 1, 1) ;
+
+    addLabel(grid, 3, 0, "Enter your MYSQL password") ;
+    dbCredentials.nb = createInput("Password") ;
+    gtk_grid_attach(GTK_GRID(grid), dbCredentials.nb, 0, 4, 1, 1) ;
+
+    button = gtk_button_new_with_label((const gchar *)"Send") ;
+    g_signal_connect (button, "clicked", G_CALLBACK(verifyCredentials), &dbCredentials);
+    gtk_grid_attach(GTK_GRID(grid), button, 0, 6, 1, 1) ;
+
+    gtk_widget_show_all(window) ;
+    gtk_main() ;
+}
+
+void verifyCredentials (GtkWidget *widget, GtkDualInputs *dbCredentials) {
+    char *username ;
+    char *password ;
+    int kill ;
+
+    retrieveData(widget, dbCredentials->name, &username) ;
+    retrieveData(widget, dbCredentials->nb, &password) ;
+    if (strlen(username) == 0)
+        return ;
+
+    if ((kill = setCredentials(username, password)) != 0) {
+        printMessage(NULL, 0, "Invalid MYSQL credentials") ;
+        return ;
+    }
+
+    closeWindow(NULL, dbCredentials->window) ;
+    mainMenu() ;
+}
+
+/*
+*/
+void mainMenu () {
     GtkBuilder *builder;
     GtkWidget *window;
-
-    gtk_init(&argc, &argv);
+    GtkWidget *option1;
+    GtkWidget *option2;
+    GtkWidget *option3;
 
     builder = gtk_builder_new();
     gtk_builder_add_from_file (builder, "main.glade", NULL);
@@ -100,20 +149,6 @@ void initProg (int argc, char **argv) {
     g_signal_connect(window, "delete_event", G_CALLBACK(destroy), NULL) ;
     backgroundColor(window, "#999999" );
 
-    mainMenu(builder, window) ;
-
-    g_object_unref(builder);
-    gtk_widget_show_all(window);
-    gtk_main();
-}
-
-/*
-*/
-void mainMenu (GtkBuilder *builder, GtkWidget *window) {
-    GtkWidget *option1;
-    GtkWidget *option2;
-    GtkWidget *option3;
-
     option1 = GTK_WIDGET(gtk_builder_get_object(builder, "dbFromXml"));
     g_signal_connect(option1, "clicked", G_CALLBACK(dbFromXMLWindow), NULL);
 
@@ -122,6 +157,10 @@ void mainMenu (GtkBuilder *builder, GtkWidget *window) {
 
     option3 = GTK_WIDGET(gtk_builder_get_object(builder, "manageDatabase"));
     g_signal_connect(option3, "clicked", G_CALLBACK(dbManagerWindow), NULL);
+
+    g_object_unref(builder);
+    gtk_widget_show_all(window);
+    gtk_main();
 }
 
 /*

@@ -7,6 +7,28 @@
 #include "all.h"
 
 extern char nameDB[30] ;
+char userDB[30] = "" ;
+char pwdDB[50] = "" ;
+
+int setCredentials (char *username, char *pwd) {
+    MYSQL mysql ;
+
+    strcpy(userDB, username) ;
+    strcpy(pwdDB, pwd) ;
+
+    mysql_init(&mysql) ;
+    mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
+
+    if(mysql_real_connect(&mysql, "localhost", userDB, pwdDB, NULL, 3306, NULL, 0) == NULL){
+        printMessage(NULL, 0, "Unable to connect to mysql\n");
+        mysql_close(&mysql);
+        return ERR_DB ;
+    }
+
+    mysql_close(&mysql) ;
+
+    return 0 ;
+}
 
 /*
 Function : initDB
@@ -29,8 +51,8 @@ int initDB (char *name) {
     mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
     strcat(create, name) ;
     strcat(drop, name) ;
-    if(mysql_real_connect(&mysql, "localhost", "root", "root", NULL, 3306, NULL, 0) == NULL){
-        printf("Unable to connect to the database\n");
+    if(mysql_real_connect(&mysql, "localhost", userDB, pwdDB, NULL, 3306, NULL, 0) == NULL){
+        printMessage(NULL, 0, "Unable to connect to mysql\n");
         mysql_close(&mysql);
         return ERR_DB ;
     }
@@ -63,8 +85,8 @@ int connectDB (char *command) {
     mysql_init(&mysql) ;
     mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
 
-    if(mysql_real_connect(&mysql, "localhost", "root", "root", nameDB, 3306, NULL, 0) == NULL) {
-        printf("\nConnection to mysql database failed\n");
+    if(mysql_real_connect(&mysql, "localhost", userDB, pwdDB, nameDB, 3306, NULL, 0) == NULL) {
+        printMessage(NULL, 0, "Connection to mysql database failed");
         mysql_close(&mysql);
         return ERR_DB ;
     }
@@ -95,8 +117,8 @@ ERR_DB if something went wrong
     mysql_init(db->mysql) ;
     mysql_options(db->mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
 
-    if(mysql_real_connect(db->mysql, "localhost", "root", "root", nameDB, 3306, NULL, 0) == NULL) {
-        printMessage(NULL, 0, "Connection to mysql database failed") ;
+    if(mysql_real_connect(db->mysql, "localhost", userDB, pwdDB, nameDB, 3306, NULL, 0) == NULL) {
+        printMessage(NULL, 0, "Connexion to mysql database failed");
         mysql_close(db->mysql);
         return ERR_DB ;
     }
@@ -125,7 +147,7 @@ void dropDB (void) {
     mysql_init(&mysql) ;
     mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
 
-    if(mysql_real_connect(&mysql, "localhost", "root", "root", nameDB, 3306, NULL, 0) == NULL){
+    if(mysql_real_connect(&mysql, "localhost", userDB, pwdDB, nameDB, 3306, NULL, 0) == NULL){
         printMessage(NULL, 0, "Connection to mysql database failed") ;
         mysql_close(&mysql);
         return ;

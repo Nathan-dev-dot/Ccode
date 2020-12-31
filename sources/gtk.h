@@ -7,10 +7,12 @@ GtkWidget * createWindow (char *windowTitle, uint16_t width, uint16_t height) ;
 GtkWidget * createGrid (GtkWidget *window) ;
 
 void initProg (int argc, char **argv) ;
+void askCredentials () ;
+void verifyCredentials (GtkWidget *widget, GtkDualInputs *dbCredentials) ;
 void destroy(GtkWidget *widget, gpointer data) ;
 void closeWindow (GtkWidget *widget, GtkWidget *window) ;
 
-void mainMenu (GtkBuilder *builder, GtkWidget *window) ;
+void mainMenu () ;
 void retrieveData(GtkWidget *widget, GtkWidget *input, char **str);
 void retrieveComboBoxContent (GtkWidget *widget, GtkWidget *box, char **str) ;
 
