@@ -40,11 +40,11 @@ void actionOnTableWindow (GtkWidget *widget, char *tName) ;
 
 void showTableContent (GtkWidget *widget, char *tName) ;
 uint8_t retrieveColNames (char *tName, GtkWidget *grid) ;
-uint8_t retrieveColData(char *tName, GtkWidget *grid) ;
+uint8_t retrieveColData (char *tName, GtkWidget *grid) ;
 
 void alterTableWindow (GtkWidget *widget, char *tName) ;
 TableCol * getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropButtons) ;
-void setColEntries (MYSQL_ROW row, TableCol colNames, GtkColumn col, char *tName) ;
+void setColEntries (MYSQL_ROW row, TableCol *colNames, GtkColumn col, char *tName) ;
 void retrieveColNb (GtkWidget *widget, XMLdbData *table) ;
 uint8_t addColumns (GtkWidget *widget, XMLdbData *table) ;
 void alterTable (GtkWidget *widget, XMLdbData *tableData) ;
@@ -57,6 +57,7 @@ void dropTable (GtkWidget *widget, char *tName) ;
 void retrievePrimKeys (GtkWidget *widget, char *pk, char *tName, char *newAi) ;
 uint8_t managePrimKeys (GtkWidget *widget, MYSQL_RES *results, XMLdbData *table) ;
 void unsetAI (char *ai, char *tName) ;
+void writeAI (char *ai, char *tName) ;
 void dropAddPrimKeys (char *primKeys, char *tName) ;
 
 void inputCommand (GtkWidget *widget) ;

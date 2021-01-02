@@ -11,12 +11,13 @@ extern char nameDB[30] ;
 
 /*
 Function : hello
--------------------------
-Prints hello
--------------------------
+--------------------------------------------------------------------------------
+Printf hello
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget
 gpointer data : pointer to data of type (void *)
--------------------------
+--------------------------------------------------------------------------------
 */
 void hello (GtkWidget *widget, gpointer data) {
     printf("Hello %p\n", data) ;
@@ -24,13 +25,14 @@ void hello (GtkWidget *widget, gpointer data) {
 
 /*
 Function : printMessage
--------------------------
+--------------------------------------------------------------------------------
 Prints a message in a new window
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget
 uint8_t errNo : error number given by the previous functions
 char *message : message to be eventually printed
--------------------------
+--------------------------------------------------------------------------------
 */
 void printMessage (GtkWidget *widget, uint8_t errNo, char *message) {
     uint8_t found = 0;
@@ -63,13 +65,14 @@ void printMessage (GtkWidget *widget, uint8_t errNo, char *message) {
 
 /*
 Function : createWindow
--------------------------
+--------------------------------------------------------------------------------
 Creates a gtk window
--------------------------
+
+--------------------------------------------------------------------------------
 char *windowTitle : title given to the window
 uint16_t width : width of the window
 uint16_t height : height of the window
--------------------------
+--------------------------------------------------------------------------------
 Return values
     The GtkWidget * pointing on the window
 */
@@ -83,11 +86,12 @@ GtkWidget * createWindow (char *windowTitle, uint16_t width, uint16_t height) {
 
 /*
 Function : createGrid
--------------------------
+--------------------------------------------------------------------------------
 Creates a gtk grid attached a the window
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *window : window
--------------------------
+--------------------------------------------------------------------------------
 Return values
     The GtkWidget * pointing on the grid
 */
@@ -102,11 +106,12 @@ GtkWidget * createGrid (GtkWidget *window) {
 
 /*
 Function : createInput
--------------------------
+--------------------------------------------------------------------------------
 Creates a gtk input
--------------------------
+
+--------------------------------------------------------------------------------
 char *placeholder : the value of the input's placeholder
--------------------------
+--------------------------------------------------------------------------------
 Return values
     The GtkWidget * pointing on the input
 */
@@ -118,14 +123,15 @@ GtkWidget * createInput (char *placeholder) {
 
 /*
 Function : addLabel
--------------------------
+--------------------------------------------------------------------------------
 Adds a label to the grid at position (lin, col)
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *grid : the grid pointer
 uint8_t lin : lin position of the label
 uint8_t col : col position of the label
 char *str : label content
--------------------------
+--------------------------------------------------------------------------------
 */
 void addLabel (GtkWidget *grid, uint8_t lin, uint8_t col, char *str) {
     GtkWidget *label ;
@@ -135,17 +141,18 @@ void addLabel (GtkWidget *grid, uint8_t lin, uint8_t col, char *str) {
 
 /*
 Function : backgroundColor
--------------------------
+--------------------------------------------------------------------------------
 Sets the background of a window
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget
 char *color : the color that you want in background
--------------------------
+--------------------------------------------------------------------------------
 */
 void backgroundColor (GtkWidget *widget, char *color) {
   GtkCssProvider * cssProvider = gtk_css_provider_new();
 
-  char css[64] = "* { background-image:none; background-color:";
+  char css[64] = "* { background-image :none; background-color :";
   strcat(strcat(css, color), ";}");
 
   gtk_css_provider_load_from_data(cssProvider, css,-1,NULL);
@@ -157,12 +164,13 @@ void backgroundColor (GtkWidget *widget, char *color) {
 
 /*
 Function : destroy
--------------------------
+--------------------------------------------------------------------------------
 Quits the program
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget
 gpointer data : void pointer
--------------------------
+--------------------------------------------------------------------------------
 */
 void destroy (GtkWidget *widget, gpointer data) {
     gtk_main_quit();
@@ -170,12 +178,13 @@ void destroy (GtkWidget *widget, gpointer data) {
 
 /*
 Function : closeWindow
--------------------------
+--------------------------------------------------------------------------------
 Closes a window
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by callback functions
 GtkWidget *window : window to be destroyed
--------------------------
+--------------------------------------------------------------------------------
 */
 void closeWindow (GtkWidget *widget, GtkWidget *window) {
     gtk_window_close(GTK_WINDOW(window)) ;
@@ -185,11 +194,12 @@ void closeWindow (GtkWidget *widget, GtkWidget *window) {
 
 /*
 Function : initProg
--------------------------
+--------------------------------------------------------------------------------
 Initialises the program
--------------------------
+
+--------------------------------------------------------------------------------
 char *placeholder : the value of the input's placeholder
--------------------------
+--------------------------------------------------------------------------------
 */
 void initProg (int argc, char **argv) {
     gtk_init(&argc, &argv);
@@ -198,10 +208,11 @@ void initProg (int argc, char **argv) {
 
 /*
 Function : askCredentials
--------------------------
+--------------------------------------------------------------------------------
 Displays a window asking the mysql username and password
 Sends the data to verifyCredentials
--------------------------
+
+--------------------------------------------------------------------------------
 */
 void askCredentials (void) {
     GtkWidget *window;
@@ -232,14 +243,15 @@ void askCredentials (void) {
 
 /*
 Function : verifyCredentials
--------------------------
+--------------------------------------------------------------------------------
 Retrieves the data in the credentials entries
 Verifies if the username isn't null
-If the data is valid, sends it to setCredentials
--------------------------
+If the data is valid, sends it to db.c/(setCredentials)
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by callback function
 GtkDualInputs *dbCredentials : structure of two inputs (username and password)
--------------------------
+--------------------------------------------------------------------------------
 */
 void verifyCredentials (GtkWidget *widget, GtkDualInputs *dbCredentials) {
     char *username ;
@@ -264,9 +276,10 @@ void verifyCredentials (GtkWidget *widget, GtkDualInputs *dbCredentials) {
 
 /*
 Function : mainMenu
--------------------------
+--------------------------------------------------------------------------------
 Creates the main menu of the program
--------------------------
+
+--------------------------------------------------------------------------------
 */
 void mainMenu (void) {
     GtkBuilder *builder;
@@ -299,15 +312,18 @@ void mainMenu (void) {
 
 
 
+/*----------------------------------------------------------------------------*/
 /*-------------------Create a database from an XML document-------------------*/
+/*----------------------------------------------------------------------------*/
 
 /*
 Function : dbFromXMLWindow
--------------------------
+--------------------------------------------------------------------------------
 Creates a window asking to input the XML file path
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by callback function
--------------------------
+--------------------------------------------------------------------------------
 */
 void dbFromXMLWindow (GtkWidget *widget) {
     GtkBuilder *builder;
@@ -333,16 +349,19 @@ void dbFromXMLWindow (GtkWidget *widget) {
 
 
 
+/*----------------------------------------------------------------------------*/
 /*-------------------Create an XML document from entries----------------------*/
+/*----------------------------------------------------------------------------*/
 
 /*
 Function : xmlFromEntries
--------------------------
+--------------------------------------------------------------------------------
 Asks for the xml database and file name and the number of tables it will contain
-Sends the data to createXMLDoc
--------------------------
+Sends the data to xml.c/(createXMLDoc)
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
--------------------------
+--------------------------------------------------------------------------------
 */
 void xmlFromEntries (GtkWidget *widget) {
     GtkWidget *window;
@@ -373,13 +392,14 @@ void xmlFromEntries (GtkWidget *widget) {
 
 /*
 Function : writeTables
--------------------------
-Calls for tableData as long as all the tables are being written
+--------------------------------------------------------------------------------
+Calls (tableDataWindow) as long as all the tables are being written
 At the end, frees the tables allocated in xmlData
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 XMLdbData *xmlData : structure with the XML data
--------------------------
+--------------------------------------------------------------------------------
 */
 void writeTables (GtkWidget *widget, XMLdbData *xmlData) {
     xmlData->pos.current++ ;
@@ -394,13 +414,14 @@ void writeTables (GtkWidget *widget, XMLdbData *xmlData) {
 
 /*
 Function : tableDataWindow
--------------------------
+--------------------------------------------------------------------------------
 Creates a window asking for the table data (name and number of columns)
-Sends the data to setTableData
--------------------------
+Sends the data to xml.c/(setTableData)
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 XMLdbData *xmlData : structure with the XML data
--------------------------
+--------------------------------------------------------------------------------
 */
 void tableDataWindow (GtkWidget *widget, XMLdbData *dbData) {
     GtkWidget *window ;
@@ -436,14 +457,15 @@ void tableDataWindow (GtkWidget *widget, XMLdbData *dbData) {
 
 /*
 Function : getTableColumns
--------------------------
+--------------------------------------------------------------------------------
 Creates the columns for the table
-Calls createXmlColInputs to create all the inputs for each column
+Calls (createXmlColInputs) to create all the inputs for each column
 Sends the data to the function set in the dbData parameter
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 XMLdbData *xmlData : structure with the XML data
--------------------------
+--------------------------------------------------------------------------------
 */
 void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
     GtkWidget *window ;
@@ -469,16 +491,19 @@ void getTableColumns (GtkWidget *widget, XMLdbData *dbData) {
 
 
 
-/*-------------------Create an XML document from entries----------------------*/
+/*----------------------------------------------------------------------------*/
+/*-------------------Manage a database----------------------------------------*/
+/*----------------------------------------------------------------------------*/
 
 /*
 Function : dbManagerWindow
--------------------------
+--------------------------------------------------------------------------------
 Creates a window asking for the database you want to modify
-Sends the data to setDBName
--------------------------
+Sends the data to (setDBName)
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
--------------------------
+--------------------------------------------------------------------------------
 */
 void dbManagerWindow (GtkWidget *widget) {
     GtkWidget *window;
@@ -508,12 +533,13 @@ void dbManagerWindow (GtkWidget *widget) {
 
 /*
 Function : setDBName
--------------------------
-Sets the database name in the global variable
--------------------------
+--------------------------------------------------------------------------------
+Sets the database name in the nameDB global variable
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 GtkWidget *comboBox : GTK combo box retrieving the database name
--------------------------
+--------------------------------------------------------------------------------
 */
 void setDBName (GtkWidget *widget, GtkWidget *comboBox) {
     char *tmp = "" ;
@@ -526,12 +552,13 @@ void setDBName (GtkWidget *widget, GtkWidget *comboBox) {
 
 /*
 Function : showTables
--------------------------
+--------------------------------------------------------------------------------
 Displays the tables in the selected database
-Sends the data to setTableName or calls tableDataWindow to add a table
--------------------------
+Sends the data to (setTableName) or calls tableDataWindow to add a table
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
--------------------------
+--------------------------------------------------------------------------------
 */
 void showTables (GtkWidget *widget) {
     GtkWidget *window;
@@ -572,14 +599,15 @@ void showTables (GtkWidget *widget) {
 
 /*
 Function : addTable
--------------------------
+--------------------------------------------------------------------------------
 Writes the SQL command to add a table
-Calls for addColumnCommand to retrieve the values of the inputs
+Calls str.c/(addColumnCommand) to retrieve the values of the inputs
 Sends the command to connectDB
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 XMLdbData *table : structure containing the table data
--------------------------
+--------------------------------------------------------------------------------
 */
 uint8_t addTable (GtkWidget *widget, XMLdbData *table) {
     size_t nbCol = table->size ;
@@ -618,13 +646,14 @@ uint8_t addTable (GtkWidget *widget, XMLdbData *table) {
 
 /*
 Function : setTableName
--------------------------
-Sets the talbe name in a variable
-Sends the data to actionOnTableWindow
--------------------------
+--------------------------------------------------------------------------------
+Sets the table name in a variable
+Sends the data to (actionOnTableWindow)
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 GtkWidget *comboBox : GTK combo box retrieving the table name
--------------------------
+--------------------------------------------------------------------------------
 */
 void setTableName (GtkWidget *widget, GtkWidget *comboBox) {
     char *table = "" ;
@@ -636,17 +665,18 @@ void setTableName (GtkWidget *widget, GtkWidget *comboBox) {
 
 /*
 Function : actionOnTableWindow
--------------------------
+--------------------------------------------------------------------------------
 Displays the different actions that can be performed on a table
 Can send the table name to
-    showTableContent    to show the table's content
-    alterTableWindow    to alter the table
-    inputData           to input data in the table
-    dropVerify          to drop the table
--------------------------
+    (showTableContent) to show the table's content
+    (alterTableWindow) to alter the table
+    (inputData) to input data in the table
+    (dropVerify) to drop the table
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 char *tName : selected table name
--------------------------
+--------------------------------------------------------------------------------
 */
 void actionOnTableWindow (GtkWidget *widget, char *tName) {
     GtkBuilder *builder;
@@ -684,12 +714,13 @@ void actionOnTableWindow (GtkWidget *widget, char *tName) {
 
 /*
 Function : showTableContent
--------------------------
+--------------------------------------------------------------------------------
 Displays the content of the selected table
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 char *tName : selected table name
--------------------------
+--------------------------------------------------------------------------------
 */
 void showTableContent (GtkWidget *widget, char *tName) {
     GtkWidget *window;
@@ -718,12 +749,14 @@ void showTableContent (GtkWidget *widget, char *tName) {
 
 /*
 Function : retrieveColNames
--------------------------
+--------------------------------------------------------------------------------
 Retrieves the names of the columns from mysql and adds them to the grid in labels
--------------------------
+And count the number of column of the table.
+
+--------------------------------------------------------------------------------
 char *tName : selected table name
 GtkWidget *grid : grid to which are attached the labels
--------------------------
+--------------------------------------------------------------------------------
 Return values
     the number of columns in the table
     0 if there's no data in the table
@@ -756,12 +789,13 @@ uint8_t retrieveColNames (char *tName, GtkWidget *grid) {
 
 /*
 Function : retrieveColData
--------------------------
+--------------------------------------------------------------------------------
 Retrieves the content of the columns from mysql and adds them to the grid in labels
--------------------------
+
+--------------------------------------------------------------------------------
 char *tName : selected table name
 GtkWidget *grid : grid to which are attached the labels
--------------------------
+--------------------------------------------------------------------------------
 Return values
     the number of rows in the table
     0 if there's no data in the table
@@ -805,15 +839,16 @@ uint8_t retrieveColData (char *tName, GtkWidget *grid) {
 
 /*
 Function : alterTableWindow
--------------------------
+--------------------------------------------------------------------------------
 Creates the window to alter the table
-Calls for getColStructure to get the columns of the table and their values
-Sends the data to alterTable
+Calls (getColStructure) to get the columns of the table and their values
+Sends the data to (alterTable)
 Can also call retrieveColNb to later add a certain number of columns to the table
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 char *tName : selected table name
--------------------------
+--------------------------------------------------------------------------------
 */
 void alterTableWindow (GtkWidget *widget, char *tName) {
     GtkWidget *window;
@@ -840,7 +875,6 @@ void alterTableWindow (GtkWidget *widget, char *tName) {
     g_signal_connect(alterButton, "clicked", G_CALLBACK(alterTable), &table) ;
 
     table.colFunc = &addColumns ;
-
     nbColInput = gtk_entry_new() ;
     gtk_grid_attach(GTK_GRID(grid), nbColInput, 0, table.size + 2, 1, 1) ;
     di.nb = nbColInput ;
@@ -859,17 +893,19 @@ void alterTableWindow (GtkWidget *widget, char *tName) {
 
 /*
 Function : getColStructure
--------------------------
+--------------------------------------------------------------------------------
 Gets the structure of each column from mysql (name of the column, type, etc.)
-Calls for createSqlColInputs to create the inputs for each column of the table
-Calls for setColEntries to set the input contents
+Calls
+    (createSqlColInputs) to create the inputs for each column of the table
+    (setColEntries) to set the input contents
 Creates a TableCol array to store the column names
 Creates the buttons to drop each column independently of the others
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 XMLdbData *table : data of the table
 GtkWidget **dropButtons : buttons to drop each column
--------------------------
+--------------------------------------------------------------------------------
 Return values
     The pointer to the TableCol array created
 */
@@ -877,16 +913,19 @@ TableCol * getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropB
     MYSQL mysql ;
     MysqlCoAndRes db ;
     MYSQL_ROW row ;
-    char command[30] = "DESCRIBE " ;
+    char command[50] = "DESCRIBE " ;
     uint8_t lin = 0 ;
     TableCol *colNames ;
-
+    printf("%s\n", table->name) ;
     strcat(command, table->name) ;
     db.mysql = &mysql ;
+    printf("%s\n", command) ;
+
     reachMysql(&db, command) ;
     if (db.results == NULL) {
         return NULL ;
     }
+    printf("Hello2\n") ;
 
     table->size = countLin(db.results) ;
     table->columns = createSqlColInputs(table->size, grid) ;
@@ -896,17 +935,20 @@ TableCol * getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropB
     colNames = malloc(table->size * sizeof(TableCol)) ;
     if (colNames == NULL)
         return NULL ;
+        printf("Hello3\n") ;
 
     reachMysql(&db, command) ;
     while ((row = mysql_fetch_row(db.results)) != NULL) {
-        setColEntries(row, colNames[lin], table->columns[lin], table->name) ;
+        setColEntries(row, &colNames[lin], table->columns[lin], table->name) ;
         colNames[lin].window = table->dualInputs->window ;
+        printf("Hello4\n") ;
 
         dropButtons[lin] = gtk_button_new_with_label((const gchar *)"Drop") ;
         gtk_grid_attach(GTK_GRID(grid), dropButtons[lin], 5, lin + 1, 1, 1) ;
         g_signal_connect(dropButtons[lin], "clicked", G_CALLBACK(dropColumn), &colNames[lin]) ;
         lin++ ;
     }
+    printf("Hello5\n") ;
 
     mysql_free_result(db.results);
     mysql_close(&mysql) ;
@@ -915,18 +957,19 @@ TableCol * getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropB
 
 /*
 Function : setColEntries
--------------------------
+--------------------------------------------------------------------------------
 Sets the values of the inputs in a GtkColumn by getting the associated row data
--------------------------
+
+--------------------------------------------------------------------------------
 MYSQL_ROW row : mysql row from which the data is retrieved
 GtkColumn col : structure of inputs in which the data is set
 char *tName : table name
--------------------------
+--------------------------------------------------------------------------------
 */
-void setColEntries (MYSQL_ROW row, TableCol colNames, GtkColumn col, char *tName) {
+void setColEntries (MYSQL_ROW row, TableCol *tableCol, GtkColumn col, char *tName) {
     gtk_entry_set_text(GTK_ENTRY(col.name), row[0]) ;
-    strcpy(colNames.cName, row[0]) ;
-    strcpy(colNames.tName, tName) ;
+    strcpy(tableCol->cName, row[0]) ;
+    strcpy(tableCol->tName, tName) ;
     gtk_entry_set_text(GTK_ENTRY(col.size), row[1]) ;
     if (row[4] != NULL)
         gtk_entry_set_text(GTK_ENTRY(col.def), row[4]) ;
@@ -938,12 +981,13 @@ void setColEntries (MYSQL_ROW row, TableCol colNames, GtkColumn col, char *tName
 
 /*
 Function : retrieveColNb
--------------------------
+--------------------------------------------------------------------------------
 Retrieves the number of columns in a table from an input
--------------------------
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 XMLdbData *table : table data
--------------------------
+--------------------------------------------------------------------------------
 */
 void retrieveColNb (GtkWidget *widget, XMLdbData *table) {
     int16_t nbCol ;
@@ -957,12 +1001,18 @@ void retrieveColNb (GtkWidget *widget, XMLdbData *table) {
 
 /*
 Function : addColumn
--------------------------
+--------------------------------------------------------------------------------
 Creates a mysql command to alter add a column to a table
--------------------------
+Calls
+    str.c/(addColumnCommand) to write the alter column command
+    str.c/(retrieveAI) to retrieve the current auto_increment column
+    db.c/(connectDB) to send the command to mysql
+    (retrievePrimKeys) to retrieve the current primary keys
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
 XMLdbData *table : table data
--------------------------
+--------------------------------------------------------------------------------
 Return values
     0 if all went well
     the error code sent by the database
@@ -998,225 +1048,19 @@ uint8_t addColumns (GtkWidget *widget, XMLdbData *table) {
     return 0 ;
 }
 
+/*
+Function : alterTable
+--------------------------------------------------------------------------------
+Initialises the process of altering a table
+Calls (managePrimKeys) and (checkIfModified) to see if the table was modified
+Loops to make changes if necessary by calling db.c/(connectDB) with the alter command
+Frees if some rows have been modified
 
-void dropVerify (GtkWidget *widget, char *tName) {
-    GtkWidget *window ;
-    GtkWidget *grid ;
-    GtkWidget *yes ;
-    GtkWidget *no ;
-    GtkWidget *label ;
-    char str[50] = "Dropping table " ;
-
-    strcat(str, tName) ;
-
-    window = createWindow(str, 200, 200) ;
-    grid = createGrid(window) ;
-
-    label = gtk_label_new("Are you sure ?") ;
-    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 2, 1) ;
-
-    yes = gtk_button_new_with_label((const gchar *)"yes") ;
-    gtk_grid_attach(GTK_GRID(grid), yes, 0, 1, 1, 1) ;
-    g_signal_connect(yes, "clicked", G_CALLBACK(closeWindow), window) ;
-    g_signal_connect(yes, "clicked", G_CALLBACK(dropTable), tName) ;
-
-    no = gtk_button_new_with_label((const gchar *)"no") ;
-    gtk_grid_attach(GTK_GRID(grid), no, 1, 1, 1, 1) ;
-    g_signal_connect(no, "clicked", G_CALLBACK(closeWindow), window) ;
-
-    gtk_widget_show_all(window);
-    gtk_main();
-}
-
-void dropTable (GtkWidget *widget, char *tName) {
-    char command[50] = "DROP TABLE ";
-    size_t kill ;
-    strcat(command, tName) ;
-    kill = connectDB(command) ;
-    if (kill != 0)
-        printMessage(NULL, 0, "An error occurred") ;
-    else
-        printMessage(NULL, 0, "Table dropped !") ;
-}
-
-void inputData (GtkWidget *widget, char *tName) {
-    GtkBuilder *builder;
-    GtkWidget *okButton ;
-    GtkWidget *input ;
-    GtkDualInputs tInput ;
-    Inserts tData ;
-
-    builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "main.glade", NULL);
-
-    tInput.window = GTK_WIDGET(gtk_builder_get_object(builder, "windowInput"));
-    gtk_builder_connect_signals(builder, NULL);
-    backgroundColor(tInput.window, "#999999" );
-
-    strcpy(tData.name, tName) ;
-
-    input = GTK_WIDGET(gtk_builder_get_object(builder, "nbRows")) ;
-    tInput.nb = input ;
-    tData.dualInputs = &tInput ;
-    okButton = GTK_WIDGET(gtk_builder_get_object(builder, "validateInput")) ;
-    g_signal_connect(okButton, "clicked", G_CALLBACK(inputDataWindow), &tData);
-
-    g_object_unref(builder);
-    gtk_widget_show_all(tInput.window);
-    gtk_main();
-}
-
-void inputDataWindow (GtkWidget *widget, Inserts *table) {
-    GtkWidget *window ;
-    GtkWidget *grid ;
-    GtkWidget *button ;
-    GtkWidget *label ;
-    int16_t nbRows ;
-    char str[50] = "Input into table " ;
-
-    strcat(str, table->name) ;
-    retrieveInteger(widget, table->dualInputs->nb, &nbRows) ;
-    if (nbRows <= 0)
-        return ;
-    table->nbRows = nbRows ;
-    closeWindow(NULL, table->dualInputs->window) ;
-
-    window = createWindow(str, 600, 200) ;
-    grid = createGrid(window) ;
-    table->dualInputs->window = window ;
-
-    table->nbCols = retrieveColNames(table->name, grid) ;
-    createInsertInputs(table, grid) ;
-
-    button = gtk_button_new_with_label((const gchar *)"Insert") ;
-    gtk_grid_attach(GTK_GRID(grid), button, 0, nbRows+2, 1, 1) ;
-    g_signal_connect(button, "clicked", G_CALLBACK(insertData), table) ;
-
-    label = gtk_label_new("Don't forget the quotes around char/varchar/text/date(time) values !") ;
-    gtk_grid_attach(GTK_GRID(grid), label, 0, nbRows+3, 2, 1) ;
-
-    g_signal_connect(window, "destroy", G_CALLBACK(freeInserts), table) ;
-
-    gtk_widget_show_all(window) ;
-    gtk_main() ;
-}
-
-void insertData (GtkWidget *widget, Inserts *table) {
-    char command[500] ;
-    char *data ;
-    size_t i ;
-    size_t j ;
-    size_t kill ;
-
-    for (i = 0 ; i < table->nbRows ; ++i) {
-        strcat(strcat(strcpy(command, "INSERT INTO "), table->name), " VALUES (") ;
-        for (j = 0 ; j < table->nbCols ; ++j) {
-            retrieveData(widget, table->inputs[i][j], &data) ;
-            if (strlen(data) != 0)
-                strcat(strcat(command, data), ",") ;
-            else
-                strcat(strcat(command, "NULL"), ",") ;
-        }
-        removeLastChar(command) ;
-        strcat(command, ")") ;
-        kill = connectDB(command) ;
-        if (kill != 0) {
-            printMessage(NULL, 0, "Check your values") ;
-            return ;
-        }
-    }
-    freeInserts(NULL, table) ;
-    closeWindow(NULL, table->dualInputs->window) ;
-    printMessage(NULL, 0, "Data inserted !") ;
-}
-
-void freePointer (GtkWidget *widget, void *ptr) {
-    if (ptr != NULL) {
-        free(ptr) ;
-        ptr = NULL ;
-    }
-}
-
-void freeInserts (GtkWidget *widget, Inserts *inserts) {
-    uint8_t i ;
-    for (i = 0 ; i < inserts->nbRows ; ++i) {
-        freePointer(NULL, inserts->inputs[i]) ;
-    }
-    freePointer(NULL, inserts->inputs) ;
-}
-
-
-void freeTableData (GtkWidget *widget, XMLdbData *xmlData) {
-    freePointer(widget, xmlData->conf) ;
-    if (xmlData->doc != NULL)
-        xmlFreeDoc(xmlData->doc) ;
-}
-
-void createInsertInputs(Inserts *table, GtkWidget *grid) {
-    uint8_t i ;
-    uint8_t j ;
-
-    table->inputs = malloc(sizeof(GtkWidget **) * table->nbRows) ;
-    if (table->inputs == NULL) {
-        printMessage(NULL, ERR_MEM, "") ;
-    }
-    for (i = 0 ; i < table->nbRows ; ++i) {
-        table->inputs[i] = malloc(sizeof(GtkWidget *) * table->nbCols) ;
-        if (table->inputs[i] == NULL) {
-            printMessage(NULL, ERR_MEM, "") ;
-        }
-
-        for (j = 0 ; j < table->nbCols ; ++j) {
-            table->inputs[i][j] = gtk_entry_new() ;
-            gtk_grid_attach(GTK_GRID(grid), table->inputs[i][j], j, i+1, 1, 1) ;
-        }
-    }
-}
-
-void inputCommand (GtkWidget *widget) {
-    GtkBuilder *builder;
-    GtkWidget *window;
-    GtkWidget *button ;
-    GtkWidget *input ;
-
-    builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "main.glade", NULL);
-
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "windowSql"));
-    gtk_builder_connect_signals(builder, NULL);
-    backgroundColor(window, "#999999" );
-
-    input = GTK_WIDGET(gtk_builder_get_object(builder, "sqlInput")) ;
-    button = GTK_WIDGET(gtk_builder_get_object(builder, "sqlSend")) ;
-    g_signal_connect(button, "clicked", G_CALLBACK(getCommand), input);
-
-    g_object_unref(builder);
-    gtk_widget_show_all(window);
-    gtk_main();
-}
-
-void getCommand (GtkWidget *widget, GtkWidget *input) {
-    char *command ;
-    size_t kill ;
-    retrieveData(widget, input, &command) ;
-    kill = connectDB(command) ;
-}
-
-void dropColumn (GtkWidget *widget, TableCol *drop) {
-    char command[100] = "ALTER TABLE ";
-    uint8_t deleted ;
-    strcat(strcat(strcat(command, drop->tName), " DROP "), drop->cName) ;
-
-    if ((deleted = connectDB(command)) != 0) {
-        printMessage(widget, 0, "Can't drop this column, bound to a primary key") ;
-    }
-    else {
-        printMessage(widget, 0, "Column dropped") ;
-        closeWindow(NULL, drop->window) ;
-    }
-
-}
-
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+XMLdbData *tableData : structure containings the information of tabla
+--------------------------------------------------------------------------------
+*/
 void alterTable (GtkWidget *widget, XMLdbData *tableData) {
     char command[100] = "DESCRIBE " ;
     MYSQL mysql ;
@@ -1256,6 +1100,23 @@ void alterTable (GtkWidget *widget, XMLdbData *tableData) {
     mysql_close(&mysql) ;
 }
 
+/*
+Function : checkIfModified
+--------------------------------------------------------------------------------
+Retrieves the data from the database and compares if the new values are identical
+Prepares the alter table query with the necessary parameters
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+XMLdbData *tableData : struct containing the table data
+uint8_t i : counter showing which row is processed
+char *command : command to alter the table that will be sent to mysql
+MYSQL_ROW row : array containing the result of the query
+--------------------------------------------------------------------------------
+Return values
+    1 if a modification has been made
+    0 otherwise
+*/
 uint8_t checkIfModified (GtkWidget *widget, XMLdbData *tableData, uint8_t i, char *command, MYSQL_ROW row) {
     uint8_t modified = 0 ;
     char *newName ;
@@ -1288,18 +1149,109 @@ uint8_t checkIfModified (GtkWidget *widget, XMLdbData *tableData, uint8_t i, cha
     }
     return modified ;
 }
+
+
+
+/*
+Function : dropColumn
+--------------------------------------------------------------------------------
+Creates a command to drop a column and sends it to mysql
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+TableCol *drop : struct containing the column data
+--------------------------------------------------------------------------------
+*/
+void dropColumn (GtkWidget *widget, TableCol *drop) {
+    char command[100] = "ALTER TABLE ";
+    uint8_t deleted ;
+    strcat(strcat(strcat(command, drop->tName), " DROP "), drop->cName) ;
+
+    if ((deleted = connectDB(command)) != 0) {
+        printMessage(widget, 0, "Can't drop this column") ;
+    }
+    else {
+        printMessage(widget, 0, "Column dropped") ;
+        closeWindow(NULL, drop->window) ;
+    }
+}
+
+/*
+Function : dropVerify
+--------------------------------------------------------------------------------
+Creates a window to check if the user wants to drop the table
+Calls (dropTable) if the user validates the drop
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+char *tName : name of the table to be dropped
+--------------------------------------------------------------------------------
+*/
+void dropVerify (GtkWidget *widget, char *tName) {
+    GtkWidget *window ;
+    GtkWidget *grid ;
+    GtkWidget *yes ;
+    GtkWidget *no ;
+    GtkWidget *label ;
+    char str[50] = "Dropping table " ;
+
+    strcat(str, tName) ;
+
+    window = createWindow(str, 200, 200) ;
+    grid = createGrid(window) ;
+
+    label = gtk_label_new("Are you sure ?") ;
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 2, 1) ;
+
+    yes = gtk_button_new_with_label((const gchar *)"yes") ;
+    gtk_grid_attach(GTK_GRID(grid), yes, 0, 1, 1, 1) ;
+    g_signal_connect(yes, "clicked", G_CALLBACK(closeWindow), window) ;
+    g_signal_connect(yes, "clicked", G_CALLBACK(dropTable), tName) ;
+
+    no = gtk_button_new_with_label((const gchar *)"no") ;
+    gtk_grid_attach(GTK_GRID(grid), no, 1, 1, 1, 1) ;
+    g_signal_connect(no, "clicked", G_CALLBACK(closeWindow), window) ;
+
+    gtk_widget_show_all(window);
+    gtk_main();
+}
+
+/*
+Function : dropTable
+--------------------------------------------------------------------------------
+Creates a command to drop the table and sends it to mysql
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+char *tName : name of the table being dropped
+--------------------------------------------------------------------------------
+*/
+void dropTable (GtkWidget *widget, char *tName) {
+    char command[50] = "DROP TABLE ";
+    size_t kill ;
+    strcat(command, tName) ;
+    kill = connectDB(command) ;
+    if (kill != 0)
+        printMessage(NULL, 0, "An error occurred") ;
+    else
+        printMessage(NULL, 0, "Table dropped !") ;
+}
+
+
+
 /*
 Function : retrievePrimKeys
--------------------------
-call from addColumns();
+--------------------------------------------------------------------------------
+Called from (addColumns)
+Retrieves the current primary keys from mysql
+Calls (dropAddPrimKeys) to drop and add the new primary keys
 
--------------------------
-GtkWidget *widget: widget sent by the callback function
-char *pk: contain the column name of the prim key
-char *tName: contain the of the table
-char *newAi: contain the column name that have auto_increment constraint
--------------------------
-return uint8_t
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+char *pk : string of all the primary keys to be set
+char *tName : name of the table being altered
+char *newAi : string with the name of the new auto_increment column to be set
+--------------------------------------------------------------------------------
 */
 void retrievePrimKeys (GtkWidget *widget, char *pk, char *tName, char *newAi) {
     char command[100] = "DESCRIBE " ;
@@ -1322,29 +1274,36 @@ void retrievePrimKeys (GtkWidget *widget, char *pk, char *tName, char *newAi) {
     }
 
     if (strlen(ai) != 0 && strlen(newAi) != 0) {
-        printMessage(widget, 0, "The auto_increment constraint can't be set (multiple primary keys)") ;
+        printMessage(widget, 0, "Warning, unsetting the previous auto_increment") ;
+        unsetAI(ai, tName) ;
     }
 
-    if (pk[strlen(pk) - 1] == ',') {
+    if (pk[strlen(pk) - 1] == ',')
         removeLastChar(pk) ;
-    }
 
     dropAddPrimKeys(pk, tName) ;
+    if (strlen(newAi) != 0)
+        writeAI(newAi, tName) ;
+
     mysql_free_result(db.results);
     mysql_close(&mysql) ;
 }
+
 /*
 Function : managePrimKeys
--------------------------
-call from alterTable()
-Permit to compare the comboBox value of prim Key with the database
-Call unsetAI and dropAddPrimKeys if there is a diffrence
--------------------------
+--------------------------------------------------------------------------------
+Called from (alterTable)
+Compare the current comboBox value of primary key with the database
+Calls (unsetAI) and (dropAddPrimKeys) if there is any diffrence to update the primary keys
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget sent by the callback function
-MYSQL_RES *results : contains the result of the query send by alterTable
-XMLdbData *table : struct that contains the table data
--------------------------
-return uint8_t
+MYSQL_RES *results : contains the results of the query send by alterTable
+XMLdbData *table : struct containings the table data
+--------------------------------------------------------------------------------
+Return values
+    1 if a modification has been made
+    0 otherwise
 */
 uint8_t managePrimKeys (GtkWidget *widget, MYSQL_RES *results, XMLdbData *table) {
     MYSQL_ROW row ;
@@ -1387,34 +1346,60 @@ uint8_t managePrimKeys (GtkWidget *widget, MYSQL_RES *results, XMLdbData *table)
     }
     return 1 ;
 }
+
 /*
 Function : unsetAI
--------------------------
-call from managePrimKeys()
-Allows us to drop the auto_increment
--------------------------
-char *ai: column name
-char *tName: the name of the table
--------------------------
+--------------------------------------------------------------------------------
+Called from (managePrimKeys) or (retrievePrimKeys)
+Drops the auto_increment constraint in order to create new primary keys
+
+--------------------------------------------------------------------------------
+char *ai : name of the column with the auto_increment constraint
+char *tName : name of the altered table
+--------------------------------------------------------------------------------
 */
 void unsetAI (char *ai, char *tName) {
-    char unsetAI[100] = "ALTER TABLE " ;
-    strcat(unsetAI, tName) ;
+    char unsetAi[100] = "ALTER TABLE " ;
+    strcat(unsetAi, tName) ;
     if (strlen(ai) != 0) {
-        strcat(strcat(strcat(strcat(strcat(unsetAI, " CHANGE "), ai), " "), ai), " INTEGER") ;
-        connectDB(unsetAI) ;
+        strcat(strcat(strcat(strcat(strcat(unsetAi, " CHANGE "), ai), " "), ai), " int") ;
+        connectDB(unsetAi) ;
     }
 }
+
+/*
+Function : writeAI
+--------------------------------------------------------------------------------
+Called from (retrievePrimKeys)
+Writes the auto_increment constraint on a table
+
+--------------------------------------------------------------------------------
+char *ai : name of the column with the auto_increment constraint
+char *tName : name of the altered table
+--------------------------------------------------------------------------------
+*/
+void writeAI (char *ai, char *tName) {
+    char writeAi[100] = "ALTER TABLE " ;
+    int kill ;
+    strcat(writeAi, tName) ;
+    if (strlen(ai) != 0) {
+        strcat(strcat(strcat(strcat(strcat(writeAi, " CHANGE "), ai), " "), ai), " int auto_increment") ;
+        if ((kill = connectDB(writeAi)) != 0)
+            printMessage(NULL, 0, "Couldn't set the auto_increment") ;
+    }
+}
+
 /*
 Function : dropAddPrimKeys
--------------------------
-Allows us to drop the primary keys and add it
--------------------------
-char *primKeys: take the name of the primary key
-char *tName: the name of the table
--------------------------
-send data to connectDB
+--------------------------------------------------------------------------------
+Drops the current primary keys
+Adds the new primary keys
+Calls db.c/(connectDB) to send the commands to mysql
 
+--------------------------------------------------------------------------------
+char *primKeys : string of primary keys being set
+char *tName : name of the table
+--------------------------------------------------------------------------------
 */
 void dropAddPrimKeys (char *primKeys, char *tName) {
     char str[50] = "ALTER TABLE " ;
@@ -1428,14 +1413,292 @@ void dropAddPrimKeys (char *primKeys, char *tName) {
     connectDB(drop) ;
     connectDB(add) ;
 }
+
+
+
+/*
+Function : inputCommand
+--------------------------------------------------------------------------------
+(Never called)
+Creates a window where the user can write his SQL commands
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+--------------------------------------------------------------------------------
+*/
+void inputCommand (GtkWidget *widget) {
+    GtkBuilder *builder;
+    GtkWidget *window;
+    GtkWidget *button ;
+    GtkWidget *input ;
+
+    builder = gtk_builder_new();
+    gtk_builder_add_from_file (builder, "main.glade", NULL);
+
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "windowSql"));
+    gtk_builder_connect_signals(builder, NULL);
+    backgroundColor(window, "#999999" );
+
+    input = GTK_WIDGET(gtk_builder_get_object(builder, "sqlInput")) ;
+    button = GTK_WIDGET(gtk_builder_get_object(builder, "sqlSend")) ;
+    g_signal_connect(button, "clicked", G_CALLBACK(getCommand), input);
+
+    g_object_unref(builder);
+    gtk_widget_show_all(window);
+    gtk_main();
+}
+
+/*
+Function : getCommand
+--------------------------------------------------------------------------------
+Called from (inputCommand)
+Retrieves the command given by the user
+Calls db.c/(connectDB) to send the command to mysql
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+GtkWidget *input : pointer to the input retrieving the command
+--------------------------------------------------------------------------------
+*/
+void getCommand (GtkWidget *widget, GtkWidget *input) {
+    char *command ;
+    size_t kill ;
+    retrieveData(widget, input, &command) ;
+    kill = connectDB(command) ;
+}
+
+
+
+/*
+Function : inputData
+--------------------------------------------------------------------------------
+Called from (actionOnTableWindow)
+Display a window asking for the number of inputs to create
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+char *tName : name of the table
+--------------------------------------------------------------------------------
+*/
+void inputData (GtkWidget *widget, char *tName) {
+    GtkBuilder *builder;
+    GtkWidget *okButton ;
+    GtkWidget *input ;
+    GtkDualInputs tInput ;
+    Inserts tData ;
+
+    builder = gtk_builder_new();
+    gtk_builder_add_from_file (builder, "main.glade", NULL);
+
+    tInput.window = GTK_WIDGET(gtk_builder_get_object(builder, "windowInput"));
+    gtk_builder_connect_signals(builder, NULL);
+    backgroundColor(tInput.window, "#999999" );
+
+    strcpy(tData.name, tName) ;
+
+    input = GTK_WIDGET(gtk_builder_get_object(builder, "nbRows")) ;
+    tInput.nb = input ;
+    tData.dualInputs = &tInput ;
+    okButton = GTK_WIDGET(gtk_builder_get_object(builder, "validateInput")) ;
+    g_signal_connect(okButton, "clicked", G_CALLBACK(inputDataWindow), &tData);
+
+    g_object_unref(builder);
+    gtk_widget_show_all(tInput.window);
+    gtk_main();
+}
+
+/*
+Function : inputDataWindow
+--------------------------------------------------------------------------------
+Called from (inputData)
+Creates the window with all the inputs needed to insert data in the table
+Calls
+    (retrieveColNames) to get the names of the columns in the table
+    (createInsertInputs) to create the appropriate number of inputs
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+Inserts *table : struct containing the array of inputs (and other database data)
+--------------------------------------------------------------------------------
+*/
+void inputDataWindow (GtkWidget *widget, Inserts *table) {
+    GtkWidget *window ;
+    GtkWidget *grid ;
+    GtkWidget *button ;
+    GtkWidget *label ;
+    int16_t nbRows ;
+    char str[50] = "Input into table " ;
+
+    strcat(str, table->name) ;
+    retrieveInteger(widget, table->dualInputs->nb, &nbRows) ;
+    if (nbRows <= 0)
+        return ;
+    table->nbRows = nbRows ;
+    closeWindow(NULL, table->dualInputs->window) ;
+
+    window = createWindow(str, 600, 200) ;
+    grid = createGrid(window) ;
+    table->dualInputs->window = window ;
+
+    table->nbCols = retrieveColNames(table->name, grid) ;
+    createInsertInputs(table, grid) ;
+
+    button = gtk_button_new_with_label((const gchar *)"Insert") ;
+    gtk_grid_attach(GTK_GRID(grid), button, 0, nbRows+2, 1, 1) ;
+    g_signal_connect(button, "clicked", G_CALLBACK(insertData), table) ;
+
+    label = gtk_label_new("Don't forget the quotes around char/varchar/text/date(time) values !") ;
+    gtk_grid_attach(GTK_GRID(grid), label, 0, nbRows+3, 2, 1) ;
+
+    g_signal_connect(window, "destroy", G_CALLBACK(freeInserts), table) ;
+
+    gtk_widget_show_all(window) ;
+    gtk_main() ;
+}
+
+/*
+Function : createInsertInputs
+--------------------------------------------------------------------------------
+Called from (inputDataWindow)
+Allocates a two-dimensional array of inputs and attach them to the grid
+
+--------------------------------------------------------------------------------
+Inserts *table : struct containing the information of the table
+GtkWidget *grid : grid of the window
+--------------------------------------------------------------------------------
+*/
+void createInsertInputs(Inserts *table, GtkWidget *grid) {
+    uint8_t i ;
+    uint8_t j ;
+
+    table->inputs = malloc(sizeof(GtkWidget **) * table->nbRows) ;
+    if (table->inputs == NULL) {
+        printMessage(NULL, ERR_MEM, "") ;
+    }
+    for (i = 0 ; i < table->nbRows ; ++i) {
+        table->inputs[i] = malloc(sizeof(GtkWidget *) * table->nbCols) ;
+        if (table->inputs[i] == NULL) {
+            printMessage(NULL, ERR_MEM, "") ;
+        }
+
+        for (j = 0 ; j < table->nbCols ; ++j) {
+            table->inputs[i][j] = gtk_entry_new() ;
+            gtk_grid_attach(GTK_GRID(grid), table->inputs[i][j], j, i+1, 1, 1) ;
+        }
+    }
+}
+
+/*
+Function : insertData
+--------------------------------------------------------------------------------
+Called from (inputDataWindow)
+Initializes the query "insert into" and strcats the entered values
+Calls db.c/(connectDB) to send the command to mysql
+At the end, frees the array of inputs created in (inputDataWindow)
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+Inserts *table : struct containing the information needed to make the query
+--------------------------------------------------------------------------------
+*/
+void insertData (GtkWidget *widget, Inserts *table) {
+    char command[500] ;
+    char *data ;
+    size_t i ;
+    size_t j ;
+    size_t kill ;
+
+    for (i = 0 ; i < table->nbRows ; ++i) {
+        strcat(strcat(strcpy(command, "INSERT INTO "), table->name), " VALUES (") ;
+        for (j = 0 ; j < table->nbCols ; ++j) {
+            retrieveData(widget, table->inputs[i][j], &data) ;
+            if (strlen(data) != 0)
+                strcat(strcat(command, data), ",") ;
+            else
+                strcat(strcat(command, "NULL"), ",") ;
+        }
+        removeLastChar(command) ;
+        strcat(command, ")") ;
+        kill = connectDB(command) ;
+        if (kill != 0) {
+            printMessage(NULL, 0, "Check your values") ;
+            return ;
+        }
+    }
+    freeInserts(NULL, table) ;
+    closeWindow(NULL, table->dualInputs->window) ;
+    printMessage(NULL, 0, "Data inserted !") ;
+}
+
+
+
+/*----------------------------------------------------------------------------*/
+/*-------------------Other----------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
+
+/*
+Function : freeInserts
+--------------------------------------------------------------------------------
+Calls (freePointer) to free an array of pointers
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+Inserts *inserts : struct containing the inputs of inputDataWindow() .
+--------------------------------------------------------------------------------
+*/
+void freeInserts (GtkWidget *widget, Inserts *inserts) {
+    uint8_t i ;
+    for (i = 0 ; i < inserts->nbRows ; ++i) {
+        freePointer(NULL, inserts->inputs[i]) ;
+    }
+    freePointer(NULL, inserts->inputs) ;
+}
+
+/*
+Function : freePointer
+--------------------------------------------------------------------------------
+Frees a pointer ant sets it to NULL
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+void *ptr : pointer that will be freed
+--------------------------------------------------------------------------------
+*/
+void freePointer (GtkWidget *widget, void *ptr) {
+    if (ptr != NULL) {
+        free(ptr) ;
+        ptr = NULL ;
+    }
+}
+
+/*
+Function : freeTableData
+--------------------------------------------------------------------------------
+Called from (writeTables)
+Calls (freePointer) to free the arrays in the XMLdbData struct
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by the callback function
+XMLdbData *xmlData : struct containing the information about the XML file
+--------------------------------------------------------------------------------
+*/
+void freeTableData (GtkWidget *widget, XMLdbData *xmlData) {
+    freePointer(widget, xmlData->conf) ;
+    if (xmlData->doc != NULL)
+        xmlFreeDoc(xmlData->doc) ;
+}
+
+
+
 /*
 Function : countLin
--------------------------
-call from getColStructure(), retrieveColData
-count the lines of the results of mysql query
--------------------------
-MYSQL_RES *res: the result of mysql query
--------------------------
+--------------------------------------------------------------------------------
+Called from (getColStructure) and (retrieveColData)
+Conts the numebr of lines of the results of a mysql query
+
+--------------------------------------------------------------------------------
+MYSQL_RES *res : the result of mysql query
+--------------------------------------------------------------------------------
 
 */
 uint8_t countLin (MYSQL_RES *res) {
@@ -1448,14 +1711,15 @@ uint8_t countLin (MYSQL_RES *res) {
 
 /*
 Function : createXmlColInputs
--------------------------
-create inputs that we need into the window while we create new table
--------------------------
-uint8_t nbLin: number of labels that we need
-GtkWidget *grid: take the grid of the window to attach the inputs
--------------------------
-return columns
+--------------------------------------------------------------------------------
+Creates a given number of inputs used to create a new table in XML
 
+--------------------------------------------------------------------------------
+uint8_t nbLin : size of the array (number of lines of inputs)
+GtkWidget *grid : grid to which are attached the inputs
+--------------------------------------------------------------------------------
+Return values
+    the pointer to the array of inputs
 */
 GtkColumn * createXmlColInputs (uint8_t nbLin, GtkWidget *grid) {
     GtkColumn *columns ;
@@ -1490,15 +1754,16 @@ GtkColumn * createXmlColInputs (uint8_t nbLin, GtkWidget *grid) {
 
     return columns ;
 }
+
 /*
 Function : createXmlColLabels
--------------------------
-call from createXmlColInputs
-create label that we need into the window while we create new table
--------------------------
-GtkWidget *grid: take the grid of the window to attach the label
--------------------------
-call addLabel()
+--------------------------------------------------------------------------------
+Called from (createXmlColInputs)
+Creates label used to describe a new table in XML
+
+--------------------------------------------------------------------------------
+GtkWidget *grid : grid to which are attached the labels
+--------------------------------------------------------------------------------
 */
 void createXmlColLabels (GtkWidget *grid) {
     addLabel(grid, 0, 0, "Column name") ;
@@ -1511,17 +1776,19 @@ void createXmlColLabels (GtkWidget *grid) {
     addLabel(grid, 0, 7, "References") ;
     addLabel(grid, 0, 8, "Is referenced") ;
 }
+
 /*
 Function : createSqlColInputs
--------------------------
-call form getColStructure()
-create the number of inputs that we need into the alter table window
--------------------------
-uint8_t nbCol: number of inputs that we need
-GtkWidget *grid: take the grid of the window to attach the inputs
--------------------------
-return columns
-call createSqlColLabels(grid);
+--------------------------------------------------------------------------------
+Called form (getColStructure)
+Creates a given number of inputs used to create a new table in SQL
+
+--------------------------------------------------------------------------------
+uint8_t nbLin : size of the array (number of lines of inputs)
+GtkWidget *grid : grid to which are attached the inputs
+--------------------------------------------------------------------------------
+Return values
+    the pointer to the array of inputs
 */
 GtkColumn * createSqlColInputs (uint8_t nbLin, GtkWidget *grid) {
     GtkColumn *columns ;
@@ -1549,14 +1816,16 @@ GtkColumn * createSqlColInputs (uint8_t nbLin, GtkWidget *grid) {
 
     return columns ;
 }
+
 /*
 Function : createSqlColLabels
--------------------------
-create labels that we need into the alter table window
--------------------------
-GtkWidget *grid: take the grid of the window to attach the label
--------------------------
+--------------------------------------------------------------------------------
+Called from (createSqlColInputs)
+Creates label used to describe a new table in SQL
 
+--------------------------------------------------------------------------------
+GtkWidget *grid : grid to which are attached the labels
+--------------------------------------------------------------------------------
 */
 void createSqlColLabels (GtkWidget *grid) {
     addLabel(grid, 0, 0, "Column name") ;
@@ -1566,13 +1835,17 @@ void createSqlColLabels (GtkWidget *grid) {
     addLabel(grid, 0, 4, "Primary key") ;
 }
 
+
+
 /*
 Function : createComboBoxType
--------------------------
-call from createXmlColInputs
-create the comboBox and put all type that we want inside it
--------------------------
-return box: the comboBox
+--------------------------------------------------------------------------------
+Called from (createXmlColInputs)
+Creates a combo box for the different types of mysql data
+
+--------------------------------------------------------------------------------
+Return values
+    the pointer to the combo box
 */
 GtkWidget * createComboBoxType (void) {
     GtkWidget *box ;
@@ -1590,12 +1863,15 @@ GtkWidget * createComboBoxType (void) {
 
     return box ;
 }
+
 /*
 Function : createComboBoxYN
--------------------------
-create the comboBox and put YES and NO inside it
--------------------------
-return box: the comboBox
+--------------------------------------------------------------------------------
+Creates a combo box with "yes" and "no" options
+
+--------------------------------------------------------------------------------
+Return values
+    the pointer to the combo box
 */
 GtkWidget * createComboBoxYN (void) {
     GtkWidget *box ;
@@ -1606,14 +1882,17 @@ GtkWidget * createComboBoxYN (void) {
 
     return box ;
 }
+
 /*
 Function : createComboBoxDBQuery
--------------------------
-call from dbManagerWindow
-create the comboBox and put the names of databases in this comboBox
--------------------------
-return box: the comboBox
-call reachMysql(&db, command)
+--------------------------------------------------------------------------------
+Called from (dbManagerWindow)
+Calls db.c/(reachMysql) to get all the names of the databases in mysql
+Sets the name in a combo box (excluding the internal mysql databases)
+
+--------------------------------------------------------------------------------
+Return values
+    the pointer to the combo box
 */
 GtkWidget * createComboBoxDBQuery () {
     GtkWidget *box ;
@@ -1631,8 +1910,14 @@ GtkWidget * createComboBoxDBQuery () {
         return box ;
     }
 
-    while ((row = mysql_fetch_row(db.results)) != NULL)
-        gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), *row, *row) ;
+    while ((row = mysql_fetch_row(db.results)) != NULL) {
+        if (strcmp(*row, "information_schema") != 0
+            && strcmp(*row, "mysql") != 0
+            && strcmp(*row, "performance_schema") != 0
+            && strcmp(*row, "sys") != 0) {
+                gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), *row, *row) ;
+        }
+    }
 
     mysql_free_result(db.results);
     mysql_close(&mysql) ;
@@ -1641,14 +1926,15 @@ GtkWidget * createComboBoxDBQuery () {
 }
 
 /*
-Function : createComboBoxTables
--------------------------
-call from showTables
-create the comboBox and put the names of tables in this comboBox
--------------------------
-void
--------------------------
-return the comboBox
+Function : createComboBoxDBQuery
+--------------------------------------------------------------------------------
+Called from (showTables)
+Creates a combo box
+Calls db.c/(reachMysql) to get all the names of the databases in mysql
+
+--------------------------------------------------------------------------------
+Return values
+    the pointer to the combo box
 */
 GtkWidget * createComboBoxTables (void) {
     GtkWidget *box ;
@@ -1680,13 +1966,14 @@ GtkWidget * createComboBoxTables (void) {
 
 /*
 Function : retrieveData
--------------------------
-retrive value from an input
--------------------------
+--------------------------------------------------------------------------------
+Retrieves the content of a GtkEntry and sets it in *str
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget
-GtkWidget *input: the GtkWidget that we want to retrieve the value
-char **str: store our result
--------------------------
+GtkWidget *input : the GtkWidget from which the value is retrieved
+char **str : string in which is stored the retrieved value
+--------------------------------------------------------------------------------
 */
 void retrieveData(GtkWidget *widget, GtkWidget *input, char **str) {
     if (input == NULL)
@@ -1699,13 +1986,14 @@ void retrieveData(GtkWidget *widget, GtkWidget *input, char **str) {
 
 /*
 Function : retrieveComboBoxContent
--------------------------
-retrive value for a comboBox
--------------------------
+--------------------------------------------------------------------------------
+Retrieves the current value of a Gtk ComboBoxText
+
+--------------------------------------------------------------------------------
 GtkWidget *widget : widget
-GtkWidget *box: the GtkWidget that we want to retrieve the value
-char **str: store our result
--------------------------
+GtkWidget *box : the GtkWidget from which the value is retrieved
+char **str : string in which is stored the retrieved value
+--------------------------------------------------------------------------------
 */
 void retrieveComboBoxContent (GtkWidget *widget, GtkWidget *box, char **str) {
     if (box == NULL)

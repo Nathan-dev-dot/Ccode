@@ -118,7 +118,7 @@ void addNotMandatoryCommand(GtkWidget *widget, char *command, GtkColumn colInput
     char *prop = "" ;
 
     retrieveData(widget, colInputs.constraints, &prop) ;
-    if (strlen(prop) != 0) {
+    if (strlen(prop) != 0 && strcmp(prop, "auto_increment") != 0 && strcmp(prop, "AUTO_INCREMENT") != 0) {
         addSpace(strcat(command, prop)) ;
     }
 
@@ -141,7 +141,7 @@ uint8_t addPrimaryKeyCommand (GtkWidget *widget, char *pk, GtkWidget *primKeyInp
     char *yn = "" ;
     retrieveComboBoxContent(widget, primKeyInput, &yn) ;
 
-    if (strcmp(yn, "YES") == 0) {
+    if (yn != NULL && strcmp(yn, "YES") == 0) {
         strcat(strcat(pk, name), ",") ;
         return 1 ;
     }

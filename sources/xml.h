@@ -3,12 +3,14 @@
 
 #include "all.h"
 
+//Create a database from an XML document
 void dbFromXML (GtkWidget *widget, GtkWidget *input) ;
 uint8_t parseDoc (char *path) ;
 uint8_t countForeignKeys (xmlNodePtr start) ;
 uint8_t writeSQLTables (xmlNodePtr node) ;
-Conf * initConf () ;
+Conf * initConf (void) ;
 
+//Create an XML document from entries
 uint8_t createXMLDoc (GtkWidget *widget, GtkDualInputs *dbParams) ;
 uint8_t setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) ;
 uint8_t duplicateTemplate (char *fileName) ;

@@ -96,6 +96,8 @@ int connectDB (char *command) {
     MYSQL mysql ;
     int success ;
 
+    printf("Connect db / %s\n", command) ;
+
     mysql_init(&mysql) ;
     mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
 
@@ -105,6 +107,7 @@ int connectDB (char *command) {
         return ERR_DB ;
     }
     success = mysql_query(&mysql, command) ;
+    printf("Success %d\n", success) ;
     if (success != 0)
         return 3 ;
 
