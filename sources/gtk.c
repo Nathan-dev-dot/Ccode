@@ -6,6 +6,8 @@
 
 #include "all.h"
 
+//#define "main.glade" "/sources/main.glade"
+
 extern char nameDB[30] ;
 
 
@@ -287,23 +289,34 @@ void mainMenu (void) {
     GtkWidget *option1;
     GtkWidget *option2;
     GtkWidget *option3;
+    int kill ;
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "main.glade", NULL);
+    kill = gtk_builder_add_from_file(builder, "main.glade", NULL);
+
+    printf("%p %d\n", builder, kill) ;
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "windowMain"));
     gtk_builder_connect_signals(builder, NULL);
     g_signal_connect(window, "delete_event", G_CALLBACK(destroy), NULL) ;
     backgroundColor(window, "#999999" );
 
+    printf("Ok5\n") ;
+
     option1 = GTK_WIDGET(gtk_builder_get_object(builder, "dbFromXml"));
     g_signal_connect(option1, "clicked", G_CALLBACK(dbFromXMLWindow), NULL);
+
+    printf("Ok2\n") ;
 
     option2 = GTK_WIDGET(gtk_builder_get_object(builder, "createXml"));
     g_signal_connect(option2, "clicked", G_CALLBACK(xmlFromEntries), NULL);
 
+    printf("Ok3\n") ;
+
     option3 = GTK_WIDGET(gtk_builder_get_object(builder, "manageDatabase"));
     g_signal_connect(option3, "clicked", G_CALLBACK(dbManagerWindow), NULL);
+
+    printf("Ok4\n") ;
 
     g_object_unref(builder);
     gtk_widget_show_all(window);
