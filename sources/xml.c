@@ -24,6 +24,7 @@ Calls
 GtkWidget *widget : widget sent by the callback function
 GtkWidget *input : input from which is retrieved the data
 --------------------------------------------------------------------------------
+
 */
 void dbFromXML (GtkWidget *widget, GtkWidget *input) {
     uint8_t kill ;

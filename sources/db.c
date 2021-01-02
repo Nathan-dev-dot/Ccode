@@ -13,15 +13,15 @@ char pwdDB[50] = "" ;
 
 /*
 Function : setCredentials
--------------------
+--------------------------------------------------------------------------------
 Sets the global connexion variables
-
+--------------------------------------------------------------------------------
 char *username : username to be set
 char *pwd : password to be set
-
-returns :
-0 if ok
-ERR_DB if the connection to the mysql failed
+--------------------------------------------------------------------------------
+Return values
+    0 if ok
+    ERR_DB if the connection to the mysql failed
 */
 int setCredentials (char *username, char *pwd) {
     MYSQL mysql ;
@@ -45,15 +45,16 @@ int setCredentials (char *username, char *pwd) {
 
 /*
 Function : initDB
--------------------
+--------------------------------------------------------------------------------
 Initialises the connection to the mysql database
 Sets the value of the global variable nameDB
 
+--------------------------------------------------------------------------------
 char *name : name of the database
-
-returns :
-0 if ok
-ERR_DB if the connection to mysql failed
+--------------------------------------------------------------------------------
+Return values
+    0 if ok
+    ERR_DB if the connection to mysql failed
 */
 int initDB (char *name) {
     MYSQL mysql ;
@@ -81,16 +82,16 @@ int initDB (char *name) {
 
 /*
 Function : connectDB
--------------------
-Connects to the databse created by createDB()
+--------------------------------------------------------------------------------
+Connects to the databse created by createDB
 Sends the commands to the database
 
+--------------------------------------------------------------------------------
 char *command : command sent to be executed
-MYSQL_RES *results : structure of results (used only if output required)
-
-returns :
-0 if ok
-ERR_DB if something went wrong
+--------------------------------------------------------------------------------
+Return values
+    0 if ok
+    ERR_DB if something went wrong
 */
 int connectDB (char *command) {
     MYSQL mysql ;
@@ -117,16 +118,17 @@ int connectDB (char *command) {
 
 /*
 Function : reachMysql
--------------------
+--------------------------------------------------------------------------------
 Connects to the Mysql
-Sends a commands to Mysql
+Sends a query to Mysql expecting results
 
+--------------------------------------------------------------------------------
 char *command : command sent to be executed
-MYSQL_RES *results : structure of results (used only if output required)
-
-returns :
-0 if ok
-ERR_DB if something went wrong
+MysqlCoAndRes : struct containing the mysql data and the results
+--------------------------------------------------------------------------------
+Return values
+    0 if ok
+    ERR_DB if something went wrong
 */
  int reachMysql (MysqlCoAndRes *db, char *command) {
     int success ;
@@ -152,8 +154,11 @@ ERR_DB if something went wrong
 
 /*
 Function : dropDB
--------------------
+--------------------------------------------------------------------------------
 Drops the database if it was created
+
+--------------------------------------------------------------------------------
+
 */
 void dropDB (void) {
     MYSQL mysql ;

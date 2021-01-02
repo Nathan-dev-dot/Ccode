@@ -9,10 +9,13 @@
 
 /*
 Function : trimWhiteSpace
--------------------------
+--------------------------------------------------------------------------------
 Trims the white spaces at the beginning and end of a string
 
+--------------------------------------------------------------------------------
 char *str : string to be trimmed
+--------------------------------------------------------------------------------
+
 */
 void trimWhiteSpace (char *str) {
     uint8_t start ;
@@ -35,10 +38,13 @@ void trimWhiteSpace (char *str) {
 
 /*
 Function : addSpace
--------------------
+--------------------------------------------------------------------------------
 Concatenates a space at the end of a string
 
+--------------------------------------------------------------------------------
 char *str : string to be modified
+--------------------------------------------------------------------------------
+
 */
 void addSpace (char *str) {
     strcat(str, " ") ;
@@ -46,16 +52,35 @@ void addSpace (char *str) {
 
 /*
 Function : removeLastChar
--------------------
+--------------------------------------------------------------------------------
 Removes the last character of a string
 
+--------------------------------------------------------------------------------
 char *str : string to be modified
+--------------------------------------------------------------------------------
+
 */
 void removeLastChar (char *str) {
     if (strlen(str) != 0)
         str[strlen(str) - 1] = '\0' ;
 }
 
+
+
+/*
+Function : getErrorsFromConf
+--------------------------------------------------------------------------------
+Called from gtk.c/(printMessage)
+Reads the conf file to find the messages associated to error codes
+
+--------------------------------------------------------------------------------
+uint8_t errNo : error code
+GtkWidget *label : GtkLabel in which the message is displayed
+--------------------------------------------------------------------------------
+Return values
+    1 if ok
+    0 if the error code wasn't found
+*/
 uint8_t getErrorsFromConf (uint8_t errNo, GtkWidget *label) {
     FILE *confFile = fopen("../config", "r") ;
     char str[150] ;
@@ -80,6 +105,27 @@ uint8_t getErrorsFromConf (uint8_t errNo, GtkWidget *label) {
     return 0 ;
 }
 
+
+
+/*----------------------------------------------------------------------------*/
+/*-------------------Manage a database----------------------------------------*/
+/*----------------------------------------------------------------------------*/
+
+/*
+Function : addColumnCommand
+--------------------------------------------------------------------------------
+Called from gtk.c/(addTable)
+Writes the command to add a column to a table
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget used by (retrieveData)
+char *command : SQL command
+GtkColumn colInput : struct of inputs containing the new column data
+--------------------------------------------------------------------------------
+Return values
+    1 if the column is set as a primary key (requested from (addPrimaryKeyCommand))
+    0 otherwise
+*/
 uint8_t addColumnCommand(GtkWidget *widget, char *command, GtkColumn colInputs, char *pk) {
     char *cName ;
     char *type ;
@@ -114,6 +160,19 @@ uint8_t addColumnCommand(GtkWidget *widget, char *command, GtkColumn colInputs, 
     return addPrimaryKeyCommand(widget, pk, colInputs.primKey, cName) ;
 }
 
+/*
+Function : addNotMandatoryCommand
+--------------------------------------------------------------------------------
+Called from (addColumnCommand)
+Adds the not mandatory parameters to the command
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget used by (retrieveData)
+char *command : SQL command
+GtkColumn colInput : struct of inputs containing the new column data
+char *type : type of the column
+--------------------------------------------------------------------------------
+*/
 void addNotMandatoryCommand(GtkWidget *widget, char *command, GtkColumn colInputs, char *type) {
     char *prop = "" ;
 
@@ -125,7 +184,6 @@ void addNotMandatoryCommand(GtkWidget *widget, char *command, GtkColumn colInput
     retrieveData(widget, colInputs.check, &prop) ;
     if (strlen(prop) != 0) {
         addSpace(strcat(strcat(strcat(command, "CHECK ("), prop), ")")) ;
-    }
 
     retrieveData(widget, colInputs.def, &prop) ;
     if (strlen(prop) != 0) {
@@ -136,7 +194,21 @@ void addNotMandatoryCommand(GtkWidget *widget, char *command, GtkColumn colInput
         }
     }
 }
+/*
+Function : addPrimaryKeyCommand
+--------------------------------------------------------------------------------
+called form (addColumnCommand) to get the Primary Key
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by callback function
+char *pk:array that contain the primary key colum name
+GtkWidget *primKeyInput: the combobox containing the primary key setting
+char *name:
+--------------------------------------------------------------------------------
+Return values
+    1 if there is one or mulriple primary primKeys
+    0 if no primary key to concatenate
 
+*/
 uint8_t addPrimaryKeyCommand (GtkWidget *widget, char *pk, GtkWidget *primKeyInput, char *name) {
     char *yn = "" ;
     retrieveComboBoxContent(widget, primKeyInput, &yn) ;
@@ -148,27 +220,48 @@ uint8_t addPrimaryKeyCommand (GtkWidget *widget, char *pk, GtkWidget *primKeyInp
     return 0 ;
 }
 
-uint8_t addForeignKeyCommand (GtkWidget *widget, char *command, GtkWidget *input) {
+/*
+Function : addForeignKeyCommand
+--------------------------------------------------------------------------------
+Called form (addColumnCommand)
+Concats the foreign key constaint at the end of the command
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by callback function
+char *command: the SQL command
+GtkWidget *input: input of referenced table
+--------------------------------------------------------------------------------
+Return values
+
+*/
+void addForeignKeyCommand (GtkWidget *widget, char *command, GtkWidget *input) {
     char *prop ;
 
     retrieveData(widget, input, &prop) ;
     if (strlen(prop) != 0) {
         strcat(strcat(command, "REFERENCES "), prop) ;
     }
-
-    return 0 ;
 }
 
-uint8_t retrieveAI (GtkWidget *widget, GtkColumn col, char *aiName) {
+/*
+Function : retrieveAI
+--------------------------------------------------------------------------------
+Called from gtk.c/(addColumns)
+Retrives the current auto_increment constraint
+
+--------------------------------------------------------------------------------
+GtkWidget *widget : widget sent by callback function
+GtkColumn col : struct containing all the inputs for add column
+char *aiName : name of auto_increment column
+--------------------------------------------------------------------------------
+
+*/
+void retrieveAI (GtkWidget *widget, GtkColumn col, char *aiName) {
     char *tmp ;
     retrieveData(widget, col.constraints, &tmp) ;
     if (strcmp(tmp, "auto_increment") == 0 || strcmp(tmp, "AUTO_INCREMENT") == 0) {
-        if (strlen(aiName) != 0) {
-            printf("Multiples AI !") ;
-            return 1 ;
-        }
         retrieveData(widget, col.name, &tmp) ;
         strcpy(aiName, tmp) ;
     }
-    return 0 ;
+
 }

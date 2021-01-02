@@ -10,19 +10,20 @@ extern char nameDB[30] ;
 
 /*
 Function : writeSQLColumn
--------------------
+--------------------------------------------------------------------------------
+Called from xml.c/(writeSQLTables)
 Concatenates the column creation command for each column node in the table
-Calls for catForeignKeys to put the foreign key at the end of the column command
+Calls (catForeignKeys) to put the foreign key at the end of the column command
 
+--------------------------------------------------------------------------------
 xmlNodePtr node : first column node in the table
 Conf *colConf : array with the column configuration (mandatory and not mandatory)
 char *command : SQL command
-char *primKeys[][20] : array with the primary keys of the table
 ForeignKey *foreignKeys : array with the foreign keys of the database
-
-returns :
-0 if ok
-1 if something went wrong
+--------------------------------------------------------------------------------
+Return values
+    0 if ok
+    an error code otherwise
 */
 uint8_t writeSQLColumn (xmlNodePtr node, Conf *colConf, char *command, ForeignKey *foreignKeys) {
     uint8_t kill ;
@@ -59,17 +60,18 @@ uint8_t writeSQLColumn (xmlNodePtr node, Conf *colConf, char *command, ForeignKe
 
 /*
 Function : catMandatory
--------------------
+--------------------------------------------------------------------------------
 Concatenates the mandatory props for the column
 
-xmlNodePtr node : column node
+--------------------------------------------------------------------------------
+xmlNodePtr n : column node
 Conf *colConf : array with the column configuration (mandatory and not mandatory)
 uint8_t i : given line in colConf
 char *command : SQL command
-
-returns :
-0 if ok
-1 if something went wrong
+--------------------------------------------------------------------------------
+Return values
+    0 if ok
+    1 if something went wrong
 */
 uint8_t catMandatory (xmlNodePtr n, Conf *colConf, uint8_t i, char *command) {
     char prop[30] ;
@@ -91,18 +93,16 @@ uint8_t catMandatory (xmlNodePtr n, Conf *colConf, uint8_t i, char *command) {
 
 /*
 Function : catNotMandatory
--------------------
+--------------------------------------------------------------------------------
 Concatenates the not mandatory props for the column
 
+--------------------------------------------------------------------------------
 xmlNodePtr node : column node
 Conf *colConf : array with the column configuration (mandatory and not mandatory)
 uint8_t i : given line in colConf
 char *command : SQL command
-char *primKeys[][20] : array of the primary key of the table
+--------------------------------------------------------------------------------
 
-returns :
-0 if ok
-1 if something went wrong
 */
 void catNotMandatory (xmlNodePtr n, Conf *colConf, uint8_t i, char *command) {
     char prop[30] ;
@@ -131,9 +131,10 @@ void catNotMandatory (xmlNodePtr n, Conf *colConf, uint8_t i, char *command) {
 
 /*
 Function : catPrimaryKeys
--------------------
-Concatenates the primary keys at the end of the table creation command
+--------------------------------------------------------------------------------
+Concatenates the primary key command at the end of a string
 
+--------------------------------------------------------------------------------
 xmlNodePtr parent : node of the table
 char *command : SQL command
 */
@@ -162,16 +163,17 @@ uint8_t catPrimaryKeys (xmlNodePtr parent, char *command) {
 
 /*
 Function : getForeignKeys
--------------------
-Stores all the foreign keys in an array to be used later
-(Storing format : table |column | type&size)
+--------------------------------------------------------------------------------
+Called from xml.c/(writeSQLTables)
+Allocates an array of foreign keys
+(Storing format : table | column | type&size)
 
+--------------------------------------------------------------------------------
 ForeignKey *foreignKeys : foreign keys array
 xmlNodePtr parent : table node
-
-returns :
-0 if ok
-1 in case of an error
+--------------------------------------------------------------------------------
+Return values
+    the pointer to the array of foreign keys
 */
 ForeignKey * getForeignKeys (xmlNodePtr parent, uint8_t size) {
     uint8_t i = 0 ;
@@ -209,18 +211,20 @@ ForeignKey * getForeignKeys (xmlNodePtr parent, uint8_t size) {
 
 /*
 Function : catForeignKeys
--------------------
-Concatenates the foreign key at the end of the column creation command
+--------------------------------------------------------------------------------
+Called from (writeSQLColumn)
+Concatenates the foreign key constraint at the end of the column creation command
 
-char *table[15][3][20] : foreign keys array
+--------------------------------------------------------------------------------
+ForeignKey *foreignKeys: pointer to the array of foreign keys
 xmlNodePtr n : column node
 char *command : SQL command
-
-returns :
-0 if ok
-1 in case of an error
+--------------------------------------------------------------------------------
+Return values
+    0 if ok
+    1 in case of an error
 */
-uint8_t catForeignKeys(ForeignKey *foreignKeys, xmlNodePtr n, char *command) {
+uint8_t catForeignKeys (ForeignKey *foreignKeys, xmlNodePtr n, char *command) {
     uint8_t i = 0 ;
     ForeignKey tmp ;
     char strTmp[30] = "" ;
@@ -254,18 +258,26 @@ uint8_t catForeignKeys(ForeignKey *foreignKeys, xmlNodePtr n, char *command) {
     return 0 ;
 }
 
+
+
 /*
 Function : writeSQLFile
--------------------
+--------------------------------------------------------------------------------
+Called from xml.c/(writeSQLTables)
 Writes a sql command in the sql file
 
+--------------------------------------------------------------------------------
 char *command : command to be written
-uint8_t first : first time calling the function (creates the file and overwrites previous content)
+uint8_t first : first time calling the function (if 0, creates the file and overwrites previous content)
+--------------------------------------------------------------------------------
+Return values
+    0 if ok
+    ERR_SQL if an error occured in the process
 */
-uint8_t writeSQLFile(char *command, uint8_t first) {
+uint8_t writeSQLFile (char *command, uint8_t first) {
     FILE *sqlFile ;
     char filePath[30] = "../outputs/" ;
-    uint8_t pruint8_t ;
+    int8_t kill ;
 
     strcat(strcat(filePath, nameDB), ".sql") ;
 
@@ -277,17 +289,26 @@ uint8_t writeSQLFile(char *command, uint8_t first) {
     }
     if (sqlFile == NULL) {
         printMessage(NULL, 0, "Error in creating the sql file") ;
-        return EXIT_FAILURE ;
+        return ERR_SQL ;
     }
 
     fseek(sqlFile, 0, SEEK_END) ;
 
     strcat(command, ";\n");
-    pruint8_t = fprintf(sqlFile, "%s", command);
+    kill = fprintf(sqlFile, "%s", command);
     fclose(sqlFile) ;
-    return ERR_SQL ;
+    return kill < 0 ? ERR_SQL : 0 ;
 }
 
+/*
+Function : dropSQLFile
+--------------------------------------------------------------------------------
+Called from xml.c/(parseDoc)
+Drops an SQL file
+
+--------------------------------------------------------------------------------
+
+*/
 void dropSQLFile (void) {
     char filePath[30] = "../outputs/" ;
 
