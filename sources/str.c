@@ -24,11 +24,11 @@ void trimWhiteSpace (char *str) {
     strcpy(tmp, str) ;
 
     start = 0 ;
-    while (tmp[start] == ' ')
+    while (tmp[start] == ' ' || tmp[start] == '\n' || tmp[start] == '\t')
         start++ ;
 
     end = strlen(tmp) - 1 ;
-    while (tmp[end] == ' ')
+    while (tmp[end] == ' '  || tmp[end] == '\n' || tmp[end] == '\t')
         end-- ;
 
     strncpy(str, tmp + start, end - start + 1) ;
