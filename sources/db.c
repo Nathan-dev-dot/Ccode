@@ -17,6 +17,7 @@ uint16_t port ;
 Function : setCredentials
 --------------------------------------------------------------------------------
 Sets the global connexion variables
+Calls getDBConf to get the hostname and the port
 --------------------------------------------------------------------------------
 char *username : username to be set
 char *pwd : password to be set

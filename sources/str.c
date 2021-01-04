@@ -105,7 +105,20 @@ uint8_t getErrorsFromConf (uint8_t errNo, GtkWidget *label) {
     return 0 ;
 }
 
+/*
+Function : getDBConf
+--------------------------------------------------------------------------------
+Called from db.c/(setCredentials)
+Reads the conf file to find the mysql hostnames and port
 
+--------------------------------------------------------------------------------
+char *host : hostname to be set
+uint16_t *port : pointer to the port numer to be set
+--------------------------------------------------------------------------------
+Return values
+    0 if ok
+    ERR_CONF if an error occured
+*/
 uint8_t getDBConf (char *host, uint16_t *port) {
     FILE *confFile = fopen("../config", "r") ;
     char tmp[50] ;
