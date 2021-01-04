@@ -21,6 +21,9 @@ void trimWhiteSpace (char *str) {
     uint8_t start ;
     uint8_t end ;
     char *tmp = malloc(sizeof(char) * (strlen(str) + 1)) ;
+
+    if (tmp == NULL)
+        return ;
     strcpy(tmp, str) ;
 
     start = 0 ;
