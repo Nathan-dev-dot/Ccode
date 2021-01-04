@@ -185,12 +185,20 @@ Conf * initConf (void) {
     char str[20] ;
     uint8_t lines = 0 ;
     uint8_t i ;
+    uint16_t pos = 0 ;
 
-    if (confFile == NULL)
+    if (confFile == NULL) {
+        printMessage(NULL, 0, "config file not found") ;
         return NULL ;
+    }
 
-    fseek(confFile, 47, SEEK_SET) ;
-    while (fgets(str, 50, confFile) != NULL && strcmp(str, "\n"))
+    while (fgets(str, 50, confFile) != NULL && strcmp(str, "[column_conf]\n") != 0) {
+        pos += strlen(str) ;
+        printf("%d\n", pos);
+    }
+    pos += strlen(str) ;
+    //fseek(confFile, 47, SEEK_SET) ;
+    while (fgets(str, 50, confFile) != NULL && strcmp(str, "\n") != 0)
         lines++ ;
 
     colConf = (Conf *)malloc(sizeof(Conf) * (lines + 1)) ;
@@ -199,15 +207,19 @@ Conf * initConf (void) {
         return NULL ;
     }
 
-    fseek(confFile, 47, SEEK_SET) ;
+    fseek(confFile, pos, SEEK_SET) ;
+
     for (i = 0 ; i < lines ; ++i) {
         fscanf(confFile, "%c :%s\n", &mand, colConf[i].prop) ;
         colConf[i].mand = mand == 'm' ;
     }
+
     colConf[i].mand = 0 ;
     strcpy(colConf[i].prop, "STOP") ;
+    printf("Ok5\n") ;
 
     fclose(confFile) ;
+    printf("Ok6\n") ;
     return colConf ;
 }
 

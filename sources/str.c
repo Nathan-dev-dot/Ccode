@@ -184,6 +184,7 @@ void addNotMandatoryCommand(GtkWidget *widget, char *command, GtkColumn colInput
     retrieveData(widget, colInputs.check, &prop) ;
     if (strlen(prop) != 0) {
         addSpace(strcat(strcat(strcat(command, "CHECK ("), prop), ")")) ;
+    }
 
     retrieveData(widget, colInputs.def, &prop) ;
     if (strlen(prop) != 0) {
@@ -194,6 +195,7 @@ void addNotMandatoryCommand(GtkWidget *widget, char *command, GtkColumn colInput
         }
     }
 }
+
 /*
 Function : addPrimaryKeyCommand
 --------------------------------------------------------------------------------
