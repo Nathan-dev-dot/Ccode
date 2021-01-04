@@ -106,6 +106,35 @@ uint8_t getErrorsFromConf (uint8_t errNo, GtkWidget *label) {
 }
 
 
+uint8_t getDBConf (char *host, uint16_t *port) {
+    FILE *confFile = fopen("../config", "r") ;
+    char tmp[50] ;
+
+    if (confFile == NULL){
+        return ERR_CONF ;
+    }
+
+    *port = 0 ;
+    strcpy(host, "") ;
+    while (fgets(tmp, 50, confFile) != NULL) {
+
+        if (strncmp(tmp, "host", 4) == 0) {
+            strcpy(host, strchr(tmp, ':') + 1) ;
+            removeChariot(host) ;
+        }
+        if (strncmp(tmp, "port", 4) == 0) {
+            strcpy(tmp, strchr(tmp, ':') + 1) ;
+            removeChariot(tmp) ;
+            *port = atoi(tmp) ;
+        }
+    }
+
+    if (strlen(host) == 0 || *port == 0)
+        return ERR_CONF ;
+    return 0 ;
+}
+
+
 
 /*----------------------------------------------------------------------------*/
 /*-------------------Manage a database----------------------------------------*/

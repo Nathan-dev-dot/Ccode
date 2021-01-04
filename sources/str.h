@@ -6,6 +6,7 @@ void addSpace (char *str) ;
 void removeLastChar (char *str) ;
 
 uint8_t getErrorsFromConf (uint8_t errNo, GtkWidget *label) ;
+uint8_t getDBConf (char *host, uint16_t *port) ;
 
 //Manage database
 uint8_t addColumnCommand(GtkWidget *widget, char *command, GtkColumn colInputs, char *pk) ;

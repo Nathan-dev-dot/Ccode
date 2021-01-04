@@ -1,5 +1,5 @@
 // m = mandatory / n = non mandatory
-[columns]
+[column_conf]
 m :type
 m :size
 n :constraints
@@ -16,3 +16,7 @@ n :default
 7 :XML parsing error
 8 :Can't set an empty entry
 9 :Invalid file
+
+[mysql_setup]
+host :localhost
+port :3306

@@ -127,12 +127,14 @@ Return values
 uint8_t writeSQLTables (xmlNodePtr node) {
     uint8_t kill ;
     xmlNodePtr n ;
-    Conf *colConf = NULL ;
+    Conf *conf = NULL ;
     ForeignKey *foreignKeys = NULL ;
     uint8_t size ;
     char command[500] ;
 
-    if ((colConf = initConf()) == NULL)
+    conf = initConf() ;
+
+    if (conf == NULL)
          return ERR_CONF ;
 
     if ((size = countForeignKeys(node)) == 0)
@@ -147,7 +149,7 @@ uint8_t writeSQLTables (xmlNodePtr node) {
                 return ERR_XML ;
             strcat(strcat(strcat(command, "CREATE TABLE "), (const char *)xmlGetProp(n, (const xmlChar *)"tname")), "(") ;
 
-            if ((kill = writeSQLColumn(n->children, colConf, command, foreignKeys)) != 0)
+            if ((kill = writeSQLColumn(n->children, conf, command, foreignKeys)) != 0)
                 return kill ;
 
             if ((kill = catPrimaryKeys(n, command)) != 0)
@@ -163,8 +165,8 @@ uint8_t writeSQLTables (xmlNodePtr node) {
     }
     if (foreignKeys != NULL)
         freePointer(NULL, foreignKeys) ;
-    if (colConf != NULL)
-        freePointer(NULL, colConf) ;
+    if (conf != NULL)
+        freePointer(NULL, conf) ;
     return 0 ;
 }
 
@@ -185,20 +187,12 @@ Conf * initConf (void) {
     char str[20] ;
     uint8_t lines = 0 ;
     uint8_t i ;
-    uint16_t pos = 0 ;
 
-    if (confFile == NULL) {
-        printMessage(NULL, 0, "config file not found") ;
+    if (confFile == NULL)
         return NULL ;
-    }
 
-    while (fgets(str, 50, confFile) != NULL && strcmp(str, "[column_conf]\n") != 0) {
-        pos += strlen(str) ;
-        printf("%d\n", pos);
-    }
-    pos += strlen(str) ;
-    //fseek(confFile, 47, SEEK_SET) ;
-    while (fgets(str, 50, confFile) != NULL && strcmp(str, "\n") != 0)
+    fseek(confFile, 47, SEEK_SET) ;
+    while (fgets(str, 50, confFile) != NULL && strcmp(str, "\n"))
         lines++ ;
 
     colConf = (Conf *)malloc(sizeof(Conf) * (lines + 1)) ;
@@ -207,19 +201,15 @@ Conf * initConf (void) {
         return NULL ;
     }
 
-    fseek(confFile, pos, SEEK_SET) ;
-
+    fseek(confFile, 47, SEEK_SET) ;
     for (i = 0 ; i < lines ; ++i) {
         fscanf(confFile, "%c :%s\n", &mand, colConf[i].prop) ;
         colConf[i].mand = mand == 'm' ;
     }
-
     colConf[i].mand = 0 ;
     strcpy(colConf[i].prop, "STOP") ;
-    printf("Ok5\n") ;
 
     fclose(confFile) ;
-    printf("Ok6\n") ;
     return colConf ;
 }
 
@@ -270,7 +260,7 @@ uint8_t createXMLDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
     if (kill != 0)
         return kill ;
 
-    if ((xmlData.conf = initConf()) == NULL){
+    if ((xmlData.conf = initConf()) != NULL){
         xmlFreeDoc(xmlData.doc) ;
         return ERR_CONF ;
     }
