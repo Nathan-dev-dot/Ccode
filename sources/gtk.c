@@ -943,16 +943,14 @@ TableCol * getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropB
     char command[50] = "DESCRIBE " ;
     uint8_t lin = 0 ;
     TableCol *colNames ;
-    printf("%s\n", table->name) ;
+    
     strcat(command, table->name) ;
     db.mysql = &mysql ;
-    printf("%s\n", command) ;
 
     reachMysql(&db, command) ;
     if (db.results == NULL) {
         return NULL ;
     }
-    printf("Hello2\n") ;
 
     table->size = countLin(db.results) ;
     table->columns = createSqlColInputs(table->size, grid) ;
@@ -962,20 +960,17 @@ TableCol * getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropB
     colNames = malloc(table->size * sizeof(TableCol)) ;
     if (colNames == NULL)
         return NULL ;
-        printf("Hello3\n") ;
 
     reachMysql(&db, command) ;
     while ((row = mysql_fetch_row(db.results)) != NULL) {
         setColEntries(row, &colNames[lin], table->columns[lin], table->name) ;
         colNames[lin].window = table->dualInputs->window ;
-        printf("Hello4\n") ;
 
         dropButtons[lin] = gtk_button_new_with_label((const gchar *)"Drop") ;
         gtk_grid_attach(GTK_GRID(grid), dropButtons[lin], 5, lin + 1, 1, 1) ;
         g_signal_connect(dropButtons[lin], "clicked", G_CALLBACK(dropColumn), &colNames[lin]) ;
         lin++ ;
     }
-    printf("Hello5\n") ;
 
     mysql_free_result(db.results);
     mysql_close(&mysql) ;
@@ -1992,9 +1987,10 @@ GtkWidget * createComboBoxTables (void) {
     char command[40] = "USE " ;
 
     strcat(command, nameDB) ;
+    connectDB(command) ;
+
     box = gtk_combo_box_text_new() ;
     db.mysql = &mysql ;
-    reachMysql(&db, command) ;
     reachMysql(&db, "SHOW TABLES") ;
 
     if (db.results == NULL) {

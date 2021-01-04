@@ -103,8 +103,6 @@ uint8_t connectDB (char *command) {
     MYSQL mysql ;
     uint8_t success ;
 
-    printf("Connect db / %s\n", command) ;
-
     mysql_init(&mysql) ;
     mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
 
@@ -114,7 +112,6 @@ uint8_t connectDB (char *command) {
         return ERR_DB ;
     }
     success = mysql_query(&mysql, command) ;
-    printf("Success %d\n", success) ;
     if (success != 0)
         return 3 ;
 
@@ -150,10 +147,7 @@ Return values
 
     success = mysql_query(db->mysql, command) == 0 ? 0 : 3;
     db->results = mysql_use_result(db->mysql) ;
-    if (strncmp(command, "USE ", 4) != 0)
-        db->nbFields = mysql_num_fields(db->results);
-    else
-        db->nbFields = 1 ;
+    db->nbFields = mysql_num_fields(db->results);
 
     return success ;
 }
