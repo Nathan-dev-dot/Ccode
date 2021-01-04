@@ -26,7 +26,7 @@ Return values
     0 if ok
     ERR_DB if the connection to the mysql failed
 */
-int setCredentials (char *username, char *pwd) {
+uint8_t setCredentials (char *username, char *pwd) {
     MYSQL mysql ;
 
     strcpy(userDB, username) ;
@@ -62,11 +62,11 @@ Return values
     0 if ok
     ERR_DB if the connection to mysql failed
 */
-int initDB (char *name) {
+uint8_t initDB (char *name) {
     MYSQL mysql ;
     char drop[100] = "DROP DATABASE IF EXISTS " ;
     char create[100] = "CREATE DATABASE " ;
-    int success ;
+    uint8_t success ;
 
     mysql_init(&mysql) ;
     mysql_options(&mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
@@ -99,9 +99,9 @@ Return values
     0 if ok
     ERR_DB if something went wrong
 */
-int connectDB (char *command) {
+uint8_t connectDB (char *command) {
     MYSQL mysql ;
-    int success ;
+    uint8_t success ;
 
     printf("Connect db / %s\n", command) ;
 
@@ -136,8 +136,8 @@ Return values
     0 if ok
     ERR_DB if something went wrong
 */
- int reachMysql (MysqlCoAndRes *db, char *command) {
-    int success ;
+ uint8_t reachMysql (MysqlCoAndRes *db, char *command) {
+    uint8_t success ;
 
     mysql_init(db->mysql) ;
     mysql_options(db->mysql, MYSQL_READ_DEFAULT_GROUP, "option") ;
