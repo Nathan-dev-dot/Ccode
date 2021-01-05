@@ -85,7 +85,7 @@ Return values
     0 if the error code wasn't found
 */
 uint8_t getErrorsFromConf (uint8_t errNo, GtkWidget *label) {
-    FILE *confFile = fopen("../config", "r") ;
+    FILE *confFile = fopen("config", "r") ;
     char str[150] ;
     size_t errCode ;
 
@@ -123,7 +123,7 @@ Return values
     ERR_CONF if an error occured
 */
 uint8_t getDBConf (char *host, uint16_t *port) {
-    FILE *confFile = fopen("../config", "r") ;
+    FILE *confFile = fopen("config", "r") ;
     char tmp[50] ;
 
     if (confFile == NULL){

@@ -276,7 +276,7 @@ Return values
 */
 uint8_t writeSQLFile (char *command, uint8_t first) {
     FILE *sqlFile ;
-    char filePath[30] = "../outputs/" ;
+    char filePath[30] = "outputs/" ;
     int8_t kill ;
 
     strcat(strcat(filePath, nameDB), ".sql") ;
@@ -310,7 +310,7 @@ Drops an SQL file
 
 */
 void dropSQLFile (void) {
-    char filePath[30] = "../outputs/" ;
+    char filePath[30] = "outputs/" ;
 
     strcat(strcat(filePath, nameDB), ".sql") ;
     remove(filePath) ;

@@ -182,7 +182,7 @@ Return values
 */
 Conf * initConf (void) {
     Conf *colConf = NULL ;
-    FILE *confFile = fopen("../config", "r") ;
+    FILE *confFile = fopen("config", "r") ;
     char mand ;
     char str[20] ;
     uint8_t lines = 0 ;
@@ -298,7 +298,7 @@ uint8_t setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) {
         return ERR_ENTRY ;
 
     strcpy(nameDB, tmp) ;
-    strcat(strcat(strcpy(path, "../outputs/"), nameDB), ".xml") ;
+    strcat(strcat(strcpy(path, "outputs/"), nameDB), ".xml") ;
 
     return 0 ;
 }
@@ -321,7 +321,7 @@ uint8_t duplicateTemplate (char *fileName) {
     FILE *duplicate ;
     char str[50] = "" ;
 
-    origin = fopen("../ressources/template.xml", "r") ;
+    origin = fopen("ressources/template.xml", "r") ;
     if (origin == NULL) {
         printMessage(NULL, 0, "Erreur d'ouverture du fichier d'origine") ;
         return ERR_FILE ;
@@ -428,7 +428,7 @@ uint8_t addTableNode (GtkWidget *widget, XMLdbData *tableData) {
     freePointer(widget, tableData->columns) ;
     xmlAddChild(tableData->root, tNode) ;
 
-    strcat(strcat(strcat(path, "../outputs/"), (const char *)xmlGetProp(tableData->root, (const xmlChar *)"dbname")), ".xml") ;
+    strcat(strcat(strcat(path, "outputs/"), (const char *)xmlGetProp(tableData->root, (const xmlChar *)"dbname")), ".xml") ;
     writeXMLFile(path, tableData->doc) ;
     closeWindow(NULL, tableData->dualInputs->window) ;
     writeTables(widget, tableData) ;
