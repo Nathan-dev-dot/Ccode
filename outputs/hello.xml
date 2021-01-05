@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<database dbname="hello">
+    <table tname="uno">
+        <column type="INTEGER" attribute="primary key" reference="target">uno</column>
+        <column type="CHAR" size="23" attribute="primary key">dos</column>
+    </table>
+    <table tname="dos">
+        <column type="FLOAT">kikou</column>
+        <column type="INTEGER" attribute="primary key" reference="uno(uno)">dos</column>
+    </table>
+</database>
