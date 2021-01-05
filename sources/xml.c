@@ -182,7 +182,7 @@ Return values
 */
 Conf * initConf (void) {
     Conf *colConf = NULL ;
-    FILE *confFile = fopen("../config", "r") ;
+    FILE *confFile = fopen("config", "r") ;
     char mand ;
     char str[20] ;
     uint8_t lines = 0 ;
@@ -239,11 +239,13 @@ uint8_t createXMLDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
     int16_t nbTables = 0 ;
     XMLdbData xmlData ;
     GtkDualInputs di ;
+    xmlNodePtr root ;
 
     if ((kill = setXMLDatabase(widget, dbParams->name, (char *)path)) != 0)
         return kill ;
     if ((kill = retrieveInteger(widget, dbParams->nb, &nbTables)) != 0)
         return kill ;
+
     if (nbTables <= 0)
         return ERR_ENTRY ;
 
@@ -255,13 +257,15 @@ uint8_t createXMLDoc (GtkWidget *widget, GtkDualInputs *dbParams) {
     if (xmlData.doc == NULL)
         return ERR_PATH ;
 
-    xmlData.root = xmlDocGetRootElement(xmlData.doc);
-    kill = setRoot(xmlData.root) ;
+    root = xmlDocGetRootElement(xmlData.doc);
+    kill = setRoot(root) ;
+    xmlData.root = root ;
     if (kill != 0)
         return kill ;
 
-    if ((xmlData.conf = initConf()) != NULL){
+    if ((xmlData.conf = initConf()) == NULL){
         xmlFreeDoc(xmlData.doc) ;
+        printMessage(NULL, ERR_CONF, "") ;
         return ERR_CONF ;
     }
 
@@ -298,7 +302,7 @@ uint8_t setXMLDatabase (GtkWidget *widget, GtkWidget *input, char *path) {
         return ERR_ENTRY ;
 
     strcpy(nameDB, tmp) ;
-    strcat(strcat(strcpy(path, "../outputs/"), nameDB), ".xml") ;
+    strcat(strcat(strcpy(path, "outputs/"), nameDB), ".xml") ;
 
     return 0 ;
 }
@@ -321,7 +325,7 @@ uint8_t duplicateTemplate (char *fileName) {
     FILE *duplicate ;
     char str[50] = "" ;
 
-    origin = fopen("../ressources/template.xml", "r") ;
+    origin = fopen("ressources/template.xml", "r") ;
     if (origin == NULL) {
         printMessage(NULL, 0, "Erreur d'ouverture du fichier d'origine") ;
         return ERR_FILE ;
@@ -428,11 +432,10 @@ uint8_t addTableNode (GtkWidget *widget, XMLdbData *tableData) {
     freePointer(widget, tableData->columns) ;
     xmlAddChild(tableData->root, tNode) ;
 
-    strcat(strcat(strcat(path, "../outputs/"), (const char *)xmlGetProp(tableData->root, (const xmlChar *)"dbname")), ".xml") ;
+    strcat(strcat(strcat(path, "outputs/"), (const char *)xmlGetProp(tableData->root, (const xmlChar *)"dbname")), ".xml") ;
     writeXMLFile(path, tableData->doc) ;
     closeWindow(NULL, tableData->dualInputs->window) ;
     writeTables(widget, tableData) ;
-    printf("All good\n") ;
     return 0 ;
 }
 
@@ -456,7 +459,6 @@ Return values
     the pointer to the created column node
 */
 xmlNodePtr addColumnNode (GtkWidget *widget, GtkColumn colInputs) {
-    printf("Alive\n") ;
     char *tmp = "" ;
     xmlNodePtr cNode = NULL ;
     int8_t kill ;
@@ -482,7 +484,7 @@ xmlNodePtr addColumnNode (GtkWidget *widget, GtkColumn colInputs) {
     kill = addForeignKey(widget, cNode, colInputs) ;
     if (kill == ERR_CREA)
         return NULL ;
-    printf("Debug 5\n") ;
+        
     return cNode ;
 }
 

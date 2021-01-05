@@ -6,7 +6,7 @@
 
 #include "all.h"
 
-//#define "main.glade" "/sources/main.glade"
+//#define "sources/main.glade" "/sources/sources/main.glade"
 
 extern char nameDB[30] ;
 
@@ -45,7 +45,7 @@ void printMessage (GtkWidget *widget, uint8_t errNo, char *message) {
     GtkWidget *label ;
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "main.glade", NULL);
+    gtk_builder_add_from_file (builder, "sources/main.glade", NULL);
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "windowPopup"));
     gtk_builder_connect_signals(builder, NULL);
@@ -302,7 +302,7 @@ void mainMenu (void) {
     int kill ;
 
     builder = gtk_builder_new();
-    kill = gtk_builder_add_from_file(builder, "main.glade", NULL);
+    kill = gtk_builder_add_from_file(builder, "sources/main.glade", NULL);
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "windowMain"));
     gtk_builder_connect_signals(builder, NULL);
@@ -347,7 +347,7 @@ void dbFromXMLWindow (GtkWidget *widget) {
     GtkWidget *input ;
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file(builder, "main.glade", NULL);
+    gtk_builder_add_from_file(builder, "sources/main.glade", NULL);
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "windowXml"));
     gtk_builder_connect_signals(builder, NULL);
@@ -712,7 +712,7 @@ void actionOnTableWindow (GtkWidget *widget, char *tName) {
     GtkWidget *dropT ;
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "main.glade", NULL);
+    gtk_builder_add_from_file (builder, "sources/main.glade", NULL);
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "windowTable"));
     gtk_builder_connect_signals(builder, NULL);
@@ -943,7 +943,7 @@ TableCol * getColStructure (GtkWidget *grid, XMLdbData *table, GtkWidget **dropB
     char command[50] = "DESCRIBE " ;
     uint8_t lin = 0 ;
     TableCol *colNames ;
-    
+
     strcat(command, table->name) ;
     db.mysql = &mysql ;
 
@@ -1466,7 +1466,7 @@ void inputCommand (GtkWidget *widget) {
     GtkWidget *input ;
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "main.glade", NULL);
+    gtk_builder_add_from_file (builder, "sources/main.glade", NULL);
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "windowSql"));
     gtk_builder_connect_signals(builder, NULL);
@@ -1523,7 +1523,7 @@ void inputData (GtkWidget *widget, char *tName) {
     Inserts tData ;
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "main.glade", NULL);
+    gtk_builder_add_from_file (builder, "sources/main.glade", NULL);
 
     tInput.window = GTK_WIDGET(gtk_builder_get_object(builder, "windowInput"));
     gtk_builder_connect_signals(builder, NULL);
