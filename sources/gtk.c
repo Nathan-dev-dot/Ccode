@@ -1707,12 +1707,10 @@ void *ptr : pointer that will be freed
 
 */
 void freePointer (GtkWidget *widget, void *ptr) {
-    printf("Hello\n") ;
     if (ptr != NULL) {
         free(ptr) ;
         ptr = NULL ;
     }
-    printf("Hello2\n") ;
 }
 
 /*
