@@ -1,5 +1,5 @@
 // m = mandatory / n = non mandatory
-[column_conf]
+[columns]
 m :type
 m :size
 n :constraints
