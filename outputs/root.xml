@@ -1,2 +1,3 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<database dbname="root"><table tname="hello"><column type="INTEGER" constraints="auto_increment" attribute="primary key" reference="target">id</column></table><table tname="t2"><column type="INTEGER" attribute="primary key" reference="hello(id)">refd</column><column type="CHAR" size="32">ho</column></table></database>
+
+<database></database>

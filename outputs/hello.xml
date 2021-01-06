@@ -1,3 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-
-<database></database>
+<database dbname="hello">
+    <table tname="kikou">
+        <column type="INTEGER" constraints="auto_increment" attribute="primary key">inde</column>
+        <column type="VARCHAR" size="32" reference="target">hiko</column>
+    </table>
+    <table tname="kikou2">
+        <column type="VARCHAR" size="32" attribute="primary key" reference="kikou(hiko)">yolo</column>
+        <column type="DATETIME">dt</column>
+    </table>
+</database>

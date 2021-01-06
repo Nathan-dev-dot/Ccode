@@ -81,7 +81,8 @@ uint8_t catMandatory (xmlNodePtr n, Conf *colConf, uint8_t i, char *command) {
     strcpy(prop, (const char *)xmlGetProp(n, (const xmlChar *)colConf[i].prop)) ;
     strcat(command, prop) ;
 
-    if (!strcmp((const char *)prop, "varchar") || !strcmp((const char *)prop, "char")) {
+    if (!strcmp((const char *)prop, "varchar") || !strcmp((const char *)prop, "VARCHAR")
+            || !strcmp((const char *)prop, "char") || !strcmp((const char *)prop, "CHAR")) {
         if (xmlGetProp(n, (const xmlChar *)colConf[i+1].prop) == NULL)
             return ERR_XML ;
         strcat(strcat(strcat(command, "("), (const char *)xmlGetProp(n, (const xmlChar *)colConf[i+1].prop)), ")") ;
