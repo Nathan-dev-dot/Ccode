@@ -4,7 +4,11 @@
 
 
 
-The database manager is a program that will allow you insert a database in MYSQL from an XML file and to manage it through the GUI. It can also let you create an XML file from the entries input in the graphical interface. 
+With the database manager, you can insert an XML file describing your database, and the program will create the associated database in MySQL and generate a .sql creation file. The configuration file contains the correspondences that can create the database (for example <table tname="example">*<table> ⬄ `create table example`).
+
+Another option of the program allows the user to generate an XML database file from the entries the user sets in the command line.
+
+Finally, the user can manage his databases through the GUI (alter tables, add columns or tables, etc.)
 
 
 
@@ -27,7 +31,7 @@ The database manager is a program that will allow you insert a database in MYSQL
 
 The database manager requires an installed instance of mysql on your computer.
 
-To launch the program, execute it from the command line using the  `./dbmanager` command. Enter your MySQL log inputs.
+To launch the program, execute it from the command line using the  `./main` command. Enter your MySQL log inputs.
 
 If you have modified the MySQL listening port, or if your have a different hostname, open the config file and modify the corresponding elements in `[mysql_setup]`.
 
@@ -39,11 +43,16 @@ For general use, we have set the boundaries of our text entries to **30 characte
 
 #### 			a) Database from XML document
 
-[blabla]
+The access path can be given from the folder in which is executed the `dbmanager`or as an absolute path.
 
-If you have any douts about the format used for your XML document, please check the `format.xml`document.
+If you have any douts about the format used for your XML document, please check the `format.xml` or the `example.xml`documents, but here's a list of the props and a way to se them :
 
-	#### 			b) XML from entries
+- The mandatory props are the name of the table / column, the type of the column, and the size in the case of a CHAR or a VARCHAR. The other ones can be left empty.
+- The `reference="target"`column prop is meant to show to the program that this specific column will be referenced by another column. If that value is absent, the reference command won't be executed.
+- The `constraints`prop contains values like `auto_increment`, `not null`, etc.
+- The `check`prop contains values like `colName > 5`for an integer for example.
+
+#### b) XML from entries
 
 [blabla]
 

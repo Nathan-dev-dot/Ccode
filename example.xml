@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<database dbname="theo4">
+<database dbname="kamaji">
      <table tname="place">
           <column type="integer" attribute="primary key" constraints="auto_increment" reference="target">id</column>
           <column type="varchar" size="32">name</column>

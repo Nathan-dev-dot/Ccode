@@ -40,6 +40,7 @@ uint8_t writeSQLColumn (xmlNodePtr node, Conf *colConf, char *command, ForeignKe
             trimWhiteSpace(name) ;
             addSpace(strcat(command, name)) ;
             while (strcmp(colConf[i].prop, "STOP") != 0) {
+                printf("%s\n", colConf[i].prop) ;
                 if (colConf[i].mand == 1) {
                     if ((kill = catMandatory(n, colConf, i, command)) != 0)
                         return kill ;
@@ -107,10 +108,12 @@ char *command : SQL command
 void catNotMandatory (xmlNodePtr n, Conf *colConf, uint8_t i, char *command) {
     char prop[30] ;
 
+    printf("colConf prop %s\n", colConf[i].prop) ;
     if (xmlGetProp(n, (const xmlChar *)colConf[i].prop) != NULL) {
         strcpy(prop, (const char *)xmlGetProp(n, (const xmlChar *)colConf[i].prop)) ;
 
         if (strcmp(colConf[i].prop, "default") == 0) {
+            printf("Default here \n") ;
             strcat(command, "default ") ;
             if ((!strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "varchar") ||
                     !strcmp((const char *)xmlGetProp(n, (const xmlChar *)"type"), "VARCHAR") ||

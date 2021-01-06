@@ -2,12 +2,13 @@
 
 <database dbname="test">
      <table tname="table1">
-          <column type="integer" constraints="auto_increment" attribute="primary key" reference="target">tcv</column>
+          <column type="integer" constraints="auto_increment" attribute="primary key" reference="target">t1c1</column>
           <column type="varchar" attribute="primary key" size="32">t1c2</column>
+          <column type="varchar" size="32" default="Hello !">message</column>
      </table>
      <table tname="table2">
           <column type="varchar" size="32" attribute="primary key">t2c1</column>
-          <column type="varchar" size="32" default="Hello" attribute="primary key">t2c2</column>
-          <column type="integer" constraints="not null" reference="table1(tcv)">t2c3</column>
+          <column type="integer" check="t2c2>5" attribute="primary key">t2c2</column>
+          <column type="integer" constraints="not null" reference="table1(t1c1)">t2c3</column>
      </table>
 </database>

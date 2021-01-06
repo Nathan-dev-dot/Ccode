@@ -205,6 +205,7 @@ Conf * initConf (void) {
     for (i = 0 ; i < lines ; ++i) {
         fscanf(confFile, "%c :%s\n", &mand, colConf[i].prop) ;
         colConf[i].mand = mand == 'm' ;
+        printf("Col conf %d, %s", colConf[i].mand, colConf[i].prop) ;
     }
     colConf[i].mand = 0 ;
     strcpy(colConf[i].prop, "STOP") ;
@@ -484,7 +485,7 @@ xmlNodePtr addColumnNode (GtkWidget *widget, GtkColumn colInputs) {
     kill = addForeignKey(widget, cNode, colInputs) ;
     if (kill == ERR_CREA)
         return NULL ;
-        
+
     return cNode ;
 }
 
