@@ -55,7 +55,6 @@ void printMessage (GtkWidget *widget, uint8_t errNo, char *message) {
     label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
     if (strlen(message) == 0) {
         found = getErrorsFromConf(errNo, label) ;
-
         if (found == 0)
             gtk_label_set_text(GTK_LABEL(label), (const gchar *)"Error code not found") ;
     } else {
@@ -1586,7 +1585,7 @@ void inputDataWindow (GtkWidget *widget, Inserts *table) {
     label = gtk_label_new("Don't forget the quotes around char/varchar/text/date(time) values !") ;
     gtk_grid_attach(GTK_GRID(grid), label, 0, nbRows+3, 2, 1) ;
 
-    g_signal_connect(window, "destroy", G_CALLBACK(freeInserts), table) ;
+    g_signal_connect(window, "delete_event", G_CALLBACK(freeInserts), table) ;
 
     gtk_widget_show_all(window) ;
     gtk_main() ;
@@ -1657,12 +1656,14 @@ void insertData (GtkWidget *widget, Inserts *table) {
         }
         removeLastChar(command) ;
         strcat(command, ")") ;
+
         kill = connectDB(command) ;
         if (kill != 0) {
             printMessage(NULL, 0, "Check your values") ;
             return ;
         }
     }
+
     freeInserts(NULL, table) ;
     closeWindow(NULL, table->dualInputs->window) ;
     printMessage(NULL, 0, "Data inserted !") ;
@@ -1687,6 +1688,7 @@ Inserts *inserts : struct containing the inputs of inputDataWindow() .
 */
 void freeInserts (GtkWidget *widget, Inserts *inserts) {
     uint8_t i ;
+
     for (i = 0 ; i < inserts->nbRows ; ++i) {
         freePointer(NULL, inserts->inputs[i]) ;
     }
@@ -1705,10 +1707,12 @@ void *ptr : pointer that will be freed
 
 */
 void freePointer (GtkWidget *widget, void *ptr) {
+    printf("Hello\n") ;
     if (ptr != NULL) {
         free(ptr) ;
         ptr = NULL ;
     }
+    printf("Hello2\n") ;
 }
 
 /*
@@ -1763,7 +1767,7 @@ Return values
     the pointer to the array of inputs
 */
 GtkColumn * createXmlColInputs (uint8_t nbLin, GtkWidget *grid) {
-    GtkColumn *columns ;
+    GtkColumn *columns =  NULL ;
     uint8_t i ;
 
     columns = malloc(sizeof(GtkColumn) * nbLin) ;
